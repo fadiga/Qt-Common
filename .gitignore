@@ -1,0 +1,9 @@
+*~*
+*pyc
+*.sqlite
+*.orig
+*.db
+*.exe
+doc/
+*.pdf
+cmedia/img_media/product/
