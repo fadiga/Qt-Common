@@ -1,5 +1,15 @@
+#!/usr/bin/env python
+# -*- coding: utf8 -*-
+# vim: ai ts=4 sts=4 et sw=4 nu
+# maintainer: Fad
+from __future__ import (unicode_literals, absolute_import, division, print_function)
 
-import peewee
+import hashlib
+
+
+from datetime import datetime
+from common import peewee
+# import peewee
 
 DB_FILE = "database.db"
 dbh = peewee.SqliteDatabase(DB_FILE)
@@ -22,30 +32,32 @@ class Owner(BaseModel):
     USER = 0
     ADMIN = 1
     ROOT = 2
-    GROUPS = ((USER, u"user"), (ADMIN, u"admin"), (ROOT, u"superuser"))
+    GROUPS = ((USER, u"user"),
+              (ADMIN, u"admin"),
+              (ROOT, u"superuser"))
 
-    username = peewee.CharField(max_length=30, verbose_name=("Nom d'utilisateur"),
-                                unique=True)
-    password = peewee.CharField(max_length=150)
-    phone = peewee.CharField(max_length=30, blank=True, null=True,
-                             verbose_name=("Telephone"))
     group = peewee.CharField(choices=GROUPS, default=USER)
-    isactive = peewee.BooleanField(default=True)
     islog = peewee.BooleanField(default=False)
-    # is_admin = peewee.BooleanField()
-    # is_active = peewee.BooleanField()
-    # last_login = peewee.DateTimeField()
-    # login_count = peewee.IntegerField()
+    phone = peewee.CharField(max_length=30, blank=True, null=True, verbose_name=("Telephone"))
+    username = peewee.CharField(max_length=30, unique=True, verbose_name=("Nom d'utilisateur"))
+    password = peewee.CharField(max_length=150)
+    isactive = peewee.BooleanField(default=True)
+    last_login = peewee.DateTimeField(default=datetime.now())
+    login_count = peewee.IntegerField(default=0)
 
-    # def save(self):
-    #     self.password = hashlib.sha224(self.password).hexdigest()
-    #     super(Owner, self).save()
-
-    def __unicode__(self):
+    def __str__(self):
         return u"{}".format(self.username)
 
     def full_mane(self):
-        return u"{name} {group} {phone}".format(name=self.username,
-                                                group=self.group,
-                                                phone=self.phone)
+        return u"{name}/{group}/{login_count}".format(name=self.username,
+                                                      group=self.group,
+                                                      login_count=self.login_count)
 
+    def crypt_password(self, password):
+        return hashlib.sha224(password).hexdigest()
+
+    def save(self):
+        if self.islog:
+            self.login_count += 1
+
+        super(Owner, self).save()

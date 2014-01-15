@@ -1,15 +1,16 @@
 #!/usr/bin/env python
-# encoding=utf-8
-# maintainer: fad
+# -*- coding: utf8 -*-
+# maintainer: Fad
+from __future__ import (unicode_literals, absolute_import, division, print_function)
 
 from datetime import date
 
-from PyQt4.QtCore import (Qt, QSize)
-from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QCommandLinkButton,
+from PyQt4.QtCore import Qt, QSize, QString
+from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QGroupBox,
                          QPalette, QDateTimeEdit, QFont, QWidget, QTabBar,
-                         QTextEdit, QColor, QIntValidator, QDoubleValidator)
-from PyQt4.QtGui import QGridLayout, QGroupBox
-from tools.periods import Period
+                         QTextEdit, QColor, QIntValidator, QDoubleValidator,
+                         QGridLayout, QCommandLinkButton)
+
 from configuration import Config
 
 
@@ -17,11 +18,18 @@ class FMainWindow(QMainWindow):
     def __init__(self, parent=0, *args, **kwargs):
         QMainWindow.__init__(self)
 
+        self.setWindowIcon(QIcon.fromTheme('logo', QIcon(u"{}logo.png".format(Config.img_cmedia))))
         self.wc = 1100
         self.hc = 600
         self.resize(self.wc, self.hc)
         self.setWindowTitle(Config.NAME_ORGA)
         self.setWindowIcon(QIcon(Config.APP_LOGO))
+
+    def resizeEvent(self, event):
+        """lancé à chaque redimensionnement de la fenêtre"""
+         # trouve les dimensions du container
+        self.wc = self.width()
+        self.hc = self.height()
 
     def change_context(self, context_widget, *args, **kwargs):
 
@@ -46,14 +54,12 @@ class F_Widget(QWidget):
         self.pp = parent
         self.setMaximumWidth(self.pp.wc)
 
-        css = """
+        self.css = """
             QWidget{
-                border: 1px solid #dff;
-                border-radius: 5px 5px 5px 5px;
-                color: red;
-                }
+                /* background: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #eef, stop: 1 #ccf);*/
+            }
             """
-        # self.setStyleSheet(css)
+        self.setStyleSheet(self.css)
 
     def refresh(self):
         pass
@@ -81,37 +87,73 @@ class TabPane(QTabBar):
 
         css = """
         TabPane{
-            border: 1px solid;
-            border-radius: 20px 30px 2px;
+            border: 1px solid gray;
+            border-radius: 7px;
+            background: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #38395a, stop: 1 #141529);
         }
         Button_menu:hover{
             Background: #000;
             font-size:11px;
         }
         """
-        # self.setStyleSheet(css)
+        self.setStyleSheet(css)
 
     def addBox(self, box):
         self.setLayout(box)
 
 
-class F_PageTitle(QLabel):
+class F_Label(QLabel):
+
+    def __init__(self, *args, **kwargs):
+        super(F_Label, self).__init__(*args, **kwargs)
+        # self.setFont(QFont("Times New Roman", 50))
+        css = """font-size: 14px;
+                color: gry;
+              """
+        self.setStyleSheet(css)
+
+
+class F_PageTitle(F_Label):
 
     def __init__(self, *args, **kwargs):
         super(F_PageTitle, self).__init__(*args, **kwargs)
         # self.setFont(QFont("Times New Roman", 50))
-        css = """border-top-color: red; border:1px solid Gray;
-                 font: 75 12pt 'URW Bookman L'; border-radius: 4px 14px 4px 4px;
-                 gridline-color: rgb(255, 255, 255);"""
         self.setAlignment(Qt.AlignCenter)
+
+        css = """
+                font-weight: bold;
+                font-size: 20px;
+                color: gry;"""
         self.setStyleSheet(css)
 
 
-class F_BoxTitle(QLabel):
+class F_BoxTitle(F_Label):
 
     def __init__(self, *args, **kwargs):
         super(F_BoxTitle, self).__init__(*args, **kwargs)
         self.setFont(QFont("Times New Roman", 12, QFont.Bold, True))
+        self.setAlignment(Qt.AlignLeft)
+
+
+class ErrorLabel(F_Label):
+
+    def __init__(self, text, parent=None):
+        F_Label.__init__(self, text, parent)
+        font = QFont()
+        self.setFont(font)
+        red = QColor(Qt.red)
+        palette = QPalette()
+        palette.setColor(QPalette.WindowText, red)
+        self.setPalette(palette)
+        self.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+
+class FormLabel(F_Label):
+
+    def __init__(self, text, parent=None):
+        F_Label.__init__(self, text, parent)
+        font = QFont()
+        font.setBold(True)
+        self.setFont(font)
         self.setAlignment(Qt.AlignLeft)
 
 
@@ -125,7 +167,34 @@ class Button(QCommandLinkButton):
         # self.setFixedSize(100, 40)
 
         self.setFont(QFont("Comic Sans MS", 13, QFont.Bold, True))
-
+        css = """
+            QPushButton {
+            /* color: white;
+            background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #88d, stop: 0.1 #99e, stop: 0.49 #77c, stop: 0.5 #66b, stop: 1 #77c);
+            border-width: 1px;
+            border-color: #339;
+            border-style: solid;
+            border-radius: 7;
+            padding: 3px;
+            font-size: 10px;
+            padding-left: 5px;
+            padding-right: 5px;*/
+            color: white;
+            background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #88d, stop: 0.1 #444450, stop: 0.49 #444450, stop: 0.5 #3c3c46, stop: 1 #1f1f24);
+            border-width: 1px;
+            border-color: #141529;
+            border-style: solid;
+            border-radius:4;
+            padding: 3px;
+            font-size: 18px;
+            font-variant:small-caps;
+            font-family: sans-serif;
+            /* font-family: courier;
+            padding-left:5px;
+            padding-right: 5px;*/
+        }
+        """
+        self.setStyleSheet(css)
         # self.setCheckable(True)
 
 
@@ -137,9 +206,7 @@ class Button_rond(Button):
                                                       img='save.png'))))
         css = """
                 border-radius:9px;
-
                 border:1px solid #4b8f29;
-
                 color:#ffffff;
                 font-family:arial;
                 font-size:13px;
@@ -206,7 +273,7 @@ class Button_save(Button):
         font-weight:bold;
         padding:6px 24px;
         """
-        self.setStyleSheet(css)
+        # self.setStyleSheet(css)
         self.setIconSize(QSize(20, 20))
         self.setFocusPolicy(Qt.TabFocus)
         font = QFont()
@@ -240,48 +307,23 @@ class Button_export(Button):
                                                       img='xls.png'))))
 
 
-class ErrorLabel(QLabel):
-
-    def __init__(self, text, parent=None):
-        QLabel.__init__(self, text, parent)
-        font = QFont()
-        self.setFont(font)
-        red = QColor(Qt.red)
-        palette = QPalette()
-        palette.setColor(QPalette.WindowText, red)
-        self.setPalette(palette)
-        self.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-
-
-class FormatDate(QDateTimeEdit):
-
-    def __init__(self, *args, **kwargs):
-        super(FormatDate, self).__init__(*args, **kwargs)
-        self.setDisplayFormat(u"dd/MM/yyyy")
-        self.setCalendarPopup(True)
-
-
-class FormLabel(QLabel):
-
-    def __init__(self, text, parent=None):
-        QLabel.__init__(self, text, parent)
-        font = QFont()
-        font.setBold(True)
-        self.setFont(font)
-        self.setAlignment(Qt.AlignLeft)
-
-
 class LineEdit(QLineEdit):
     """Accepter que des nombre positive """
 
     def __init__(self, parent=None):
         QLineEdit.__init__(self, parent)
         css = """
-        LineEdit {
-            border: 1px solid #dff;
-            border-radius: 5px 5px 5px 5px;
+            QLineEdit {
+            padding: 1px;
+            border-style: solid;
+            border: 1px solid ;
+            color: white;
+            border-radius: 2px;
+            border-color: #141529;
+            background-color: #6d6d80;
+            }
         """
-        # self.setStyleSheet(css)
+        self.setStyleSheet(css)
 
 
 class IntLineEdit(LineEdit):
@@ -322,42 +364,6 @@ class F_PeriodHolder(object):
     main_date = property(getmain_date, setmain_date)
 
 
-class F_PeriodTabBar(QTabBar):
-
-    def __init__(self, parent, main_date, *args, **kwargs):
-
-        super(F_PeriodTabBar, self).__init__(*args, **kwargs)
-
-        for i in range(0, 3):
-            self.addTab(u"{}".format(i))
-        self.set_data_from(main_date)
-        self.build_tab_list()
-
-        self.currentChanged.connect(self.changed_period)
-
-    def set_data_from(self, period):
-
-        self.main_period = Period(period.year, period.duration, period.duration_number)
-        self.periods = [self.main_period.previous, self.main_period.current, self.main_period.next]
-
-    def build_tab_list(self):
-        for index, period in enumerate(self.periods):
-            self.setTabText(index, str(period.display_name()))
-            self.setTabToolTip(index, unicode(period))
-        self.setTabTextColor(1, QColor('SeaGreen'))
-        self.setCurrentIndex(1)
-
-    def changed_period(self, index):
-        if index == -1 or index == 1:
-            return False
-        else:
-            np = self.periods[index]
-            self.set_data_from(np)
-            self.build_tab_list()
-            self.parentWidget().main_date = np
-            self.parentWidget().change_period(np)
-
-
 class EnterDoesTab(QWidget):
 
     def keyReleaseEvent(self, event):
@@ -368,3 +374,11 @@ class EnterDoesTab(QWidget):
 
 class EnterTabbedLineEdit(LineEdit, EnterDoesTab):
     pass
+
+
+class FormatDate(QDateTimeEdit):
+
+    def __init__(self, *args, **kwargs):
+        super(FormatDate, self).__init__(*args, **kwargs)
+        self.setDisplayFormat(u"dd/MM/yyyy")
+        self.setCalendarPopup(True)

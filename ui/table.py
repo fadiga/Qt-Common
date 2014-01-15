@@ -1,13 +1,15 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# -*- coding: utf8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
+# maintainer: Fad
+from __future__ import (unicode_literals, absolute_import, division, print_function)
 
 from PyQt4.QtCore import Qt
-from PyQt4.QtGui import (QTableWidget, QAbstractItemView, QLineEdit,
+from PyQt4.QtGui import (QTableWidget, QAbstractItemView, QLabel,
                          QHeaderView, QTableWidgetItem, QWidget,
                          QPushButton)
 
-from util import formatted_number
+from common.ui.util import formatted_number
 
 
 class FlexibleTable(QTableWidget):
@@ -431,5 +433,5 @@ class EnterDoesTab(QWidget):
             self.focusNextChild()
 
 
-class EnterTabbedLineEdit(QLineEdit, EnterDoesTab):
+class EnterTabbedQLabel(QLabel, EnterDoesTab):
     pass

@@ -1,16 +1,17 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# -*- coding: utf8 -*-
+# vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
+from __future__ import (unicode_literals, absolute_import, division, print_function)
 
-import os
-import sys
+import os, sys
 import locale
 import tempfile
 import subprocess
 import datetime
 
 from PyQt4 import QtGui, QtCore
-from window import F_Window
+from common.ui.window import F_Window
 
 
 class PDFFileUnavailable(IOError):
@@ -32,6 +33,13 @@ def uopen_prefix(platform=sys.platform):
         return 'xdg-open'
 
     return 'xdg-open'
+
+
+def openFile(file):
+    if sys.platform == 'linux2':
+        subprocess.call(["xdg-open", file])
+    else:
+        os.startfile(file)
 
 
 def uopen_file(filename):
@@ -140,8 +148,7 @@ def date_on(dat):
 
 def date_start_end(date, st):
     day, month, year = str(unicode(date)).split('/')
-    # return datetime(int(year), int(month), int(day), if st 0 else 23,
-    #                                            if st: 0 else 59, if st: 0 59)
+    # return datetime(int(year), int(month), int(day), if st: 0 else 23, if st: 0 else 59, if st: 0 59)
 
 
 def format_date(dat):
@@ -152,3 +159,16 @@ def format_date(dat):
 
 def show_date(dat):
     return dat.strftime(u"%A le %d %b %Y a %Hh:%Mmn")
+
+
+def to_jstimestamp(adate):
+    if not adate is None:
+        return int(to_timestamp(adate)) * 1000
+
+
+def to_timestamp(dt):
+    """
+    Return a timestamp for the given datetime object.
+    """
+    if not dt is None:
+        return (dt - datetime.datetime(1970, 1, 1)).total_seconds()

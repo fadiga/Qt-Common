@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 # encoding=utf-8
-# maintainer: Fadiga
+# maintainer: Fad
+from __future__ import (unicode_literals, absolute_import, division, print_function)
 
-import hashlib
-
-from PyQt4.QtGui import (QVBoxLayout, QLabel, QCheckBox, QGridLayout,
-                         QDialog, QLineEdit, QComboBox, QPixmap)
 from PyQt4.QtCore import Qt
+from PyQt4.QtGui import (QVBoxLayout, QLabel, QCheckBox, QGridLayout,
+                         QDialog, QComboBox, QPixmap)
 
 from model import Owner
-from common import F_Widget, Button_save, Button, IntLineEdit, F_PageTitle
-from util import raise_success, raise_error
+
+from common.cstatic import CConstants
+from common.ui.util import raise_success, raise_error
+from common.ui.common import (F_Widget, Button_save, Button, IntLineEdit,
+                              F_PageTitle, LineEdit)
 
 
 class EditOwnerViewWidget(QDialog, F_Widget):
@@ -21,7 +23,6 @@ class EditOwnerViewWidget(QDialog, F_Widget):
         self.parent = parent
         vbox = QVBoxLayout()
         vbox.addWidget(F_PageTitle(u"Utilisateur: %s " % self.owner.username))
-        self.article = QLineEdit()
 
         self.checked = QCheckBox("Active")
         if self.owner.isactive:
@@ -30,10 +31,10 @@ class EditOwnerViewWidget(QDialog, F_Widget):
         self.checked.setToolTip(u"Cocher si vous voulez que l'utilisateur %s"
                                 u"continue à utiliser le systeme" %
                                 self.owner.username)
-        self.password = QLineEdit(self.owner.password)
-        self.password.setEchoMode(QLineEdit.PasswordEchoOnEdit)
-        self.password_v = QLineEdit(self.owner.password)
-        self.password_v.setEchoMode(QLineEdit.PasswordEchoOnEdit)
+        self.password = LineEdit(self.owner.password)
+        self.password.setEchoMode(LineEdit.PasswordEchoOnEdit)
+        self.password_v = LineEdit(self.owner.password)
+        self.password_v.setEchoMode(LineEdit.PasswordEchoOnEdit)
         self.password_v.textChanged.connect(self.check_password)
         self.phone = IntLineEdit(self.owner.phone)
         self.pixmap = QPixmap("")
@@ -80,11 +81,11 @@ class EditOwnerViewWidget(QDialog, F_Widget):
 
         if (unicode(self.password.text()) == unicode(self.password_v.text())
                                                      and self.password != ""):
-            self.pixmap = QPixmap("img_mediaaccept.png")
+            self.pixmap =  QPixmap(u"{}accept.png".format(CConstants.img_cmedia))
             self.image.setToolTip("Mot de passe correct")
             self.flog = True
         else:
-            self.pixmap = QPixmap("img_mediadecline.png")
+            self.pixmap =  QPixmap(u"{}decline.png".format(CConstants.img_cmedia))
             self.image.setToolTip("Mot de passe sont incorrect")
         self.image.setPixmap(self.pixmap)
 
@@ -99,10 +100,11 @@ class EditOwnerViewWidget(QDialog, F_Widget):
         self.check_password()
         if self.flog:
             status = False
+            ow = Owner.get(id=self.owner.id)
+            pass_isdiff = unicode(self.password.text()) != ow.password
             if self.checked.checkState() == Qt.Checked:
                 status = True
-            ow = Owner.get(id=self.owner.id)
-            ow.password = hashlib.sha224(password).hexdigest()
+            ow.password = Owner().crypt_password(password) if pass_isdiff else ow.password
             ow.phone = phone
             ow.group = group
             ow.isactive = status

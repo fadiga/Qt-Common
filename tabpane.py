@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# -*- coding: utf8 -*-
+# vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
 
 from PyQt4.QtGui import QTabWidget

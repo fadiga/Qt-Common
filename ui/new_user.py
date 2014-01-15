@@ -1,19 +1,18 @@
 #!usr/bin/env python
-# -*- coding: utf-8 -*-
-#maintainer: Fad
+# -*- coding: utf8 -*-
+# maintainer: Fad
+from __future__ import (unicode_literals, absolute_import, division, print_function)
 
-import hashlib
 from sqlite3 import IntegrityError
-
 from PyQt4.QtGui import (QComboBox, QLabel, QVBoxLayout,
                          QGridLayout, QPixmap, QDialog)
 
-from configuration import Config
-
+from common.cstatic import CConstants
 from model import Owner
-from common import (F_Widget, IntLineEdit, Button_save, LineEdit, Button)
-from util import raise_success, raise_error
-from login import LoginWidget
+from common.ui.util import raise_success, raise_error
+
+from common.ui.login import LoginWidget
+from common.ui.common import (IntLineEdit, F_Widget, Button_save, LineEdit, Button)
 
 
 class NewUserViewWidget(QDialog, F_Widget):
@@ -23,15 +22,15 @@ class NewUserViewWidget(QDialog, F_Widget):
         self.setWindowTitle(u"Nouvel utilisateur")
         self.parent = parent
         self.go_home = go_home
-        self.parentWidget().setWindowTitle(Config.NAME_ORGA + u"    ADMINISTRATION")
+        self.parentWidget().setWindowTitle(u"Création d'un nouvel utilisateur")
 
-        self.username = LineEdit()
-        self.password = LineEdit()
-        self.password.setEchoMode(LineEdit.PasswordEchoOnEdit)
-        self.password_v = LineEdit()
-        self.password_v.setEchoMode(LineEdit.PasswordEchoOnEdit)
-        self.password_v.textChanged.connect(self.check_password)
-        self.phone = IntLineEdit()
+        self.username_field = LineEdit()
+        self.password_field = LineEdit()
+        self.password_field.setEchoMode(LineEdit.PasswordEchoOnEdit)
+        self.password_field_v = LineEdit()
+        self.password_field_v.setEchoMode(LineEdit.PasswordEchoOnEdit)
+        self.password_field_v.textChanged.connect(self.check_password)
+        self.phone_field = IntLineEdit()
         self.pixmap = QPixmap("")
         self.image = QLabel(self)
         self.image.setPixmap(self.pixmap)
@@ -43,20 +42,20 @@ class NewUserViewWidget(QDialog, F_Widget):
             self.box_group.addItem(u'%(group)s' % {'group': index})
 
         butt = Button_save(u"Enregistrer")
-        butt.clicked.connect(self.add_operation)
+        butt.clicked.connect(self.add_user)
         cancel_but = Button(u"Annuler")
         cancel_but.clicked.connect(self.cancel)
 
         editbox = QGridLayout()
         editbox.addWidget(QLabel(u"Non d'utilisateur"), 0, 0)
-        editbox.addWidget(self.username, 0, 1)
+        editbox.addWidget(self.username_field, 0, 1)
         editbox.addWidget(QLabel(u"Mot de passe"), 1, 0)
-        editbox.addWidget(self.password, 1, 1)
+        editbox.addWidget(self.password_field, 1, 1)
         editbox.addWidget(QLabel(u"Verification du Mot de passe"), 2, 0)
-        editbox.addWidget(self.password_v, 2, 1)
+        editbox.addWidget(self.password_field_v, 2, 1)
         editbox.addWidget(self.image, 2, 2)
         editbox.addWidget(QLabel(u"Numero de Téléphone"), 4, 0)
-        editbox.addWidget(self.phone, 4, 1)
+        editbox.addWidget(self.phone_field, 4, 1)
         editbox.addWidget(QLabel(u"Groupe"), 5, 0)
         editbox.addWidget(self.box_group, 5, 1)
         editbox.addWidget(butt, 6, 1)
@@ -75,29 +74,27 @@ class NewUserViewWidget(QDialog, F_Widget):
 
         self.flog = False
 
-        if (unicode(self.password.text()) == unicode(self.password_v.text())):
-            self.pixmap = QPixmap(u"{img_media}{img}".format(img_media=Config.img_media,
-                                                      img="accept.png"))
+        if (unicode(self.password_field.text()) == unicode(self.password_field_v.text())):
+            self.pixmap = QPixmap(u"{}accept.png".format(CConstants.img_cmedia))
             self.image.setToolTip("Mot de passe correct")
             self.flog = True
         else:
-            self.pixmap = QPixmap(u"{img_media}{img}".format(img_media=Config.img_media,
-                                                      img="decline.png"))
+            self.pixmap = QPixmap(u"{}decline.png".format(CConstants.img_cmedia))
             self.image.setToolTip("Mot de passe sont incorrect")
         self.image.setPixmap(self.pixmap)
 
-    def add_operation(self):
-        ''' add operation '''
-        username = unicode(self.username.text())
-        password = unicode(self.password.text())
-        phone = unicode(self.phone.text())
+    def add_user(self):
+        """ add User """
+        username = unicode(self.username_field.text()).strip()
+        password = unicode(self.password_field.text()).strip()
+        password = Owner().crypt_password(password)
+        phone = unicode(self.phone_field.text())
         group = self.liste_group[self.box_group.currentIndex()]
-
-        if (username != "" and password != "" and phone != ""):
+        if (username != "" and password != ""):
             if self.flog:
                 ow = Owner()
                 ow.username = username
-                ow.password = hashlib.sha224(password).hexdigest()
+                ow.password = password
                 ow.phone = phone
                 ow.group = group
                 try:
@@ -111,6 +108,7 @@ class NewUserViewWidget(QDialog, F_Widget):
                     raise_success(u"Confirmation", u"L'utilisateurs %s "
                                   u"a été enregistré" % ow.username)
                 except IntegrityError:
+                    raise
                     raise_error(u"Erreur", u"L'utilisateurs %s "
                                 u"existe déjà dans la base de donnée" % ow.username)
         else:

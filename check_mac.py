@@ -1,11 +1,11 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-# maintainer: Fadiga
+#!/usr/bin/env python
+# -*- coding: utf8 -*-
+# vim: ai ts=4 sts=4 et sw=4 nu
+# maintainer: Fad
+# from __future__ import (unicode_literals, absolute_import, division, print_function)
 
 import re
 import subprocess
-
-from configuration import Config
 
 
 def get_mac():
@@ -29,6 +29,6 @@ def get_mac():
         return None
 
 
-def is_valide_mac():
+def is_valide_mac(license):
     """ check de license """
-    return Config.license.has_key(get_mac())
+    return license.has_key(get_mac())
