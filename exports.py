@@ -11,7 +11,7 @@ from models import DB_FILE
 
 from configuration import Config
 
-from common.ui.util import raise_success, raise_error
+from Common.ui.util import raise_success, raise_error
 
 DATETIME = u"{}".format(unicode(datetime.now().strftime('%d-%m-%Y %Hh%M')))
 

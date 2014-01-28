@@ -9,9 +9,9 @@ from PyQt4.QtGui import (QVBoxLayout, QLabel, QCheckBox, QGridLayout,
 
 from model import Owner
 
-from common.cstatic import CConstants
-from common.ui.util import raise_success, raise_error
-from common.ui.common import (F_Widget, Button_save, Button, IntLineEdit,
+from Common.cstatic import CConstants
+from Common.ui.util import raise_success, raise_error
+from Common.ui.common import (F_Widget, Button_save, Button, IntLineEdit,
                               F_PageTitle, LineEdit)
 
 

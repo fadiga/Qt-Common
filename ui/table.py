@@ -9,7 +9,7 @@ from PyQt4.QtGui import (QTableWidget, QAbstractItemView, QLabel,
                          QHeaderView, QTableWidgetItem, QWidget,
                          QPushButton)
 
-from common.ui.util import formatted_number
+from Common.ui.util import formatted_number
 
 
 class FlexibleTable(QTableWidget):

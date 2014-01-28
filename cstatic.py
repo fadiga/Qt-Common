@@ -15,8 +15,8 @@ class CConstants(object):
     M = "month"
 
     # type_period = W
-    des_image_prod = os.path.join(ROOT_DIR, "cmedia/img_prod")
-    img_cmedia = os.path.join(ROOT_DIR, "common/cmedia/images/")
+    # des_image_prod = os.path.join(ROOT_DIR, "cmedia/img_prod")
+    img_cmedia = os.path.join(ROOT_DIR, "Cmedia/images/")
 
     # ------------------------- Autor --------------------------#
     AUTOR = u"Fadiga Ibrahima"

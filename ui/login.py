@@ -7,10 +7,10 @@ from __future__ import (unicode_literals, absolute_import, division, print_funct
 from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QIcon, QPixmap,
                          QPushButton)
 
-from common.ui.common import (F_Widget, F_PageTitle, FormLabel, PyTextViewer,
+from Common.ui.common import (F_Widget, F_PageTitle, FormLabel, PyTextViewer,
                               EnterTabbedLineEdit, ErrorLabel, Button_menu,
                               Button_rond, LineEdit)
-from common.ui.util import raise_error
+from Common.ui.util import raise_error
 from model import Owner
 from configuration import Config
 from ui.home import HomeViewWidget
@@ -120,7 +120,7 @@ class LoginWidget(F_Widget):
         self.change_main_context(HomeViewWidget)
 
     def goto_new_user(self):
-        from common.ui.new_user import NewUserViewWidget
+        from Common.ui.new_user import NewUserViewWidget
         self.parent.open_dialog(NewUserViewWidget, modal=True, go_home=True)
 
     def ckecklogin(self):

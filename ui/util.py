@@ -11,7 +11,7 @@ import subprocess
 import datetime
 
 from PyQt4 import QtGui, QtCore
-from common.ui.window import F_Window
+from Common.ui.window import F_Window
 
 
 class PDFFileUnavailable(IOError):

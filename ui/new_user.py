@@ -7,12 +7,12 @@ from sqlite3 import IntegrityError
 from PyQt4.QtGui import (QComboBox, QLabel, QVBoxLayout,
                          QGridLayout, QPixmap, QDialog)
 
-from common.cstatic import CConstants
+from Common.cstatic import CConstants
 from model import Owner
-from common.ui.util import raise_success, raise_error
+from Common.ui.util import raise_success, raise_error
 
-from common.ui.login import LoginWidget
-from common.ui.common import (IntLineEdit, F_Widget, Button_save, LineEdit, Button)
+from Common.ui.login import LoginWidget
+from Common.ui.common import (IntLineEdit, F_Widget, Button_save, LineEdit, Button)
 
 
 class NewUserViewWidget(QDialog, F_Widget):

@@ -8,8 +8,7 @@ import hashlib
 
 
 from datetime import datetime
-from common import peewee
-# import peewee
+from Common import peewee
 
 DB_FILE = "database.db"
 dbh = peewee.SqliteDatabase(DB_FILE)
