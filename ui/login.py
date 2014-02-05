@@ -7,9 +7,9 @@ from __future__ import (unicode_literals, absolute_import, division, print_funct
 from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QIcon, QPixmap,
                          QPushButton)
 
-from Common.ui.common import (F_Widget, F_PageTitle, FormLabel, PyTextViewer,
+from Common.ui.common import (F_Widget, F_PageTitle, FormLabel,
                               EnterTabbedLineEdit, ErrorLabel, Button_menu,
-                              Button_rond, LineEdit)
+                              LineEdit)
 from Common.ui.util import raise_error
 from model import Owner
 from configuration import Config

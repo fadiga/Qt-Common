@@ -15,8 +15,15 @@ class CConstants(object):
     M = "month"
 
     # type_period = W
-    # des_image_prod = os.path.join(ROOT_DIR, "cmedia/img_prod")
-    img_cmedia = os.path.join(ROOT_DIR, "Cmedia/images/")
+
+    # des_image_prod = os.path.join(ROOT_DIR, "media/img_prod")
+
+    file_img = 'cimages/'
+    # deployment
+    if os.path.exists(file_img):
+        img_cmedia = file_img
+    else:
+        img_cmedia = os.path.join(ROOT_DIR, "Common/cimages/")
 
     # ------------------------- Autor --------------------------#
     AUTOR = u"Fadiga Ibrahima"
