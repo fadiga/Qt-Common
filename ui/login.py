@@ -10,7 +10,7 @@ from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QIcon, QPixmap,
 from Common.ui.common import (F_Widget, F_PageTitle, FormLabel,
                               EnterTabbedLineEdit, ErrorLabel, Button_menu,
                               LineEdit)
-from Common.ui.util import raise_error
+from Common.ui.util import raise_error, WigglyWidget
 from model import Owner
 from configuration import Config
 from ui.home import HomeViewWidget
@@ -29,18 +29,18 @@ class LoginWidget(F_Widget):
 
         self.intro = FormLabel(u"<h3>Vous devez vous identifier pour pouvoir<h3>"
                                   u"<i>utiliser {}.</i>".format(Config.NAME_ORGA))
-        self.title = F_PageTitle(u"<ul><h2>{app_org}</h2> \
+        self.title = F_PageTitle(u"<h4>{app_org}</h4> \
                                  <b><li>{app_name}</li> </b>\
-                                 <ul><li>{org}</li><li><b>Version:\
-                                 </b> {version}</li></ul>\
-                                 </ul>".format(email=Config.EMAIL_AUT,
-                                               app_org=Config.NAME_ORGA,
-                                               org=Config.ORG_AUT,
-                                               version=Config.APP_VERSION,
-                                               app_name=Config.APP_NAME))
+                                 <ol><li>{org}</li><li><b>Version:\
+                                 </b> {version}</li></ol>\
+                                 ".format(app_org=Config.NAME_ORGA,
+                                           org=Config.ORG_AUT,
+                                           version=Config.APP_VERSION,
+                                           app_name=Config.APP_NAME))
         self.title.setStyleSheet(u"background: url({}) \
-                                 no-repeat scroll 20px 50px #CCCCCC;\
-                                 border-radius: 14px 14px 4px 4px;font: \
+                                 no-repeat scroll 20px 50px #fff; width: 900%;\
+                                 border-radius: 14px 14px 8px 8px; \
+                                 border: 10px double #fff;font: \
                                  13pt 'URW Bookman L';".format(Config.APP_LOGO))
 
         vbox = QHBoxLayout()
@@ -52,6 +52,8 @@ class LoginWidget(F_Widget):
             self.setLayout(vbox)
         else:
             self.createLoginUserGroupBox()
+            wigglyWidget = WigglyWidget("Hello World !", parent=self)
+            vbox.addWidget(wigglyWidget)
             vbox.addWidget(self.topLeftGroupBox)
             # set focus to username field
             self.setFocusProxy(self.username_field)
@@ -183,4 +185,3 @@ class LoginWidget(F_Widget):
         else:
             self.password_error.clear()
         return complete
-

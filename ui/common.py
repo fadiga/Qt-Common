@@ -3,7 +3,7 @@
 # maintainer: Fad
 from __future__ import (unicode_literals, absolute_import, division, print_function)
 
-from datetime import date
+from datetime import date, timedelta
 
 from PyQt4.QtCore import Qt, QSize, QString
 from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QGroupBox,
@@ -12,6 +12,7 @@ from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QGroupBox,
                          QGridLayout, QCommandLinkButton)
 
 from configuration import Config
+from periods import Period
 
 
 class FMainWindow(QMainWindow):
@@ -364,6 +365,50 @@ class F_PeriodHolder(object):
     main_date = property(getmain_date, setmain_date)
 
 
+class FormatDate(QDateTimeEdit):
+
+    def __init__(self, *args, **kwargs):
+        super(FormatDate, self).__init__(*args, **kwargs)
+        self.setDisplayFormat(u"dd/MM/yyyy")
+        self.setCalendarPopup(True)
+
+
+class F_PeriodTabBar(QTabBar):
+
+    def __init__(self, parent, main_date, *args, **kwargs):
+
+        super(F_PeriodTabBar, self).__init__(*args, **kwargs)
+
+        for i in range(0, 3):
+            self.addTab(u"{}".format(i))
+        self.set_data_from(main_date)
+        self.build_tab_list()
+
+        self.currentChanged.connect(self.changed_period)
+
+    def set_data_from(self, period):
+
+        self.main_period = Period(period.year, period.duration, period.duration_number)
+        self.periods = [self.main_period.previous, self.main_period.current, self.main_period.next]
+
+    def build_tab_list(self):
+        for index, period in enumerate(self.periods):
+            self.setTabText(index, str(period.display_name()))
+            self.setTabToolTip(index, unicode(period))
+        self.setTabTextColor(1, QColor('SeaGreen'))
+        self.setCurrentIndex(1)
+
+    def changed_period(self, index):
+        if index == -1 or index == 1:
+            return False
+        else:
+            np = self.periods[index]
+            self.set_data_from(np)
+            self.build_tab_list()
+            self.parentWidget().main_date = np
+            self.parentWidget().change_period(np)
+
+
 class EnterDoesTab(QWidget):
 
     def keyReleaseEvent(self, event):
@@ -374,11 +419,3 @@ class EnterDoesTab(QWidget):
 
 class EnterTabbedLineEdit(LineEdit, EnterDoesTab):
     pass
-
-
-class FormatDate(QDateTimeEdit):
-
-    def __init__(self, *args, **kwargs):
-        super(FormatDate, self).__init__(*args, **kwargs)
-        self.setDisplayFormat(u"dd/MM/yyyy")
-        self.setCalendarPopup(True)

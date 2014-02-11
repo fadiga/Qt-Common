@@ -172,3 +172,47 @@ def to_timestamp(dt):
     """
     if not dt is None:
         return (dt - datetime.datetime(1970, 1, 1)).total_seconds()
+
+
+class WigglyWidget(QtGui.QWidget):
+    def __init__(self, test, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+
+        self.setBackgroundRole(QtGui.QPalette.Midlight)
+        print(test)
+        newFont = self.font()
+        newFont.setPointSize(newFont.pointSize() + 20)
+        self.setFont(newFont)
+
+        self.timer = QtCore.QBasicTimer()
+        self.text = QtCore.QString(test)
+
+        self.step = 0;
+        self.timer.start(60, self)
+
+    def paintEvent(self, event):
+        sineTable = [0, 38, 71, 92, 100, 92, 71, 38, 0, -38, -71, -92, -100, -92, -71, -38]
+
+        metrics = QtGui.QFontMetrics(self.font())
+        x = (self.width() - metrics.width(self.text)) / 2
+        y = (self.height() + metrics.ascent() - metrics.descent()) / 2
+        color = QtGui.QColor()
+
+        painter = QtGui.QPainter(self)
+
+        for i in xrange(self.text.size()):
+            index = (self.step + i) % 16
+            color.setHsv((15 - index) * 16, 255, 191)
+            painter.setPen(color)
+            painter.drawText(x, y - ((sineTable[index] * metrics.height()) / 400), QtCore.QString(self.text[i]))
+            x += metrics.width(self.text[i])
+
+    def setText(self, newText):
+        self.text = QtCore.QString(newText)
+
+    def timerEvent(self, event):
+        if (event.timerId() == self.timer.timerId()):
+            self.step = self.step + 1
+            self.update()
+        else:
+            QtGui.QWidget.timerEvent(event)
