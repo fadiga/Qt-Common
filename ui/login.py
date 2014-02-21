@@ -4,44 +4,45 @@
 # maintainer: Fad
 from __future__ import (unicode_literals, absolute_import, division, print_function)
 
+from sqlite3 import IntegrityError
 from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QIcon, QPixmap,
-                         QPushButton)
+                         QPushButton, QDialog, QLabel, QComboBox)
 
-from Common.ui.common import (F_Widget, F_PageTitle, FormLabel,
+from Common.ui.common import (FMainWindow, F_PageTitle, FormLabel,
                               EnterTabbedLineEdit, ErrorLabel, Button_menu,
-                              LineEdit)
+                              Button_save, LineEdit, IntLineEdit, Button)
 from Common.ui.util import raise_error, WigglyWidget
 from model import Owner
 from configuration import Config
 from ui.home import HomeViewWidget
 
 
-class LoginWidget(F_Widget):
+class LoginWidget(QDialog, FMainWindow):
 
     title = u"Identification"
 
-    def __init__(self, parent=0, *args, **kwargs):
+    def __init__(self):
+        QDialog.__init__(self)
 
-        super(LoginWidget, self).__init__(parent=parent, *args, **kwargs)
-        self.parent = parent
-
-        self.parentWidget().setWindowTitle(Config.NAME_ORGA + u"    LOGIN")
+        self.setWindowTitle(Config.NAME_ORGA + u"    LOGIN")
 
         self.intro = FormLabel(u"<h3>Vous devez vous identifier pour pouvoir<h3>"
-                                  u"<i>utiliser {}.</i>".format(Config.NAME_ORGA))
-        self.title = F_PageTitle(u"<h4>{app_org}</h4> \
-                                 <b><li>{app_name}</li> </b>\
-                                 <ol><li>{org}</li><li><b>Version:\
-                                 </b> {version}</li></ol>\
-                                 ".format(app_org=Config.NAME_ORGA,
-                                           org=Config.ORG_AUT,
-                                           version=Config.APP_VERSION,
-                                           app_name=Config.APP_NAME))
-        self.title.setStyleSheet(u"background: url({}) \
-                                 no-repeat scroll 20px 50px #fff; width: 900%;\
-                                 border-radius: 14px 14px 8px 8px; \
-                                 border: 10px double #fff;font: \
-                                 13pt 'URW Bookman L';".format(Config.APP_LOGO))
+                               u"<i>utiliser {}.</i>".format(Config.NAME_ORGA))
+        self.title = F_PageTitle(u"""<h4>{app_org}</h4>
+                                 <b><li>{app_name}</li> </b>
+                                 <ol><li>{org}</li><li><b>Version:
+                                 </b> {version}</li></ol>
+                                 """.format(app_org=Config.NAME_ORGA,
+                                            org=Config.ORG_AUT,
+                                            version=Config.APP_VERSION,
+                                            app_name=Config.APP_NAME))
+        self.title.setStyleSheet(""" background:
+                                 url({}) no-repeat scroll 200px 50px #fff;
+                                 border-radius: 14px 14px 8px 8px;
+                                 border: 10px double #fff;
+                                 width: 100%; height: auto;
+                                 padding: 3.3em 1em 1em 100px;
+                                 font: 12pt 'URW Bookman L';""".format(Config.APP_LOGO))
 
         vbox = QHBoxLayout()
         vbox.addWidget(self.title)
@@ -52,8 +53,6 @@ class LoginWidget(F_Widget):
             self.setLayout(vbox)
         else:
             self.createLoginUserGroupBox()
-            wigglyWidget = WigglyWidget("Hello World !", parent=self)
-            vbox.addWidget(wigglyWidget)
             vbox.addWidget(self.topLeftGroupBox)
             # set focus to username field
             self.setFocusProxy(self.username_field)
@@ -108,22 +107,56 @@ class LoginWidget(F_Widget):
     def createNewUserGroupBox(self):
         self.topLeftGroupBoxBtt = QGroupBox(self.tr("Nouveau utilisateur"))
 
-        butt = Button_menu(u"Créer un nouvel utilisateur")
-        butt.setIcon(QIcon.fromTheme('save', QIcon(u"{}useradd.png".format(Config.img_cmedia))))
-        butt.clicked.connect(self.goto_new_user)
+        self.setWindowTitle(u"Création d'un nouvel utilisateur")
 
-        gridbox = QGridLayout()
-        gridbox.addWidget(butt, 0, 1, 1, 1)
-        gridbox.addWidget(butt, 1, 2, 1, 1)
+        self.username_field = LineEdit()
+        self.password_field = LineEdit()
+        self.password_field.setEchoMode(LineEdit.PasswordEchoOnEdit)
+        self.password_field_v = LineEdit()
+        self.password_field_v.setEchoMode(LineEdit.PasswordEchoOnEdit)
+        self.password_field_v.textChanged.connect(self.check_password)
+        # self.phone_field = IntLineEdit()
+        self.pixmap = QPixmap("")
+        self.image = QLabel(self)
+        self.image.setPixmap(self.pixmap)
 
-        self.topLeftGroupBoxBtt.setLayout(gridbox)
+        self.liste_group = [u"user", u"admin"]
+        #Combobox widget
+        self.box_group = QComboBox()
+        for index in self.liste_group:
+            self.box_group.addItem(u'%(group)s' % {'group': index})
+
+        butt = Button_save(u"Enregistrer")
+        butt.clicked.connect(self.add_user)
+        cancel_but = Button(u"Annuler")
+        cancel_but.clicked.connect(self.cancel)
+
+        editbox = QGridLayout()
+        editbox.addWidget(QLabel(u"Non d'utilisateur"), 0, 0)
+        editbox.addWidget(self.username_field, 0, 1)
+        editbox.addWidget(QLabel(u"Mot de passe"), 1, 0)
+        editbox.addWidget(self.password_field, 1, 1)
+        editbox.addWidget(QLabel(u"Verification du Mot de passe"), 2, 0)
+        editbox.addWidget(self.password_field_v, 2, 1)
+        editbox.addWidget(self.image, 2, 2)
+        # editbox.addWidget(QLabel(u"Numero de Téléphone"), 4, 0)
+        # editbox.addWidget(self.phone_field, 4, 1)
+        editbox.addWidget(QLabel(u"Groupe"), 5, 0)
+        editbox.addWidget(self.box_group, 5, 1)
+        editbox.addWidget(butt, 6, 1)
+        editbox.addWidget(cancel_but, 6, 0)
+
+        self.topLeftGroupBoxBtt.setLayout(editbox)
+
+    def cancel(self):
+        self.close()
 
     def goto_home(self):
-        self.change_main_context(HomeViewWidget)
+        self.change_context(HomeViewWidget)
 
     def goto_new_user(self):
         from Common.ui.new_user import NewUserViewWidget
-        self.parent.open_dialog(NewUserViewWidget, modal=True, go_home=True)
+        self.open_dialog(NewUserViewWidget, modal=True, go_home=True)
 
     def ckecklogin(self):
         """ """
@@ -161,7 +194,9 @@ class LoginWidget(F_Widget):
 
         # Le droit de reset des mots de passes
         # Une page special
-        self.goto_home()
+        # self.goto_home()
+
+        self.accept()
 
     def is_complete(self):
         """ form has been completly filled or not. Sets error messages """
@@ -185,3 +220,57 @@ class LoginWidget(F_Widget):
         else:
             self.password_error.clear()
         return complete
+
+    def check_password(self):
+
+        self.flog = False
+
+        if (unicode(self.password_field.text()) == unicode(self.password_field_v.text())):
+            self.pixmap = QPixmap(u"{}accept.png".format(Config.img_cmedia))
+            self.image.setToolTip("Mot de passe correct")
+            self.flog = True
+        else:
+            self.pixmap = QPixmap(u"{}decline.png".format(Config.img_cmedia))
+            self.image.setToolTip("Mot de passe sont incorrect")
+        self.image.setPixmap(self.pixmap)
+
+    def add_user(self):
+        """ add User """
+        username = unicode(self.username_field.text()).strip()
+        password = unicode(self.password_field.text()).strip()
+        password = Owner().crypt_password(password)
+        # phone = unicode(self.phone_field.text())
+        group = self.liste_group[self.box_group.currentIndex()]
+        if (username != "" and password != ""):
+            if self.flog:
+                ow = Owner()
+                ow.username = username
+                ow.password = password
+                # ow.phone = phone
+                ow.group = group
+                ow.islog=True
+                try:
+                    ow.save()
+                    self.accept()
+                    self.close()
+                    # raise_success(u"Confirmation", u"L'utilisateurs %s "
+                    #               u"a été enregistré" % ow.username)
+                except IntegrityError:
+                    raise
+                    raise_error(u"Erreur", u"L'utilisateurs %s "
+                                u"existe déjà dans la base de donnée" % ow.username)
+
+
+        else:
+            raise_error(u"Erreur", u"Tout les champs sont obligatoire")
+
+
+def john_doe():
+    try:
+        ow = Owner.get(username="anomime")
+    except:
+        ow = Owner(username="anomime", password="anomime",
+                   group="admin", last_login=0)
+    ow.islog = True
+    ow.save()
+    return ow
