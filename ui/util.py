@@ -62,6 +62,7 @@ def raise_error(title, message):
                             message, QtGui.QMessageBox.Ok,
                             parent=F_Window.window)
     box.setWindowOpacity(0.9)
+
     box.exec_()
 
 

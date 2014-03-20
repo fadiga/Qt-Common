@@ -107,6 +107,7 @@ class NewUserViewWidget(QDialog, F_Widget):
                     self.close()
                     raise_success(u"Confirmation", u"L'utilisateurs %s "
                                   u"a été enregistré" % ow.username)
+
                 except IntegrityError:
                     raise
                     raise_error(u"Erreur", u"L'utilisateurs %s "
@@ -115,4 +116,6 @@ class NewUserViewWidget(QDialog, F_Widget):
             raise_error(u"Erreur", u"Tout les champs sont obligatoire")
 
     def goto_home(self):
-        self.change_main_context(LoginWidget)
+
+        from Common.ui.login_manage import LoginManageWidget
+        self.change_main_context(LoginManageWidget)

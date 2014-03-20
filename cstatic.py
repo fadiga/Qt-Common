@@ -16,9 +16,7 @@ class CConstants(object):
 
     # type_period = W
 
-    # des_image_prod = os.path.join(ROOT_DIR, "media/img_prod")
-
-    file_img = 'cimages/'
+    file_img = os.path.join(os.path.dirname(os.path.abspath('__file__')), 'cimages/')
     # deployment
     if os.path.exists(file_img):
         img_cmedia = file_img
@@ -28,7 +26,7 @@ class CConstants(object):
     # ------------------------- Autor --------------------------#
     AUTOR = u"Fadiga Ibrahima"
     EMAIL_AUT = u"ibfadiga@gmail.com"
-    TEL_AUT = u"(223)76 43 38 90 ou (223)63 34 14 24"
+    TEL_AUT = u"(+223)76 43 38 90 \n (+223)63 34 14 24"
     ADRESS_AUT = u"Boulkassoumbougou Bamako"
     ORG_AUT = u"Copyright © 2012 xxxx"
     # ------------------------- Application --------------------------#

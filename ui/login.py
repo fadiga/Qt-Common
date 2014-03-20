@@ -23,7 +23,6 @@ class LoginWidget(QDialog, FMainWindow):
 
     def __init__(self):
         QDialog.__init__(self)
-
         self.setWindowTitle(Config.NAME_ORGA + u"    LOGIN")
 
         self.intro = FormLabel(u"<h3>Vous devez vous identifier pour pouvoir<h3>"
@@ -47,18 +46,18 @@ class LoginWidget(QDialog, FMainWindow):
         vbox = QHBoxLayout()
         vbox.addWidget(self.title)
 
-        if len(Owner.all()) < 2:
+        if Owner().filter(isvisible=True, isactive=True).count() == 0:
             self.createNewUserGroupBox()
             vbox.addWidget(self.topLeftGroupBoxBtt)
             self.setLayout(vbox)
         else:
-            self.createLoginUserGroupBox()
+            self.loginUserGroupBox()
             vbox.addWidget(self.topLeftGroupBox)
             # set focus to username field
             self.setFocusProxy(self.username_field)
             self.setLayout(vbox)
 
-    def createLoginUserGroupBox(self):
+    def loginUserGroupBox(self):
         self.topLeftGroupBox = QGroupBox(self.tr("Identification"))
 
         # username field
@@ -105,7 +104,7 @@ class LoginWidget(QDialog, FMainWindow):
         self.topLeftGroupBox.setLayout(gridbox)
 
     def createNewUserGroupBox(self):
-        self.topLeftGroupBoxBtt = QGroupBox(self.tr("Nouveau utilisateur"))
+        self.topLeftGroupBoxBtt = QGroupBox(self.tr("Nouvel utilisateur"))
 
         self.setWindowTitle(u"Création d'un nouvel utilisateur")
 
@@ -259,7 +258,6 @@ class LoginWidget(QDialog, FMainWindow):
                     raise
                     raise_error(u"Erreur", u"L'utilisateurs %s "
                                 u"existe déjà dans la base de donnée" % ow.username)
-
 
         else:
             raise_error(u"Erreur", u"Tout les champs sont obligatoire")

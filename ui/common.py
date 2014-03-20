@@ -12,7 +12,7 @@ from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QGroupBox,
                          QGridLayout, QCommandLinkButton)
 
 from configuration import Config
-from periods import Period
+from Common.periods import Period
 
 
 class FMainWindow(QMainWindow):
@@ -203,8 +203,7 @@ class Button_rond(Button):
 
     def __init__(self, *args, **kwargs):
         super(Button_rond, self).__init__(*args, **kwargs)
-        self.setIcon(QIcon.fromTheme('save', QIcon(u"{img_media}{img}".format(img_media=Config.img_media,
-                                                      img='save.png'))))
+        # self.setIcon(QIcon.fromTheme('document-save', QIcon('')))
         css = """
                 border-radius:9px;
                 border:1px solid #4b8f29;
@@ -222,8 +221,7 @@ class Deleted_btt(Button):
 
     def __init__(self, *args, **kwargs):
         super(Deleted_btt, self).__init__(*args, **kwargs)
-        # self.setIcon(QIcon.fromTheme('save', QIcon(u"{img_media}{img}".format(img_media=Config.img_media,
-                                                      # img='save.png'))))
+        self.setIcon(QIcon.fromTheme('edit-delete', QIcon('')))
         css = """
                 background-color:#fc8d83;
                 border-radius:6px;
@@ -262,8 +260,8 @@ class Button_save(Button):
 
     def __init__(self, *args, **kwargs):
         super(Button_save, self).__init__(*args, **kwargs)
-        self.setIcon(QIcon.fromTheme('save', QIcon(u"{img_media}{img}".format(img_media=Config.img_media,
-                                                      img='save.png'))))
+
+        self.setIcon(QIcon.fromTheme('document-save', QIcon('')))
         css = """
         background-color:#dbe6c4;
         border-radius:6px;

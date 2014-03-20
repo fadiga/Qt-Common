@@ -109,10 +109,14 @@ class EditOwnerViewWidget(QDialog, F_Widget):
             ow.group = group
             ow.isactive = status
             ow.save()
+            self.goto_back()
             self.cancel()
             raise_success(u"Confirmation", u"Le Compte %s "
                           u"a été mise à jour" % ow.username)
-            from ui.admin import AdminViewWidget
-            self.change_main_context(AdminViewWidget)
         else:
             raise_error(u"Error", u"Mot de passe pas correct")
+
+    def goto_back(self):
+
+        from Common.ui.login_manage import LoginManageWidget
+        self.change_main_context(LoginManageWidget)
