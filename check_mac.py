@@ -29,6 +29,6 @@ def get_mac():
         return None
 
 
-def is_valide_mac(license):
-    """ check de license """
-    return license.has_key(get_mac())
+# def is_valide_mac(license):
+#     """ check de license """
+#     return license.has_key(get_mac())

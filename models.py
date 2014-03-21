@@ -126,3 +126,20 @@ class SettingsAdmin(BaseModel):
                 return False
         else:
             return True
+
+
+class Version(BaseModel):
+    date = peewee.DateTimeField(default=datetime.now(), verbose_name="Date de Version")
+    number = peewee.IntegerField(default=1 ,verbose_name="Numéro de Version")
+
+    def __str__(self):
+        return "{}/{}".format(self.number, self.date)
+
+    def display_name(self):
+        return "V-{}".format(self.number)
+
+
+    def update_v(self):
+        self.number += 1
+        self.date = datetime.now()
+        self.save()

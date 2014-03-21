@@ -3,11 +3,13 @@
 # maintainer: Fad
 from __future__ import (unicode_literals, absolute_import, division, print_function)
 
-import shutil
+import shutil, errno
+import os
+
 from datetime import datetime
 
-from PyQt4 import QtGui
-from models import DB_FILE
+from PyQt4.QtGui import QFileDialog, QWidget
+from models import DB_FILE, Version
 
 from configuration import Config
 
@@ -17,14 +19,12 @@ DATETIME = u"{}".format(unicode(datetime.now().strftime('%d-%m-%Y %Hh%M')))
 
 
 def export_database_as_file():
-    destination = QtGui.QFileDialog \
-                       .getSaveFileName(QtGui.QWidget(),
-                                        u"Sauvegarder la base de Donnée.",
-                                        u"Sauvegarde du {} {}.db"
-                                        .format(DATETIME, Config.NAME_ORGA), "*.db")
+    destination = QFileDialog.getSaveFileName(QWidget(),
+                            u"Sauvegarder la base de Donnée.",
+                            u"Sauvegarde du {} {}.db"
+                            .format(DATETIME, Config.NAME_ORGA), "*.db")
     if not destination:
         return None
-
     try:
         shutil.copyfile(DB_FILE, destination)
         raise_success(u"Les données ont été exportées correctement.",
@@ -36,22 +36,43 @@ def export_database_as_file():
                      Demandez de l'aide si le problème persiste.")
 
 
-# def export_as_excel(name, data):
-#     try:
-#         from tools.export_xls import main_as_excel
-#     except ImportError:
-#         raise_error("/!\ Import Erreur d'import", "Vérifiez si la fonction \
-#                     'main_as_excel existe dans le export_xls'")
+def export_backup(folder=None, dst_folder=None):
 
-#     destination = QtGui.QFileDialog \
-#                        .getSaveFileName(QtGui.QWidget(), u"Save Excel Export as...",
-#                                         u"{} {}.xls".format(DATETIME,  Config.NAME_ORGA), "*.xls")
-#     if not destination:
-#         return False
-#     try:
-#         main_as_excel(destination, name, data)
-#         raise_success(u"Success", u"La facture a été exportées correctement.")
-#     except IOError:
-#         raise_error(u"La facture n'a pas pu être exportée.",
-#                     u"Vérifiez le chemin de destination puis re-essayez.\n\n \
-#                      Demandez de l'aide si le problème persiste.")
+    directory = str(QFileDialog.getExistingDirectory(QWidget(), "Select Directory"))
+    path_backup = u"{path}-{date}-{name}".format(path=os.path.join(directory, 'BACKUP'), date=DATETIME, name=Config.NAME_ORGA)
+
+    if not directory:
+        return None
+    try:
+        if folder:
+            copyanything(folder, os.path.join(path_backup, dst_folder))
+
+        copyanything(DB_FILE, os.path.join(path_backup, DB_FILE))
+
+        raise_success(u"Le backup à été fait correctement.",
+                      u"""Conservez le dossier\n {}\n précieusement car il contient
+                       toutes vos données. Exportez vos données régulièrement.
+                      """.format(path_backup))
+    except:
+        raise_error(u"Le backup n'a pas pu être fait correctement.",
+                    u"Vérifiez le chemin de destination puis re-essayez.\n\n \
+                     Demandez de l'aide si le problème persiste.")
+
+
+def import_backup():
+
+    directory = str(QFileDialog.getExistingDirectory(QWidget(), "Select Directory"))
+    raise_error(u"Le backup n'a pas pu être import.",
+                u"""La fonctionalité n'a pas été activié.\n\n
+                    La version actualle est {}""".format(Version().get(id=1).display_name()))
+
+
+def copyanything(src, dest):
+    try:
+        shutil.copytree(src, dest, ignore=None)
+    except OSError as e:
+        # If the error was caused because the source wasn't a directory
+        if e.errno == errno.ENOTDIR:
+            shutil.copy(src, dest)
+        else:
+            print('Directory not copied. Error: %s' % e)

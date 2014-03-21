@@ -2,7 +2,7 @@
 # encoding=utf-8
 # Autor: Fadiga
 
-from model import Owner, Settings, SettingsAdmin
+from model import Owner, Settings, SettingsAdmin, Version
 
 PASS = "36cb1f4ebf4298c14c96ab541a454870fa53455d5431d1afe1d0af87" #'fad 86'
 PASS1 = "4b91d93da8bc69d1360c449c79edf8dc9b24b385807c8d887d389471" #'ano 86'
@@ -17,7 +17,9 @@ def init_fuxture():
               SettingsAdmin(license=LICENSE, tolerance=15, user="Demo"),
               Settings(slug=Settings.DEFAULT, login=True, name_orga="demo s.a.r.l",
                        phone=76433890, bp="demo", email_org="demo@demo.fr",
-                       adress_org="")]
+                       adress_org=""),
+              Version(version=1)
+              ]
 
     for obj in values:
         obj.save()

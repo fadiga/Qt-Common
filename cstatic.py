@@ -41,5 +41,5 @@ class CConstants(object):
                'E8-11-32-6C-30-28': 'Fad Wind',
                '08:00:27:38:F8:23': 'Fad Wind Virtual'}
 
-    APP_LOGO = "{}logo.png".format(img_cmedia)
-    APP_LOGO_ICO = "{}logo.ico".format(img_cmedia)
+    APP_LOGO = os.path.join(img_cmedia, "logo.png")
+    APP_LOGO_ICO = os.path.join(img_cmedia, "logo.ico")
