@@ -12,9 +12,8 @@ from Common.ui.common import (FMainWindow, F_PageTitle, FormLabel,
                               EnterTabbedLineEdit, ErrorLabel, Button_menu,
                               Button_save, LineEdit, IntLineEdit, Button)
 from Common.ui.util import raise_error, WigglyWidget
-from model import Owner
+from models import Owner
 from configuration import Config
-from ui.home import HomeViewWidget
 
 
 class LoginWidget(QDialog, FMainWindow):
@@ -110,9 +109,10 @@ class LoginWidget(QDialog, FMainWindow):
 
         self.username_field = LineEdit()
         self.password_field = LineEdit()
-        self.password_field.setEchoMode(LineEdit.PasswordEchoOnEdit)
+        self.password_field.setEchoMode(LineEdit.Password)
+        # self.password_field.setEchoMode(LineEdit.PasswordEchoOnEdit)
         self.password_field_v = LineEdit()
-        self.password_field_v.setEchoMode(LineEdit.PasswordEchoOnEdit)
+        self.password_field_v.setEchoMode(LineEdit.Password)
         self.password_field_v.textChanged.connect(self.check_password)
         # self.phone_field = IntLineEdit()
         self.pixmap = QPixmap("")
@@ -151,6 +151,7 @@ class LoginWidget(QDialog, FMainWindow):
         self.close()
 
     def goto_home(self):
+        from ui.home import HomeViewWidget
         self.change_context(HomeViewWidget)
 
     def goto_new_user(self):

@@ -16,7 +16,7 @@ from Common.ui.common import (F_Widget, FormLabel, F_Label, F_BoxTitle,
                       Button_save, LineEdit, IntLineEdit, Button)
 
 from configuration import Config
-from model import Owner
+from Common.models import Owner
 
 
 class LoginManageWidget(F_Widget):

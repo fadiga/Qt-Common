@@ -14,7 +14,6 @@ from Common import peewee
 from Common.check_mac import get_mac
 
 DB_FILE = "database.db"
-# dbh = peewee.SqliteDatabase(DB_FILE)
 dbh = peewee.SqliteDatabase(DB_FILE, threadlocals=True)
 dbh.connect()
 
@@ -88,7 +87,7 @@ class Settings(BaseModel):
     adress_org = peewee.TextField('')
 
     def __str__(self):
-        return u"{}".format(self.name_orga)
+        return self.full_mane()
 
     def change_prev(self):
         self.slug = PREV
@@ -114,7 +113,6 @@ class SettingsAdmin(BaseModel):
 
     def is_valide_mac(self, license):
         """ check de license """
-        print(hashlib.sha1(self.clean_mac).hexdigest())
         return license == hashlib.sha1(self.clean_mac).hexdigest()
 
     def can_use(self):
@@ -130,7 +128,7 @@ class SettingsAdmin(BaseModel):
 
 class Version(BaseModel):
     date = peewee.DateTimeField(default=datetime.now(), verbose_name="Date de Version")
-    number = peewee.IntegerField(default=1 ,verbose_name="Numéro de Version")
+    number = peewee.IntegerField(default=1 , verbose_name="Numéro de Version")
 
     def __str__(self):
         return "{}/{}".format(self.number, self.date)

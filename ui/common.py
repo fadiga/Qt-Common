@@ -19,7 +19,8 @@ class FMainWindow(QMainWindow):
     def __init__(self, parent=0, *args, **kwargs):
         QMainWindow.__init__(self)
 
-        self.setWindowIcon(QIcon.fromTheme('logo', QIcon(u"{}logo.png".format(Config.img_cmedia))))
+        self.setWindowIcon(QIcon.fromTheme('logo',
+                           QIcon(u"{}logo.png".format(Config.img_cmedia))))
         self.wc = 1100
         self.hc = 600
         self.resize(self.wc, self.hc)

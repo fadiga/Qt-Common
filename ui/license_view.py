@@ -8,7 +8,8 @@ from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QIcon, QPixmap,
                          QDialog, QLabel, QTextEdit)
 
 from Common.cstatic import CConstants
-from model import SettingsAdmin
+from Common.models import SettingsAdmin
+from Common.exports import export_license_as_file
 from Common.ui.util import raise_success, raise_error
 from Common.ui.common import (IntLineEdit, F_Widget, Button_save, F_PageTitle,
                               LineEdit, Button, FormLabel, PyTextViewer)
@@ -44,24 +45,28 @@ class LicenseViewWidget(QDialog, F_Widget):
     def showLicenseGroupBox(self):
 
         self.intro = FormLabel(u"""<hr> <i> Elle est n'est valable que pour cette machine</i>
-                                        <p><b>proprièteur:</b> {name}</p>
+                                        <p><b>proprièteur: </b> {name}</p>
                                         <p><b>date d'activation:</b> {date}</p><hr>
-                                        <p><b>License:</b> {license}</p>
                                         <p><b>Merci.</b></li>
                                 """.format(name=self.sttg.user,
-                                           date=self.sttg.date.strftime('%x'),
-                                           license=self.sttg.license))
+                                           date=self.sttg.date.strftime('%c')))
         self.topLeftGroupBox = QGroupBox(self.tr("License est activé"))
         gridbox = QGridLayout()
 
-        cancel_but = Button(u"Ok")
+        cancel_but = Button(u"OK")
         cancel_but.clicked.connect(self.cancel)
+        remove_lcce = Button(u"Supprimer la license")
+        remove_lcce.clicked.connect(self.remove_licence)
+        export_lcce = Button(u"Exporter la license")
+        export_lcce.clicked.connect(self.export_licence)
         # grid layout
         gridbox.addWidget(self.intro, 0, 1)
-        gridbox.addWidget(cancel_but, 4, 1)
+        gridbox.addWidget(cancel_but, 0, 2)
+        gridbox.addWidget(export_lcce, 4, 1)
+        gridbox.addWidget(remove_lcce, 4, 2)
 
         # gridbox.setColumnStretch(2, 1)
-        # gridbox.setRowStretch(0, 2)
+        # gridbox.setRowStretch(4, 1)
         gridbox.setRowStretch(4, 0)
 
         self.topLeftGroupBox.setLayout(gridbox)
@@ -103,6 +108,16 @@ class LicenseViewWidget(QDialog, F_Widget):
     def cancel(self):
         self.close()
 
+    def remove_licence(self):
+        sttg = self.sttg
+        sttg.tolerance = 0
+        sttg.save()
+        self.cancel()
+        raise_success("Suppression de la license",
+                     u"Vous pouvez activé maintenant la license en cliquant "
+                     u"sur license dans le menu ou au prochian lancement "
+                     u"du logiciel.")
+
     def check_license(self, license):
 
         self.flog = False
@@ -115,6 +130,9 @@ class LicenseViewWidget(QDialog, F_Widget):
             self.pixmap = QPixmap(u"{}decline.png".format(CConstants.img_cmedia))
             self.image.setToolTip("License incorrect")
         self.image.setPixmap(self.pixmap)
+
+    def export_licence(self):
+        export_license_as_file()
 
     def add_lience(self):
         """ add User """
@@ -132,3 +150,4 @@ class LicenseViewWidget(QDialog, F_Widget):
                           u"""La license (<b>{}</b>) à éte bien enregistré pour cette
                            machine.\n
                            Elle doit être bien gardé""".format(license))
+            file_lience = open("licence.txt", "rw")

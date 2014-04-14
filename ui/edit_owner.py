@@ -7,7 +7,7 @@ from PyQt4.QtCore import Qt
 from PyQt4.QtGui import (QVBoxLayout, QLabel, QCheckBox, QGridLayout,
                          QDialog, QComboBox, QPixmap)
 
-from model import Owner
+from Common.models import Owner
 
 from Common.cstatic import CConstants
 from Common.ui.util import raise_success, raise_error

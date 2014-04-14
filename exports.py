@@ -9,14 +9,14 @@ import os
 from datetime import datetime
 
 from PyQt4.QtGui import QFileDialog, QWidget
-from models import DB_FILE, Version
+from Common.models import DB_FILE, Version
 
 from configuration import Config
 
-from Common.ui.util import raise_success, raise_error
+from Common.ui.util import raise_success, raise_error, uopen_file
 
 DATETIME = u"{}".format(unicode(datetime.now().strftime('%d-%m-%Y %Hh%M')))
-
+LICENCE = "licence.txt"
 
 def export_database_as_file():
     destination = QFileDialog.getSaveFileName(QWidget(),
@@ -44,24 +44,32 @@ def export_backup(folder=None, dst_folder=None):
     if not directory:
         return None
     try:
+
+        shutil.copyfile(DB_FILE, os.path.join(path_backup, DB_FILE))
+    except IOError:
+        print("Error of copy database file")
+
+    try:
         if folder:
             copyanything(folder, os.path.join(path_backup, dst_folder))
-
-        copyanything(DB_FILE, os.path.join(path_backup, DB_FILE))
-
         raise_success(u"Le backup à été fait correctement.",
                       u"""Conservez le dossier\n {}\n précieusement car il contient
                        toutes vos données. Exportez vos données régulièrement.
                       """.format(path_backup))
-    except:
+    except OSError as e:
         raise_error(u"Le backup n'a pas pu être fait correctement.",
                     u"Vérifiez le chemin de destination puis re-essayez.\n\n \
                      Demandez de l'aide si le problème persiste.")
 
 
-def import_backup():
-
+def import_backup(folder=None, dst_folder=None):
+    home_path = os.path.dirname(os.path.abspath('__file__'))
+    shutil.copy(DB_FILE, home_path, "{}.old".format(DB_FILE))
     directory = str(QFileDialog.getExistingDirectory(QWidget(), "Select Directory"))
+    shutil.copy(os.path.join(directory, DB_FILE), home_path, DB_FILE)
+    copyanything(os.path.join(directory, folder),
+                 os.path.join(home_path, dst_folder))
+
     raise_error(u"Le backup n'a pas pu être import.",
                 u"""La fonctionalité n'a pas été activié.\n\n
                     La version actualle est {}""".format(Version().get(id=1).display_name()))
@@ -75,4 +83,16 @@ def copyanything(src, dest):
         if e.errno == errno.ENOTDIR:
             shutil.copy(src, dest)
         else:
-            print('Directory not copied. Error: %s' % e)
+            print(u'Directory not copied. Error: %s' % e)
+
+
+def export_license_as_file():
+
+    from model import SettingsAdmin
+    sttg = SettingsAdmin().select().where(SettingsAdmin.id==1).get()
+
+    flcce=open(LICENCE, 'w')
+    flcce.write(sttg.license)
+    flcce.close()
+    fil = os.path.join(os.path.dirname(os.path.abspath('__file__')), LICENCE)
+    uopen_file(fil)
