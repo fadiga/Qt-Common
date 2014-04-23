@@ -3,15 +3,15 @@
 # maintainer: Fad
 from __future__ import (unicode_literals, absolute_import, division, print_function)
 
-from sqlite3 import IntegrityError
-from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QIcon, QPixmap,
+# from sqlite3 import IntegrityError
+from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QPixmap,
                          QDialog, QLabel, QTextEdit)
 
 from Common.cstatic import CConstants
 from Common.models import SettingsAdmin
 from Common.exports import export_license_as_file
-from Common.ui.util import raise_success, raise_error
-from Common.ui.common import (IntLineEdit, F_Widget, Button_save, F_PageTitle,
+from Common.ui.util import raise_success
+from Common.ui.common import (F_Widget, Button_save, F_PageTitle,
                               LineEdit, Button, FormLabel, PyTextViewer)
 
 
@@ -148,6 +148,5 @@ class LicenseViewWidget(QDialog, F_Widget):
             self.cancel()
             raise_success(u"Confirmation",
                           u"""La license (<b>{}</b>) à éte bien enregistré pour cette
-                           machine.\n
-                           Elle doit être bien gardé""".format(license))
-            file_lience = open("licence.txt", "rw")
+                           machine.\n Elle doit être bien gardé""".format(license))
+            file_lience = open("licence.txt", "r")

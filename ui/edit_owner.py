@@ -16,11 +16,10 @@ from Common.ui.common import (F_Widget, Button_save, Button, IntLineEdit,
 
 
 class EditOwnerViewWidget(QDialog, F_Widget):
-    def __init__(self, owner, parent, *args, **kwargs):
-        QDialog.__init__(self, parent, *args, **kwargs)
+    def __init__(self, pp, parent, *args, **kwargs):
+        QDialog.__init__(self, parent=parent, *args, **kwargs)
 
-        self.owner = owner
-        self.parent = parent
+        self.owner = pp.owner
         vbox = QVBoxLayout()
         vbox.addWidget(F_PageTitle(u"Utilisateur: %s " % self.owner.username))
 
@@ -113,6 +112,7 @@ class EditOwnerViewWidget(QDialog, F_Widget):
             self.cancel()
             raise_success(u"Confirmation", u"Le Compte %s "
                           u"a été mise à jour" % ow.username)
+            # self.pp.table_owner.refresh.refresh_()
         else:
             raise_error(u"Error", u"Mot de passe pas correct")
 

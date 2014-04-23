@@ -6,13 +6,14 @@ from __future__ import (unicode_literals, absolute_import, division, print_funct
 
 from sqlite3 import IntegrityError
 from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QIcon, QPixmap,
-                         QPushButton, QDialog, QLabel, QComboBox)
+                         QPushButton, QDialog, QLabel, QComboBox, QTextEdit)
 
-from Common.ui.common import (FMainWindow, F_PageTitle, FormLabel,
-                              EnterTabbedLineEdit, ErrorLabel, Button_menu,
-                              Button_save, LineEdit, IntLineEdit, Button)
-from Common.ui.util import raise_error, WigglyWidget
-from models import Owner
+from Common.cstatic import CConstants
+from Common.ui.common import (FMainWindow, F_PageTitle, FormLabel, PyTextViewer,
+                              EnterTabbedLineEdit, ErrorLabel,
+                              Button_save, LineEdit, Button)
+from Common.ui.util import raise_error, raise_success
+from models import Owner, SettingsAdmin
 from configuration import Config
 
 
@@ -45,7 +46,13 @@ class LoginWidget(QDialog, FMainWindow):
         vbox = QHBoxLayout()
         vbox.addWidget(self.title)
 
-        if Owner().filter(isvisible=True, isactive=True).count() == 0:
+        self.sttg = SettingsAdmin.select().where(SettingsAdmin.id==1).get()
+        if not self.sttg.can_use():
+            self.activationGroupBox()
+            vbox.addWidget(self.topLeftGroupBoxBtt)
+            self.setLayout(vbox)
+
+        elif Owner().filter(isvisible=True, isactive=True).count() == 0:
             self.createNewUserGroupBox()
             vbox.addWidget(self.topLeftGroupBoxBtt)
             self.setLayout(vbox)
@@ -56,11 +63,52 @@ class LoginWidget(QDialog, FMainWindow):
             self.setFocusProxy(self.username_field)
             self.setLayout(vbox)
 
+    def activationGroupBox(self):
+        self.topLeftGroupBoxBtt = QGroupBox(self.tr("Nouvelle license"))
+        self.setWindowTitle(u"License")
+        self.setWindowTitle(u"Activation de la license")
+
+        self.code_field = PyTextViewer(u"""Vous avez besoin du code ci desous
+                                           pour l'activation:<hr> <b>{code}</b><hr>
+                                           <h4>Contacts:</h4>{contact}"""
+                                        .format(code=SettingsAdmin().select().get().clean_mac,
+                                         contact=CConstants.TEL_AUT))
+        self.name_field = LineEdit()
+        self.license_field = QTextEdit()
+        self.pixmap = QPixmap("")
+        self.image = QLabel(self)
+        self.image.setPixmap(self.pixmap)
+
+        butt = Button_save(u"Enregistrer")
+        butt.clicked.connect(self.add_lience)
+
+        cancel_but = Button(u"Annuler")
+        cancel_but.clicked.connect(self.cancel)
+
+        editbox = QGridLayout()
+        editbox.addWidget(QLabel(u"Nom: "), 0, 0)
+        editbox.addWidget(self.name_field, 0, 1)
+        editbox.addWidget(QLabel(u"License: "), 1, 0)
+        editbox.addWidget(self.license_field, 1, 1)
+        editbox.addWidget(self.code_field, 1, 2)
+        editbox.addWidget(self.image, 5, 1)
+        editbox.addWidget(butt, 6, 1)
+        editbox.addWidget(cancel_but, 6, 0)
+
+        self.topLeftGroupBoxBtt.setLayout(editbox)
+
     def loginUserGroupBox(self):
         self.topLeftGroupBox = QGroupBox(self.tr("Identification"))
 
+        self.liste_username = Owner.select().where((Owner.isvisible==True))
+        #Combobox widget
+        self.box_username = QComboBox()
+        for index in self.liste_username:
+            self.box_username.addItem(u'%(username)s' % {'username': index})
+
         # username field
-        self.username_field = EnterTabbedLineEdit()
+        # self.username_field = EnterTabbedLineEdit()
+        self.username_field = self.box_username
         self.username_label = FormLabel(u"&Identifiant")
         self.username_label.setBuddy(self.username_field)
         self.username_error = ErrorLabel(u"")
@@ -160,13 +208,13 @@ class LoginWidget(QDialog, FMainWindow):
 
     def ckecklogin(self):
         """ """
-        username = unicode(self.username_field.text()).strip()
+        # username = unicode(self.username_field.text()).strip()
+        username = unicode(self.liste_username[self.box_username.currentIndex()])
         password = unicode(self.password_field.text()).strip()
         password = Owner().crypt_password(password)
         # check completeness
         try:
-            # owners = Owner.get(islog=True)
-            owner = Owner.get(Owner.islog == True)
+            owner = Owner.get(Owner.islog==True)
             owner.islog = False
             owner.save()
         except:
@@ -176,9 +224,11 @@ class LoginWidget(QDialog, FMainWindow):
 
         self.pixmap = QPixmap(u"{}warning.png".format(Config.img_cmedia))
         try:
-            owner = Owner.get(username=username, password=password)
+            owner = Owner.select().where(Owner.username==username,
+                                         Owner.password==password).get()
             owner.islog = True
         except:
+            raise
             self.username_error.setToolTip("Identifiant ou mot de passe incorrect")
             self.username_error.setPixmap(self.pixmap)
             return False
@@ -205,14 +255,6 @@ class LoginWidget(QDialog, FMainWindow):
 
         # reset login error
         self.login_error.clear()
-
-        # username is required
-        if not self.username_field.text():
-            self.username_error.setText(u"L'identifiant est requis.")
-            complete = False
-        else:
-            self.username_error.clear()
-
         # password is required
         if not self.password_field.text():
             self.password_error.setText(u"Le mot de passe est requis.")
@@ -263,10 +305,41 @@ class LoginWidget(QDialog, FMainWindow):
         else:
             raise_error(u"Erreur", u"Tout les champs sont obligatoire")
 
+    def add_lience(self):
+        """ add User """
+        name = unicode(self.name_field.text()).strip()
+        license = unicode(self.license_field.toPlainText())
+        self.check_license(license)
+
+        if self.flog:
+            sttg = self.sttg
+            sttg.user = name
+            sttg.license = license
+            sttg.save()
+            self.cancel()
+            raise_success(u"Confirmation",
+                          u"""La license (<b>{}</b>) à éte bien enregistré pour cette
+                           machine.\n
+                           Elle doit être bien gardé""".format(license))
+            # file_lience = open("licence.txt", "r")
+
+    def check_license(self, license):
+
+        self.flog = False
+
+        if (SettingsAdmin().is_valide_mac(license)):
+            self.pixmap = QPixmap(u"{}accept.png".format(CConstants.img_cmedia))
+            self.image.setToolTip("License correct")
+            self.flog = True
+        else:
+            self.pixmap = QPixmap(u"{}decline.png".format(CConstants.img_cmedia))
+            self.image.setToolTip("License incorrect")
+        self.image.setPixmap(self.pixmap)
+
 
 def john_doe():
     try:
-        ow = Owner.get(username="anomime")
+        ow = Owner.get(Owner.username=="anomime")
     except:
         ow = Owner(username="anomime", password="anomime",
                    group="admin", last_login=0)

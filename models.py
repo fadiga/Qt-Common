@@ -14,7 +14,8 @@ from Common import peewee
 from Common.check_mac import get_mac
 
 DB_FILE = "database.db"
-dbh = peewee.SqliteDatabase(DB_FILE, threadlocals=True)
+# dbh = peewee.SqliteDatabase(DB_FILE, threadlocals=True)
+dbh = peewee.SqliteDatabase(DB_FILE)
 dbh.connect()
 
 

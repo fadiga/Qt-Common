@@ -3,13 +3,13 @@
 # maintainer: Fad
 from __future__ import (unicode_literals, absolute_import, division, print_function)
 
-from datetime import date, timedelta
+from datetime import date
 
-from PyQt4.QtCore import Qt, QSize, QString
-from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QGroupBox,
-                         QPalette, QDateTimeEdit, QFont, QWidget, QTabBar,
+from PyQt4.QtCore import Qt, QSize
+from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QPalette,
+                         QDateTimeEdit, QFont, QWidget, QTabBar,
                          QTextEdit, QColor, QIntValidator, QDoubleValidator,
-                         QGridLayout, QCommandLinkButton)
+                         QCommandLinkButton)
 
 from configuration import Config
 from Common.periods import Period
@@ -91,7 +91,7 @@ class TabPane(QTabBar):
         TabPane{
             border: 1px solid gray;
             border-radius: 7px;
-            background: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #38395a, stop: 1 #141529);
+            background: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #38395a, stop: 1 #4E6288);
         }
         Button_menu:hover{
             Background: #000;
@@ -184,7 +184,7 @@ class Button(QCommandLinkButton):
             color: white;
             background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #88d, stop: 0.1 #444450, stop: 0.49 #444450, stop: 0.5 #3c3c46, stop: 1 #1f1f24);
             border-width: 1px;
-            border-color: #141529;
+            border-color: #4E6288;
             border-style: solid;
             border-radius:4;
             padding: 3px;
@@ -319,7 +319,7 @@ class LineEdit(QLineEdit):
             border: 1px solid ;
             color: white;
             border-radius: 2px;
-            border-color: #141529;
+            border-color: #4E6288;
             background-color: #6d6d80;
             }
         """

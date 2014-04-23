@@ -8,20 +8,20 @@ from PyQt4.QtGui import (QComboBox, QLabel, QVBoxLayout,
                          QGridLayout, QPixmap, QDialog)
 
 from Common.cstatic import CConstants
-from model import Owner
+from models import Owner
 from Common.ui.util import raise_success, raise_error
 
-from Common.ui.login import LoginWidget
+# from Common.ui.login import LoginWidget
 from Common.ui.common import (IntLineEdit, F_Widget, Button_save, LineEdit, Button)
 
 
 class NewUserViewWidget(QDialog, F_Widget):
-    def __init__(self, go_home, parent=0, *args, **kwargs):
+    def __init__(self, pp, parent=0, *args, **kwargs):
         QDialog.__init__(self, parent, *args, **kwargs)
 
         self.setWindowTitle(u"Nouvel utilisateur")
         self.parent = parent
-        self.go_home = go_home
+        self.pp = pp
         self.parentWidget().setWindowTitle(u"Création d'un nouvel utilisateur")
 
         self.username_field = LineEdit()
@@ -99,11 +99,7 @@ class NewUserViewWidget(QDialog, F_Widget):
                 ow.group = group
                 try:
                     ow.save()
-                    if self.go_home:
-                        self.goto_home()
-                        self.parent.logout()
-                    # else:
-                    #     self.parent.table_owner.refresh_()
+                    self.pp.refresh_()
                     self.close()
                     raise_success(u"Confirmation", u"L'utilisateurs %s "
                                   u"a été enregistré" % ow.username)

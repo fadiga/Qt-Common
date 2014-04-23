@@ -88,7 +88,7 @@ def copyanything(src, dest):
 
 def export_license_as_file():
 
-    from model import SettingsAdmin
+    from models import SettingsAdmin
     sttg = SettingsAdmin().select().where(SettingsAdmin.id==1).get()
 
     flcce=open(LICENCE, 'w')

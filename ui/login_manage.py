@@ -4,16 +4,12 @@
 # maintainer: Fad
 from __future__ import (unicode_literals, absolute_import, division, print_function)
 
-from PyQt4.QtGui import (QVBoxLayout, QHBoxLayout, QTableWidgetItem, QFont,
-                         QGridLayout, QSplitter, QFrame, QGroupBox, QListWidgetItem,
-                         QComboBox, QIcon, QPixmap, QLabel, QCheckBox, QListWidget)
-from PyQt4.QtCore import QDate, Qt, QVariant, SIGNAL
+from PyQt4.QtGui import (QVBoxLayout, QFont, QGridLayout, QSplitter, QFrame,
+                         QListWidgetItem, QIcon, QPixmap, QLabel, QListWidget)
+from PyQt4.QtCore import Qt
 
-from Common.ui.table import F_TableWidget
 from Common.ui.edit_owner import EditOwnerViewWidget
-from Common.ui.common import (F_Widget, FormLabel, F_Label, F_BoxTitle,
-                      EnterTabbedLineEdit, ErrorLabel, Button_menu,
-                      Button_save, LineEdit, IntLineEdit, Button)
+from Common.ui.common import (F_Widget, F_Label, F_BoxTitle, Button)
 
 from configuration import Config
 from Common.models import Owner
@@ -24,11 +20,10 @@ class LoginManageWidget(F_Widget):
     def __init__(self, owner="", parent=0, *args, **kwargs):
         super(LoginManageWidget, self).__init__(parent=parent,
                                                            *args, **kwargs)
-        self.parentWidget().setWindowTitle(Config.NAME_ORGA +
-                                           u"  Gestion ")
+        self.parentWidget().setWindowTitle(Config.NAME_ORGA + u"  Gestion ")
         self.parent = parent
 
-        self.table_resultat = OwnerTableWidget(parent=self)
+        self.table_owner = OwnerTableWidget(parent=self)
         self.table_info = InfoTableWidget(parent=self)
         self.operation = OperationWidget(parent=self)
 
@@ -40,7 +35,7 @@ class LoginManageWidget(F_Widget):
 
         splitter_left = QSplitter(Qt.Vertical)
         splitter_left.addWidget(F_BoxTitle(u""))
-        splitter_left.addWidget(self.table_resultat)
+        splitter_left.addWidget(self.table_owner)
         splitter_left.addWidget(splitter_down)
 
         splitter_rigth = QSplitter(Qt.Vertical)
@@ -77,25 +72,25 @@ class OperationWidget(F_Widget):
                                      QIcon(u"{}user_add.png".format(Config.img_cmedia))))
         self.add_ow_but.clicked.connect(self.add_owner)
 
-        self.edit_ow_but = Button(u"Mettre à jour")
-        self.edit_ow_but.setIcon(QIcon.fromTheme('document-new',
-                                     QIcon(u"{}edit_user.png".format(Config.img_cmedia))))
+        # self.edit_ow_but = Button(u"Mettre à jour")
+        # self.edit_ow_but.setIcon(QIcon.fromTheme('document-new',
+        #                              QIcon(u"{}edit_user.png".format(Config.img_cmedia))))
         # self.edit_ow_but.setEnabled(False)
-        self.edit_ow_but.clicked.connect(self.edit_owner)
+        # self.edit_ow_but.clicked.connect(self.edit_owner)
         editbox.addWidget(self.add_ow_but, 2, 0)
-        editbox.addWidget(self.edit_ow_but, 3, 0)
+        # editbox.addWidget(self.edit_ow_but, 3, 0)
 
         vbox.addLayout(editbox)
         self.setLayout(vbox)
 
     def add_owner(self):
         from Common.ui.new_user import NewUserViewWidget
-        self.parent.open_dialog(NewUserViewWidget, modal=True, go_home=False)
+        self.parent.open_dialog(NewUserViewWidget, modal=True, pp=self.parent.table_owner)
 
 
-    def edit_owner(self):
-        self.parent.open_dialog(EditOwnerViewWidget,
-                                modal=True, owner=self.parent.table_info.owner)
+    # def edit_owner(self):
+    #     self.parent.open_dialog(EditOwnerViewWidget,
+    #                             modal=True, pp=self.parent.table_info)
 
 class OwnerTableWidget(QListWidget):
     """docstring for OwnerTableWidget"""
@@ -116,9 +111,9 @@ class OwnerTableWidget(QListWidget):
 
     def handleClicked(self):
         owner = self.currentItem()
-
         if isinstance(owner, int):
             return
+        self.parent.table_info.edit_ow_but.setEnabled(True)
         self.parent.table_info.refresh_(owner)
 
 
@@ -176,14 +171,22 @@ class InfoTableWidget(F_Widget):
         self.pixmap = QPixmap("")
         self.image = QLabel(self)
         self.image.setPixmap(self.pixmap)
+        self.edit_ow_but = Button(u"Mettre à jour")
+        self.edit_ow_but.setIcon(QIcon.fromTheme('document-new',
+                                     QIcon(u"{}edit_user.png".format(Config.img_cmedia))))
+        self.edit_ow_but.setEnabled(False)
+        self.edit_ow_but.clicked.connect(self.edit_owner)
 
         self.editbox = QGridLayout()
+        self.editbox.addWidget(self.edit_ow_but, 0, 3)
         self.editbox.addWidget(self.username_field, 0, 0)
         self.editbox.addWidget(self.group_field, 1, 0)
         self.editbox.addWidget(self.login_count_field, 2, 0)
         self.editbox.addWidget(self.isactive_field, 3, 0)
         self.editbox.addWidget(self.last_login_field, 4, 0)
         self.editbox.addWidget(self.phone_field, 5, 0)
+        self.editbox.setColumnStretch(4, 2)
+        self.editbox.setRowStretch(6, 2)
         vbox = QVBoxLayout()
         vbox.addLayout(self.editbox)
         self.setLayout(vbox)
@@ -208,3 +211,7 @@ class InfoTableWidget(F_Widget):
         self.login_count_field.setText("<b>Numbre de connexion:</b> {}"
                                       .format(self.owner.login_count))
         self.group_field.setText("<b>Groupe:</b> {}".format(self.owner.group))
+
+    def edit_owner(self):
+        self.parent.open_dialog(EditOwnerViewWidget,
+                                modal=True, pp=self.parent.table_info)
