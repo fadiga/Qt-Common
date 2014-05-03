@@ -9,6 +9,7 @@
 #    '
 import datetime
 import decimal
+import hashlib
 import logging
 import operator
 import re
@@ -21,7 +22,7 @@ from copy import deepcopy
 from functools import wraps
 from inspect import isclass
 
-__version__ = '2.2.2'
+__version__ = '2.2.3'
 __all__ = [
     'BareField',
     'BigIntegerField',
@@ -68,7 +69,8 @@ __all__ = [
     'TimeField',
 ]
 
-# Set default logging handler to avoid "No handlers could be found for logger "peewee"" warnings.
+# Set default logging handler to avoid "No handlers could be found for logger
+# "peewee"" warnings.
 try:  # Python 2.7+
     from logging import NullHandler
 except ImportError:
@@ -149,6 +151,25 @@ def _sqlite_date_part(lookup_type, datetime_string):
     dt = format_date_time(datetime_string, SQLITE_DATETIME_FORMATS)
     return getattr(dt, lookup_type)
 
+SQLITE_DATE_TRUNC_MAPPING = {
+    'year': '%Y',
+    'month': '%Y-%m',
+    'day': '%Y-%m-%d',
+    'hour': '%Y-%m-%d %H',
+    'minute': '%Y-%m-%d %H:%M',
+    'second': '%Y-%m-%d %H:%M:%S'}
+MYSQL_DATE_TRUNC_MAPPING = SQLITE_DATE_TRUNC_MAPPING.copy()
+MYSQL_DATE_TRUNC_MAPPING['minute'] = '%Y-%m-%d %H:%i'
+MYSQL_DATE_TRUNC_MAPPING['second'] = '%Y-%m-%d %H:%i:%S'
+
+def _sqlite_date_trunc(lookup_type, datetime_string):
+    assert lookup_type in SQLITE_DATE_TRUNC_MAPPING
+    dt = format_date_time(datetime_string, SQLITE_DATETIME_FORMATS)
+    return dt.strftime(SQLITE_DATE_TRUNC_MAPPING[lookup_type])
+
+def _sqlite_regexp(regex, value):
+    return re.search(regex, value, re.I) is not None
+
 # Operators used in binary expressions.
 OP_AND = 'and'
 OP_OR = 'or'
@@ -173,6 +194,7 @@ OP_IS = 'is'
 OP_LIKE = 'like'
 OP_ILIKE = 'ilike'
 OP_BETWEEN = 'between'
+OP_REGEXP = 'regexp'
 
 # To support "django-style" double-underscore filters, create a mapping between
 # operation name and operation code, e.g. "__eq" == OP_EQ.
@@ -187,6 +209,7 @@ DJANGO_MAP = {
     'is': OP_IS,
     'like': OP_LIKE,
     'ilike': OP_ILIKE,
+    'regexp': OP_REGEXP,
 }
 
 JOIN_INNER = 'inner'
@@ -344,6 +367,8 @@ class Node(object):
         return Expression(self, OP_ILIKE, '%%%s' % rhs)
     def between(self, low, high):
         return Expression(self, OP_BETWEEN, Clause(low, R('AND'), high))
+    def regexp(self, expression):
+        return Expression(self, OP_REGEXP, expression)
 
 class Expression(Node):
     """A binary expression, e.g `foo + 1` or `bar < 7`."""
@@ -956,6 +981,7 @@ class CompositeKey(object):
 
     def add_to_class(self, model_class, name):
         self.name = name
+        self.model_class = model_class
         setattr(model_class, name, self)
 
     def __get__(self, instance, instance_type=None):
@@ -966,6 +992,11 @@ class CompositeKey(object):
 
     def __set__(self, instance, value):
         pass
+
+    def __eq__(self, other):
+        expressions = [(self.model_class._meta.fields[field] == value)
+                       for field, value in zip(self.field_names, other)]
+        return reduce(operator.and_, expressions)
 
 
 class QueryCompiler(object):
@@ -1013,6 +1044,7 @@ class QueryCompiler(object):
         OP_AND: 'AND',
         OP_OR: 'OR',
         OP_MOD: '%',
+        OP_REGEXP: 'REGEXP',
     }
 
     join_map = {
@@ -1044,7 +1076,10 @@ class QueryCompiler(object):
         max_alias = 0
         if alias_map:
             for alias in alias_map.values():
-                alias_number = int(alias.lstrip('t'))
+                try:
+                    alias_number = int(alias.lstrip('t'))
+                except ValueError:
+                    alias_number = 0
                 if alias_number > max_alias:
                     max_alias = alias_number
         return max_alias + 1
@@ -1074,6 +1109,7 @@ class QueryCompiler(object):
                 sql = '.'.join((alias_map[node.model_class], sql))
             params = []
         elif isinstance(node, Func):
+            conv = node._coerce and conv or None
             sql, params = self.parse_node_list(node.arguments, alias_map, conv)
             sql = '%s(%s)' % (node.name, sql)
         elif isinstance(node, Clause):
@@ -1383,13 +1419,20 @@ class QueryCompiler(object):
         return Clause(*ddl)
     drop_table = return_parsed_node('_drop_table')
 
+    def index_name(self, table, columns):
+        index = '%s_%s' % (table, '_'.join(columns))
+        if len(index) > 64:
+            index_hash = hashlib.md5(index.encode('utf-8')).hexdigest()
+            index = '%s_%s' % (table, index_hash)
+        return index
+
     def _create_index(self, model_class, fields, unique, *extra):
-        statement = 'CREATE UNIQUE INDEX' if unique else 'CREATE INDEX'
         tbl_name = model_class._meta.db_table
-        index = '%s_%s' % (tbl_name, '_'.join(f.db_column for f in fields))
+        statement = 'CREATE UNIQUE INDEX' if unique else 'CREATE INDEX'
+        index_name = self.index_name(tbl_name, [f.db_column for f in fields])
         return Clause(
             SQL(statement),
-            Entity(index),
+            Entity(index_name),
             SQL('ON'),
             model_class._as_entity(),
             EnclosedClause(*[field._as_entity() for field in fields]),
@@ -1627,7 +1670,7 @@ class Query(Node):
 
         self._dirty = True
         self._query_ctx = model_class
-        self._joins = {self.model_class: []} # Join graph as adjacency list.
+        self._joins = {self.model_class: []}  # Join graph as adjacency list.
         self._where = None
 
     def __repr__(self):
@@ -1874,6 +1917,10 @@ class SelectQuery(Query):
 
     def compound_op(operator):
         def inner(self, other):
+            supported_ops = self.model_class._meta.database.compound_operations
+            if operator not in supported_ops:
+                raise ValueError(
+                    'Your database does not support %s' % operator)
             return CompoundSelect(self.model_class, self, operator, other)
         return inner
     __or__ = compound_op('UNION')
@@ -2144,6 +2191,7 @@ class InsertQuery(Query):
 
     def execute(self):
         if not self.database.insert_many and self._is_multi_row_insert:
+            last_id = None
             for row in self._rows:
                 last_id = InsertQuery(self.model_class, row).execute()
             return last_id
@@ -2189,10 +2237,12 @@ class ExceptionWrapper(object):
 class Database(object):
     commit_select = False
     compiler_class = QueryCompiler
+    compound_operations = ['UNION', 'INTERSECT', 'EXCEPT']
     drop_cascade = True
     field_overrides = {}
     foreign_keys = True
     for_update = False
+    for_update_nowait = False
     insert_many = True
     interpolation = '?'
     limit_max = None
@@ -2305,7 +2355,6 @@ class Database(object):
             try:
                 cursor.execute(sql, params or ())
             except Exception as exc:
-                logger.exception('%s %s', sql, params)
                 if self.get_autocommit() and self.autorollback:
                     self.rollback()
                 if self.sql_error_handler(exc, sql, params, require_commit):
@@ -2404,6 +2453,9 @@ class Database(object):
     def extract_date(self, date_part, date_field):
         return fn.EXTRACT(Clause(date_part, R('FROM'), date_field))
 
+    def truncate_date(self, date_part, date_field):
+        return fn.DATE_TRUNC(SQL(date_part), date_field)
+
 class SqliteDatabase(Database):
     drop_cascade = False
     foreign_keys = False
@@ -2415,10 +2467,10 @@ class SqliteDatabase(Database):
     }
 
     def _connect(self, database, **kwargs):
-        if not sqlite3:
-            raise ImproperlyConfigured('sqlite3 must be installed on the system')
         conn = sqlite3.connect(database, **kwargs)
         conn.create_function('date_part', 2, _sqlite_date_part)
+        conn.create_function('date_trunc', 2, _sqlite_date_trunc)
+        conn.create_function('regexp', 2, _sqlite_regexp)
         return conn
 
     def get_indexes_for_table(self, table):
@@ -2437,6 +2489,9 @@ class SqliteDatabase(Database):
     def extract_date(self, date_part, date_field):
         return fn.date_part(date_part, date_field)
 
+    def truncate_date(self, date_part, date_field):
+        return fn.strftime(SQLITE_DATE_TRUNC_MAPPING[date_part], date_field)
+
 class PostgresqlDatabase(Database):
     commit_select = True
     field_overrides = {
@@ -2448,7 +2503,11 @@ class PostgresqlDatabase(Database):
         'primary_key': 'SERIAL',
     }
     for_update = True
+    for_update_nowait = True
     interpolation = '%s'
+    op_overrides = {
+        OP_REGEXP: '~',
+    }
     reserved_tables = ['user']
     sequences = True
     window_functions = True
@@ -2482,11 +2541,11 @@ class PostgresqlDatabase(Database):
         res = self.execute_sql("""
             SELECT c2.relname, i.indisprimary, i.indisunique
             FROM
-                pg_catalog.pg_class c,
-                pg_catalog.pg_class c2,
-                pg_catalog.pg_index i
+            pg_catalog.pg_class c,
+            pg_catalog.pg_class c2,
+            pg_catalog.pg_index i
             WHERE
-                c.relname = %s AND c.oid = i.indrelid AND i.indexrelid = c2.oid
+            c.relname = %s AND c.oid = i.indrelid AND i.indexrelid = c2.oid
             ORDER BY i.indisprimary DESC, i.indisunique DESC, c2.relname""",
             (table,))
         return sorted([(r[0], r[1]) for r in res.fetchall()])
@@ -2517,6 +2576,8 @@ class PostgresqlDatabase(Database):
 
 class MySQLDatabase(Database):
     commit_select = True
+    compound_operations = ['UNION']
+    drop_cascade = False
     field_overrides = {
         'bool': 'BOOL',
         'decimal': 'NUMERIC',
@@ -2526,6 +2587,7 @@ class MySQLDatabase(Database):
         'text': 'LONGTEXT',
     }
     for_update = True
+    for_update_nowait = False
     interpolation = '%s'
     limit_max = 2 ** 64 - 1  # MySQL quirk
     op_overrides = {
@@ -2558,8 +2620,10 @@ class MySQLDatabase(Database):
         return [r[0] for r in res.fetchall()]
 
     def extract_date(self, date_part, date_field):
-        assert date_part.lower() in DATETIME_LOOKUPS
         return fn.EXTRACT(Clause(R(date_part), R('FROM'), date_field))
+
+    def truncate_date(self, date_part, date_field):
+        return fn.DATE_FORMAT(date_field, MYSQL_DATE_TRUNC_MAPPING[date_part])
 
 
 class transaction(object):
@@ -2946,21 +3010,44 @@ class Model(with_metaclass(BaseModel)):
         cls._create_indexes()
 
     @classmethod
-    def _create_indexes(cls):
-        db = cls._meta.database
-        for field_obj in cls._meta.fields.values():
-            if field_obj.primary_key:
+    def _fields_to_index(cls):
+        fields = []
+        for field in cls._meta.fields.values():
+            if field.primary_key:
                 continue
             requires_index = any((
-                field_obj.index,
-                field_obj.unique,
-                isinstance(field_obj, ForeignKeyField)))
+                field.index,
+                field.unique,
+                isinstance(field, ForeignKeyField)))
             if requires_index:
-                db.create_index(cls, [field_obj], field_obj.unique)
+                fields.append(field)
+        return fields
+
+    @classmethod
+    def _create_indexes(cls):
+        db = cls._meta.database
+        for field in cls._fields_to_index():
+            db.create_index(cls, [field], field.unique)
 
         if cls._meta.indexes:
             for fields, unique in cls._meta.indexes:
                 db.create_index(cls, fields, unique)
+
+    @classmethod
+    def sqlall(cls):
+        queries = []
+        compiler = cls._meta.database.compiler()
+        pk = cls._meta.primary_key
+        if cls._meta.database.sequences and pk.sequence:
+            queries.append(compiler.create_sequence(pk.sequence))
+        queries.append(compiler.create_table(cls))
+        for field in cls._fields_to_index():
+            queries.append(compiler.create_index(cls, [field], field.unique))
+        if cls._meta.indexes:
+            for field_names, unique in cls._meta.indexes:
+                fields = [cls._meta.fields[f] for f in field_names]
+                queries.append(compiler.create_index(cls, fields, unique))
+        return [sql for sql, _ in queries]
 
     @classmethod
     def drop_table(cls, fail_silently=False, cascade=False):
@@ -2993,19 +3080,24 @@ class Model(with_metaclass(BaseModel)):
 
     def save(self, force_insert=False, only=None):
         field_dict = dict(self._data)
-        pk = self._meta.primary_key
+        pk_field = self._meta.primary_key
         if only:
             field_dict = self._prune_fields(field_dict, only)
         if self.get_id() is not None and not force_insert:
-            field_dict.pop(pk.name, None)
-            self.update(**field_dict).where(self.pk_expr()).execute()
+            if not isinstance(pk_field, CompositeKey):
+                field_dict.pop(pk_field.name, None)
+            else:
+                field_dict = self._prune_fields(field_dict, self.dirty_fields)
+            rows = self.update(**field_dict).where(self.pk_expr()).execute()
         else:
             pk = self.get_id()
-            ret_pk = self.insert(**field_dict).execute()
-            if ret_pk is not None:
-                pk = ret_pk
-            self.set_id(pk)
+            pk_from_cursor = self.insert(**field_dict).execute()
+            if pk_from_cursor is not None:
+                pk = pk_from_cursor
+            self.set_id(pk)  # Do not overwrite current ID with a None value.
+            rows = 1
         self._dirty.clear()
+        return rows
 
     def is_dirty(self):
         return bool(self._dirty)

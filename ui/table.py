@@ -53,6 +53,9 @@ class F_TableWidget(QTableWidget):
         self.setAlternatingRowColors(True)
         self.setAutoScroll(True)
 
+    def dragMoveEvent(self, e):
+        e.accept()
+
     def _display_fixed():
 
         def fget(self):

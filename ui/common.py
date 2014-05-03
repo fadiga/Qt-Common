@@ -58,7 +58,7 @@ class F_Widget(QWidget):
 
         self.css = """
             QWidget{
-                /* background: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #eef, stop: 1 #ccf);*/
+                /* background: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #4984C7, stop: 1 #ccf);*/
             }
             """
         self.setStyleSheet(self.css)
@@ -91,7 +91,7 @@ class TabPane(QTabBar):
         TabPane{
             border: 1px solid gray;
             border-radius: 7px;
-            background: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #38395a, stop: 1 #4E6288);
+            background: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #4984C7, stop: 1 #4C7);
         }
         Button_menu:hover{
             Background: #000;
@@ -184,7 +184,7 @@ class Button(QCommandLinkButton):
             color: white;
             background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #88d, stop: 0.1 #444450, stop: 0.49 #444450, stop: 0.5 #3c3c46, stop: 1 #1f1f24);
             border-width: 1px;
-            border-color: #4E6288;
+            border-color: #4984C7;
             border-style: solid;
             border-radius:4;
             padding: 3px;
@@ -319,7 +319,7 @@ class LineEdit(QLineEdit):
             border: 1px solid ;
             color: white;
             border-radius: 2px;
-            border-color: #4E6288;
+            border-color: #4984C7;
             background-color: #6d6d80;
             }
         """

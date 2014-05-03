@@ -10,7 +10,6 @@ from PyQt4.QtCore import SIGNAL, SLOT
 from configuration import Config
 from Common.exports import export_database_as_file, export_backup, import_backup
 from Common.ui.common import F_Widget
-from Common.ui.login_manage import LoginManageWidget
 from Common.ui.license_view import LicenseViewWidget
 
 
@@ -32,12 +31,7 @@ class F_MenuBar(QMenuBar, F_Widget):
         backup.addAction(u"Importer", self.import_backup)
 
         # Comptes utilisateur
-        admin = self.file_.addMenu(u"Admistration")
-        gest_user = QAction(QIcon.fromTheme('emblem-system', QIcon('')),
-                               u"Gestion d'utilisateur", self)
-        gest_user.setShortcut("Ctrl+U")
-        self.connect(gest_user, SIGNAL("triggered()"), self.goto_gest_user)
-        admin.addAction(gest_user)
+        admin = self.file_.addMenu(u"Outils")
 
         admin_ = QAction(QIcon.fromTheme('emblem-system', QIcon('')),
                                u"Gestion Admistration", self)
@@ -93,10 +87,6 @@ class F_MenuBar(QMenuBar, F_Widget):
     # G. license
     def goto_license(self):
         self.open_dialog(LicenseViewWidget, modal=True)
-
-    # G user
-    def goto_gest_user(self):
-        self.change_main_context(LoginManageWidget)
 
     #Aide
     def goto_help(self):

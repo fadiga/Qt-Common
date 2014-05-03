@@ -4,10 +4,7 @@
 # maintainer: Fad
 from __future__ import (unicode_literals, absolute_import, division, print_function)
 
-import re
-import subprocess
 import hashlib
-
 
 from datetime import datetime
 from Common import peewee
@@ -91,7 +88,7 @@ class Settings(BaseModel):
         return self.full_mane()
 
     def change_prev(self):
-        self.slug = PREV
+        self.slug = self.PREV
         self.save()
 
     def full_mane(self):
@@ -116,6 +113,7 @@ class SettingsAdmin(BaseModel):
         """ check de license """
         return license == hashlib.sha1(self.clean_mac).hexdigest()
 
+    @property
     def can_use(self):
 
         if not self.is_valide_mac(self.license):
