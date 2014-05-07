@@ -16,7 +16,7 @@ from configuration import Config
 from Common.models import Owner
 from PyQt4.QtGui import (QCheckBox, QMessageBox, QTextEdit)
 
-from models import Settings
+from models import Organization
 from Common.tabpane import tabbox
 from Common.ui.util import (formatted_number, raise_success, raise_error)
 from Common.ui.table import F_TableWidget
@@ -36,7 +36,7 @@ class AdminViewWidget(F_Widget):
 
         editbox = QGridLayout()
         table_config = QVBoxLayout()
-        self.table_config = SettingsTableWidget(parent=self)
+        self.table_config = OrganizationTableWidget(parent=self)
         table_config.addLayout(editbox)
         table_config.addWidget(self.table_config)
 
@@ -147,12 +147,12 @@ class TrashTableWidget(F_TableWidget):
         pass
 
 
-class SettingsTableWidget(F_Widget):
+class OrganizationTableWidget(F_Widget):
 
     def __init__(self, parent, *args, **kwargs):
         super(F_Widget, self).__init__(parent=parent, *args, **kwargs)
 
-        self.organisation = Settings.get(id=1)
+        self.organisation = Organization.get(id=1)
         self.parent = parent
         vbox = QVBoxLayout()
         # vbox.addWidget(F_PageTitle(u"Utilisateur: %s " % self.organisation.name_orga))
@@ -203,7 +203,7 @@ class SettingsTableWidget(F_Widget):
 
         if self.check_impty:
             login = False
-            org = Settings.get(id=self.organisation.id)
+            org = Organization.get(id=self.organisation.id)
             if self.checked.checkState() == Qt.Checked:
                 login = True
             org.phone = phone

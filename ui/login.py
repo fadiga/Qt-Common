@@ -47,7 +47,7 @@ class LoginWidget(QDialog, FMainWindow):
         vbox.addWidget(self.title)
 
         self.sttg = SettingsAdmin.select().where(SettingsAdmin.id==1).get()
-        if not self.sttg.can_use():
+        if not self.sttg.can_use:
             self.activationGroupBox()
             vbox.addWidget(self.topLeftGroupBoxBtt)
             self.setLayout(vbox)

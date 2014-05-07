@@ -33,7 +33,7 @@ class LicenseViewWidget(QDialog, F_Widget):
         vbox = QHBoxLayout()
         vbox.addWidget(self.title)
         self.sttg = SettingsAdmin().select().where(SettingsAdmin.id==1).get()
-        if self.sttg.can_use():
+        if self.sttg.can_use:
             self.showLicenseGroupBox()
             vbox.addWidget(self.topLeftGroupBox)
             self.setLayout(vbox)
@@ -56,9 +56,9 @@ class LicenseViewWidget(QDialog, F_Widget):
         cancel_but = Button(u"OK")
         cancel_but.clicked.connect(self.cancel)
         remove_lcce = Button(u"Supprimer la license")
-        remove_lcce.clicked.connect(self.remove_licence)
+        remove_lcce.clicked.connect(self.remove_license)
         export_lcce = Button(u"Exporter la license")
-        export_lcce.clicked.connect(self.export_licence)
+        export_lcce.clicked.connect(self.export_license)
         # grid layout
         gridbox.addWidget(self.intro, 0, 1)
         gridbox.addWidget(cancel_but, 0, 2)
@@ -74,7 +74,7 @@ class LicenseViewWidget(QDialog, F_Widget):
     def activationGroupBox(self):
         self.topLeftGroupBoxBtt = QGroupBox(self.tr("Nouvelle license"))
         self.setWindowTitle(u"License")
-        self.parentWidget().setWindowTitle(u"Activation de la license")
+        # self.parentWidget().setWindowTitle(u"Activation de la license")
 
         self.code_field = PyTextViewer(u"""Vous avez besoin du code ci desous
                                            pour l'activation:<hr> <b>{code}</b><hr>
@@ -108,30 +108,30 @@ class LicenseViewWidget(QDialog, F_Widget):
     def cancel(self):
         self.close()
 
-    def remove_licence(self):
+    def remove_license(self):
         sttg = self.sttg
+        print(sttg)
         sttg.tolerance = 0
+        sttg.license = None
         sttg.save()
         self.cancel()
         raise_success("Suppression de la license",
-                     u"Vous pouvez activé maintenant la license en cliquant "
-                     u"sur license dans le menu ou au prochian lancement "
-                     u"du logiciel.")
+                     u"La license a été bien supprimée")
 
     def check_license(self, license):
 
         self.flog = False
-
         if (SettingsAdmin().is_valide_mac(license)):
-            self.pixmap = QPixmap(u"{}accept.png".format(CConstants.img_cmedia))
-            self.image.setToolTip("License correct")
+            icon = u"{}accept.png"
+            msg = "License correct"
             self.flog = True
         else:
-            self.pixmap = QPixmap(u"{}decline.png".format(CConstants.img_cmedia))
-            self.image.setToolTip("License incorrect")
-        self.image.setPixmap(self.pixmap)
+            icon = u"{}decline.png"
+            msg = "License incorrect"
+        self.image.setPixmap(QPixmap(icon.format(CConstants.img_cmedia)))
+        self.image.setToolTip(msg)
 
-    def export_licence(self):
+    def export_license(self):
         export_license_as_file()
 
     def add_lience(self):
@@ -149,4 +149,5 @@ class LicenseViewWidget(QDialog, F_Widget):
             raise_success(u"Confirmation",
                           u"""La license (<b>{}</b>) à éte bien enregistré pour cette
                            machine.\n Elle doit être bien gardé""".format(license))
-            file_lience = open("licence.txt", "r")
+            open("licence.txt", "r")
+            self.accept()

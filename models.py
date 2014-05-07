@@ -67,8 +67,8 @@ class Owner(BaseModel):
         super(Owner, self).save()
 
 
-class Settings(BaseModel):
-    """docstring for Settings"""
+class Organization(BaseModel):
+    """docstring for Organization"""
     PREV = 0
     CURRENT = 1
     DEFAULT = 2
@@ -99,11 +99,11 @@ class SettingsAdmin(BaseModel):
     """docstring for SettingsAdmin"""
     user = peewee.CharField()
     date = peewee.DateTimeField(default=datetime.now())
-    license = peewee.CharField()
-    tolerance = peewee.IntegerField(default=0)
+    license = peewee.CharField(default=None, null=True)
+    tolerance = peewee.IntegerField(default=3)
 
     def __str__(self):
-        return u"{}/{}".format(self.license, self.user)
+        return u"{1}{2}/{0}".format(self.license, self.user, self.tolerance)
 
     @property
     def clean_mac(self):
@@ -115,14 +115,10 @@ class SettingsAdmin(BaseModel):
 
     @property
     def can_use(self):
-
-        if not self.is_valide_mac(self.license):
-            if self.tolerance > 0:
-                return True
-            else:
-                return False
-        else:
+        if self.is_valide_mac(self.license) or self.tolerance >= 0:
             return True
+        else:
+            return False
 
 
 class Version(BaseModel):
