@@ -97,10 +97,10 @@ class Organization(BaseModel):
 
 class SettingsAdmin(BaseModel):
     """docstring for SettingsAdmin"""
-    user = peewee.CharField()
+    user = peewee.CharField(default="User")
     date = peewee.DateTimeField(default=datetime.now())
     license = peewee.CharField(default=None, null=True)
-    tolerance = peewee.IntegerField(default=3)
+    tolerance = peewee.IntegerField(default=30)
 
     def __str__(self):
         return u"{1}{2}/{0}".format(self.license, self.user, self.tolerance)

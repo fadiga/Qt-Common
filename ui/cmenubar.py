@@ -64,6 +64,7 @@ class F_MenuBar(QMenuBar, F_Widget):
         from Common.ui.login import LoginWidget
         # self.parent.restart()
         # self.change_main_context(LoginWidget)
+        # self.parent.setEnabled(False)
         LoginWidget().exec_()
 
     #Export the database.

@@ -8,6 +8,8 @@ from sqlite3 import IntegrityError
 from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QIcon, QPixmap,
                          QPushButton, QDialog, QLabel, QComboBox, QTextEdit)
 
+from PyQt4.QtCore import Qt
+
 from Common.cstatic import CConstants
 from Common.ui.common import (FMainWindow, F_PageTitle, FormLabel, PyTextViewer,
                               EnterTabbedLineEdit, ErrorLabel,
@@ -25,6 +27,7 @@ class LoginWidget(QDialog, FMainWindow):
         QDialog.__init__(self)
         self.setWindowTitle(Config.NAME_ORGA + u"    LOGIN")
 
+        self.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowTitleHint|Qt.WindowMaximizeButtonHint)
         self.intro = FormLabel(u"<h3>Vous devez vous identifier pour pouvoir<h3>"
                                u"<i>utiliser {}.</i>".format(Config.NAME_ORGA))
         self.title = F_PageTitle(u"""<h4>{app_org}</h4>

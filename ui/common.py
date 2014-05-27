@@ -5,6 +5,7 @@ from __future__ import (unicode_literals, absolute_import, division, print_funct
 
 from datetime import date
 
+from PyQt4.QtWebKit import QWebView
 from PyQt4.QtCore import Qt, QSize
 from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QPalette,
                          QDateTimeEdit, QFont, QWidget, QTabBar,
@@ -37,7 +38,6 @@ class FMainWindow(QMainWindow):
 
         # instanciate context
         self.view_widget = context_widget(parent=self, *args, **kwargs)
-
         # attach context to window
         self.setCentralWidget(self.view_widget)
 
@@ -54,7 +54,6 @@ class F_Widget(QWidget):
 
         QWidget.__init__(self, parent=parent, *args, **kwargs)
         self.pp = parent
-        self.setMaximumWidth(self.pp.wc)
 
         self.css = """
             QWidget{
@@ -71,6 +70,16 @@ class F_Widget(QWidget):
 
     def open_dialog(self, dialog, modal=False, *args, **kwargs):
         return self.parentWidget().open_dialog(dialog, modal=modal, *args, **kwargs)
+
+
+class FWebView(QWebView):
+
+    def __init__(self, parent=0, *args, **kwargs):
+        QWebView.__init__(self, parent=parent, *args, **kwargs)
+        self.pp = parent
+
+    def change_main_context(self, context_widget, *args, **kwargs):
+        return self.parentWidget().change_context(context_widget, *args, **kwargs)
 
 
 class PyTextViewer(QTextEdit):

@@ -10,7 +10,7 @@ PASS1 = "4b91d93da8bc69d1360c449c79edf8dc9b24b385807c8d887d389471" #'ano 86'
 LICENSE = '3483f0d7f57528841134b5802d64794234a2e85f'
 LICENSE = 'trial pour le demo'
 
-def init_fuxture():
+def init_fixture():
 
     Owner(username="root", password=PASS, group="superuser", isvisible=False, login_count=0).save()
     Owner(username="anomime", password=PASS1, group="admin", isvisible=False, login_count=0).save()

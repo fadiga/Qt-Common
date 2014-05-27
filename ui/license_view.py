@@ -149,5 +149,5 @@ class LicenseViewWidget(QDialog, F_Widget):
             raise_success(u"Confirmation",
                           u"""La license (<b>{}</b>) à éte bien enregistré pour cette
                            machine.\n Elle doit être bien gardé""".format(license))
-            open("licence.txt", "r")
+            open("licence.txt", "a")
             self.accept()
