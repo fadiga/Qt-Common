@@ -15,7 +15,7 @@ from Common.ui.common import (FMainWindow, F_PageTitle, FormLabel, PyTextViewer,
                               EnterTabbedLineEdit, ErrorLabel,
                               Button_save, LineEdit, Button)
 from Common.ui.util import raise_error, raise_success
-from models import Owner, SettingsAdmin
+from Common.models import Owner, SettingsAdmin
 from configuration import Config
 
 
@@ -47,7 +47,7 @@ class LoginWidget(QDialog, FMainWindow):
                                  font: 12pt 'URW Bookman L';""".format(Config.APP_LOGO))
 
         vbox = QHBoxLayout()
-        vbox.addWidget(self.title)
+        # vbox.addWidget(self.title)
 
         self.sttg = SettingsAdmin.select().where(SettingsAdmin.id==1).get()
         if not self.sttg.can_use:
@@ -55,7 +55,8 @@ class LoginWidget(QDialog, FMainWindow):
             vbox.addWidget(self.topLeftGroupBoxBtt)
             self.setLayout(vbox)
 
-        elif Owner().filter(isvisible=True, isactive=True).count() == 0:
+        elif Owner().select().where(Owner.isvisible == True,
+                                    Owner.isactive == True).count() == 0:
             self.createNewUserGroupBox()
             vbox.addWidget(self.topLeftGroupBoxBtt)
             self.setLayout(vbox)
@@ -74,8 +75,8 @@ class LoginWidget(QDialog, FMainWindow):
         self.code_field = PyTextViewer(u"""Vous avez besoin du code ci desous
                                            pour l'activation:<hr> <b>{code}</b><hr>
                                            <h4>Contacts:</h4>{contact}"""
-                                        .format(code=SettingsAdmin().select().get().clean_mac,
-                                         contact=CConstants.TEL_AUT))
+                                       .format(code=SettingsAdmin().select().get().clean_mac,
+                                               contact=CConstants.TEL_AUT))
         self.name_field = LineEdit()
         self.license_field = QTextEdit()
         self.pixmap = QPixmap("")
@@ -231,7 +232,6 @@ class LoginWidget(QDialog, FMainWindow):
                                          Owner.password==password).get()
             owner.islog = True
         except:
-            raise
             self.username_error.setToolTip("Identifiant ou mot de passe incorrect")
             self.username_error.setPixmap(self.pixmap)
             return False

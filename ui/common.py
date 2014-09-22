@@ -5,12 +5,12 @@ from __future__ import (unicode_literals, absolute_import, division, print_funct
 
 from datetime import date
 
-from PyQt4.QtWebKit import QWebView
 from PyQt4.QtCore import Qt, QSize
 from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QPalette,
                          QDateTimeEdit, QFont, QWidget, QTabBar,
                          QTextEdit, QColor, QIntValidator, QDoubleValidator,
                          QCommandLinkButton)
+from PyQt4.QtWebKit import QWebView
 
 from configuration import Config
 from Common.periods import Period
@@ -158,6 +158,7 @@ class ErrorLabel(F_Label):
         self.setPalette(palette)
         self.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
+
 class FormLabel(F_Label):
 
     def __init__(self, text, parent=None):
@@ -173,11 +174,12 @@ class Button(QCommandLinkButton):
     def __init__(self, *args, **kwargs):
         super(Button, self).__init__(*args, **kwargs)
         self.setAutoDefault(True)
+        self.setIcon(QIcon.fromTheme('', QIcon('')))
         self.setCursor(Qt.PointingHandCursor)
         # self.setCursor(Qt.ForbiddenCursor)
         # self.setFixedSize(100, 40)
 
-        self.setFont(QFont("Comic Sans MS", 13, QFont.Bold, True))
+        # self.setFont(QFont("Comic Sans MS", 13, QFont.Bold, True))
         css = """
             QPushButton {
             /* color: white;
@@ -205,7 +207,7 @@ class Button(QCommandLinkButton):
             padding-right: 5px;*/
         }
         """
-        self.setStyleSheet(css)
+        # self.setStyleSheet(css)
         # self.setCheckable(True)
 
 
@@ -213,7 +215,7 @@ class Button_rond(Button):
 
     def __init__(self, *args, **kwargs):
         super(Button_rond, self).__init__(*args, **kwargs)
-        # self.setIcon(QIcon.fromTheme('document-save', QIcon('')))
+        self.setIcon(QIcon.fromTheme('', QIcon('')))
         css = """
                 border-radius:9px;
                 border:1px solid #4b8f29;

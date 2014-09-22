@@ -4,9 +4,10 @@
 # maintainer: Fad
 from __future__ import (unicode_literals, absolute_import, division, print_function)
 
-from PyQt4.QtGui import (QVBoxLayout, QFont, QGridLayout, QSplitter, QFrame,
-                         QListWidgetItem, QIcon, QPixmap, QLabel, QListWidget)
 from PyQt4.QtCore import Qt, SIGNAL
+from PyQt4.QtGui import (QVBoxLayout, QFont, QGridLayout, QSplitter,
+                         QFrame, QCheckBox, QMessageBox, QTextEdit,
+                         QListWidgetItem, QIcon, QPixmap, QLabel, QListWidget)
 
 from Common.ui.edit_owner import EditOwnerViewWidget
 from Common.ui.common import (F_Widget, F_Label, F_BoxTitle, Button,
@@ -14,9 +15,8 @@ from Common.ui.common import (F_Widget, F_Label, F_BoxTitle, Button,
 
 from configuration import Config
 from Common.models import Owner
-from PyQt4.QtGui import (QCheckBox, QMessageBox, QTextEdit)
 
-from models import Organization
+from Common.models import Organization
 from Common.tabpane import tabbox
 from Common.ui.util import (formatted_number, raise_success, raise_error)
 from Common.ui.table import F_TableWidget
@@ -32,7 +32,6 @@ class AdminViewWidget(F_Widget):
         self.parent = parent
 
         self.parentWidget().setWindowTitle(Constants.APP_NAME + u"    ADMINISTRATION")
-
 
         editbox = QGridLayout()
         table_config = QVBoxLayout()

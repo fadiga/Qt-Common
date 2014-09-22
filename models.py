@@ -4,19 +4,34 @@
 # maintainer: Fad
 from __future__ import (unicode_literals, absolute_import, division, print_function)
 
+import os
+import time
 import hashlib
 
 from datetime import datetime
-from Common import peewee
+
+# from Common import peewee224 as peewee
 from Common.check_mac import get_mac
 
 DB_FILE = "database.db"
-# dbh = peewee.SqliteDatabase(DB_FILE, threadlocals=True)
-dbh = peewee.SqliteDatabase(DB_FILE)
+
+
+def peewee_v():
+    # from configuration import Config
+    from static import Constants
+    try:
+        if Constants.PEEWEE_V == 224:
+            from Common import peewee224 as peewee
+    except AttributeError:
+        from Common import peewee
+
+    return peewee
+
+dbh = peewee_v().SqliteDatabase(DB_FILE)
 dbh.connect()
 
 
-class BaseModel(peewee.Model):
+class BaseModel(peewee_v().Model):
 
     class Meta:
         database = dbh
@@ -37,20 +52,20 @@ class Owner(BaseModel):
               (ADMIN, u"admin"),
               (ROOT, u"superuser"))
 
-    group = peewee.CharField(choices=GROUPS, default=USER)
-    islog = peewee.BooleanField(default=False)
-    phone = peewee.CharField(max_length=30, null=True, verbose_name=("Telephone"))
-    username = peewee.CharField(max_length=30, unique=True, verbose_name=("Nom d'utilisateur"))
-    password = peewee.CharField(max_length=150)
-    isactive = peewee.BooleanField(default=True)
-    isvisible = peewee.BooleanField(default=True)
-    last_login = peewee.DateTimeField(default=datetime.now())
-    login_count = peewee.IntegerField(default=0)
+    group = peewee_v().CharField(choices=GROUPS, default=USER)
+    islog = peewee_v().BooleanField(default=False)
+    phone = peewee_v().CharField(max_length=30, null=True, verbose_name=("Telephone"))
+    username = peewee_v().CharField(max_length=30, unique=True, verbose_name=("Nom d'utilisateur"))
+    password = peewee_v().CharField(max_length=150)
+    isactive = peewee_v().BooleanField(default=True)
+    isvisible = peewee_v().BooleanField(default=True)
+    last_login = peewee_v().DateTimeField(default=datetime.now())
+    login_count = peewee_v().IntegerField(default=0)
 
     def __str__(self):
         return u"{}".format(self.username)
 
-    def full_mane(self):
+    def display_name(self):
         return u"{name}/{group}/{login_count}".format(name=self.username,
                                                       group=self.group,
                                                       login_count=self.login_count)
@@ -61,7 +76,7 @@ class Owner(BaseModel):
     def save(self):
         if self.islog:
             self.login_count += 1
-            stt=SettingsAdmin().select().get()
+            stt = SettingsAdmin().select().get()
             stt.tolerance -= 1
             stt.save()
         super(Owner, self).save()
@@ -73,41 +88,53 @@ class Organization(BaseModel):
     CURRENT = 1
     DEFAULT = 2
     LCONFIG = ((PREV, u"Precedent"),
-              (DEFAULT, u"Par defaut"),
-              (CURRENT, u"Actuel"),)
+               (DEFAULT, u"Par defaut"),
+               (CURRENT, u"Actuel"),)
 
-    slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
-    login = peewee.BooleanField(default=True)
-    name_orga = peewee.CharField('')
-    phone = peewee.IntegerField('')
-    bp = peewee.CharField('')
-    email_org = peewee.CharField('')
-    adress_org = peewee.TextField('')
+    slug = peewee_v().CharField(choices=LCONFIG, default=DEFAULT)
+    login = peewee_v().BooleanField(default=True)
+    name_orga = peewee_v().CharField(verbose_name=(""))
+    phone = peewee_v().IntegerField(null=True, verbose_name=(""))
+    bp = peewee_v().CharField(null=True, verbose_name=(""))
+    email_org = peewee_v().CharField(null=True, verbose_name=(""))
+    adress_org = peewee_v().TextField(null=True, verbose_name=(""))
 
     def __str__(self):
-        return self.full_mane()
+        return self.display_name()
 
     def change_prev(self):
         self.slug = self.PREV
         self.save()
 
-    def full_mane(self):
+    def display_name(self):
         return u"{}/{}/{}".format(self.name_orga, self.phone, self.email_org)
+
+    @classmethod
+    def get_or_create(cls, name_orga, typ):
+        try:
+            ctct = cls.get(name_orga=name_orga, type_=typ)
+            print(ctct)
+        except cls.DoesNotExist:
+            ctct = cls.create(name_orga=name_orga, type_=typ)
+        return ctct
 
 
 class SettingsAdmin(BaseModel):
     """docstring for SettingsAdmin"""
-    user = peewee.CharField(default="User")
-    date = peewee.DateTimeField(default=datetime.now())
-    license = peewee.CharField(default=None, null=True)
-    tolerance = peewee.IntegerField(default=30)
+    user = peewee_v().CharField(default="User")
+    date = peewee_v().DateTimeField(default=datetime.now())
+    license = peewee_v().CharField(default=None, null=True)
+    tolerance = peewee_v().IntegerField(default=230)
 
     def __str__(self):
-        return u"{1}{2}/{0}".format(self.license, self.user, self.tolerance)
+        return self.display_name()
+
+    def display_name(self):
+        return u"{}/{}/{}".format(self.user, self.date, self.license)
 
     @property
     def clean_mac(self):
-        return get_mac().replace(":", "").replace("-","")
+        return get_mac().replace(":", "").replace("-", "")
 
     def is_valide_mac(self, license):
         """ check de license """
@@ -117,22 +144,89 @@ class SettingsAdmin(BaseModel):
     def can_use(self):
         if self.is_valide_mac(self.license) or self.tolerance >= 0:
             return True
-        else:
-            return False
+        return False
 
 
 class Version(BaseModel):
-    date = peewee.DateTimeField(default=datetime.now(), verbose_name="Date de Version")
-    number = peewee.IntegerField(default=1 , verbose_name="Numéro de Version")
+    date = peewee_v().DateTimeField(default=datetime.now(), verbose_name="Date de Version")
+    number = peewee_v().IntegerField(default=1, verbose_name="Numéro de Version")
 
     def __str__(self):
-        return "{}/{}".format(self.number, self.date)
+        return u"{}/{}".format(self.number, self.date)
 
     def display_name(self):
-        return "V-{}".format(self.number)
-
+        return u"V-{}".format(self.number)
 
     def update_v(self):
         self.number += 1
         self.date = datetime.now()
         self.save()
+
+
+class FileJoin(BaseModel):
+
+    class Meta:
+        ordering = (('file_name', 'desc'))
+
+    file_name = peewee_v().CharField(max_length=200, null=True)
+    file_slug = peewee_v().CharField(max_length=200, null=True, unique=True)
+    on_created = peewee_v().DateTimeField(default=datetime.now)
+
+    def __str__(self):
+        return "{}({})".format(self.file_name, self.file_slug)
+
+    def display_name(self):
+        return u"{}".format(self.file_name)
+
+    @property
+    def get_file(self):
+        from static import Constants
+        return os.path.join(Constants.des_image_record, self.file_slug)
+
+    def show_file(self):
+        from Common.ui.util import uopen_file
+        uopen_file(self.get_file)
+
+    def remove_file(self):
+        """ Remove doc and file """
+        self.delete_instance()
+        try:
+            os.remove(self.get_file)
+        except TypeError:
+            pass
+
+    def isnottrash(self):
+        self.trash = False
+        self.save()
+
+    @property
+    def os_info(self):
+        return os.stat(self.get_file)
+
+    @property
+    def created_date(self):
+        return time.ctime(self.os_info.st_ctime)
+
+    @property
+    def modification_date(self):
+        return time.ctime(self.os_info.st_mtime)
+
+    @property
+    def last_date_access(self):
+        return time.ctime(self.os_info.st_atime)
+
+    @property
+    def get_taille(self):
+        """ La taille du document"""
+        octe = 1024
+        q = octe
+        kocte = octe * octe
+        unit = "ko"
+
+        taille_oct = float(self.os_info.st_size)
+        if kocte < taille_oct:
+            unit = "Mo"
+            q = kocte
+
+        taille = round(taille_oct / q, 2)
+        return "{} {}".format(taille, unit)

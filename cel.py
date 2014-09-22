@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# encoding=utf-8
+# -*- coding: utf-8 -*-
 
 ''' Converts numbers into french letters.
 

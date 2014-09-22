@@ -159,7 +159,7 @@ def format_date(dat):
 
 
 def show_date(dat):
-    return dat.strftime(u"%A le %d %b %Y a %Hh:%Mmn")
+    return dat.strftime(u"%c")
 
 
 def to_jstimestamp(adate):
@@ -217,3 +217,42 @@ class WigglyWidget(QtGui.QWidget):
             self.update()
         else:
             QtGui.QWidget.timerEvent(event)
+
+
+def import_file(path_filename, filename):
+    """ Copy the file, rename file in banc and return new name of the doc
+        created folder banc doc if not existe
+    """
+    import shutil
+    from static import Constants
+    destination = Constants.des_image_record
+    if not os.path.exists(destination):
+        os.mkdir(destination)
+    shutil.copyfile(path_filename, get_path(destination, filename))
+
+    return rename_file(destination, filename, slug_mane_file(filename))
+
+
+def rename_file(path, old_filename, new_filename):
+    """ Rename file in banc docs  params: old_filename, new_filename
+        return newname"""
+    os.rename(get_path(path, old_filename),
+              get_path(path, new_filename))
+    return new_filename
+
+
+def get_path(path, filename):
+    return os.path.join(path, filename)
+
+
+def slug_mane_file(file_name):
+    return u"{fname}_{timestamp}.{extension}".format(fname=file_name.replace(" ", "_"),
+                                  timestamp=to_jstimestamp(datetime.datetime.now()),
+                                  extension=file_name.split(".")[-1])
+
+
+def normalize(s):
+    if type(s) == unicode:
+        return s.encode('utf8', 'ignore')
+    else:
+        return str(s)

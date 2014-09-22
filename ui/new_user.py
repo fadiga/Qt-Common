@@ -8,7 +8,7 @@ from PyQt4.QtGui import (QComboBox, QLabel, QVBoxLayout,
                          QGridLayout, QPixmap, QDialog)
 
 from Common.cstatic import CConstants
-from models import Owner
+from Common.models import Owner
 from Common.ui.util import raise_success, raise_error
 
 # from Common.ui.login import LoginWidget

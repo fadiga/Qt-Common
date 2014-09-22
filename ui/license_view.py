@@ -45,9 +45,9 @@ class LicenseViewWidget(QDialog, F_Widget):
     def showLicenseGroupBox(self):
 
         self.intro = FormLabel(u"""<hr> <i> Elle est n'est valable que pour cette machine</i>
-                                        <p><b>proprièteur: </b> {name}</p>
-                                        <p><b>date d'activation:</b> {date}</p><hr>
-                                        <p><b>Merci.</b></li>
+                                <p><b>proprièteur: </b> {name}</p>
+                                <p><b>date d'activation:</b> {date}</p><hr>
+                                <p><b>Merci.</b></li>
                                 """.format(name=self.sttg.user,
                                            date=self.sttg.date.strftime('%c')))
         self.topLeftGroupBox = QGroupBox(self.tr("License est activé"))
@@ -80,7 +80,7 @@ class LicenseViewWidget(QDialog, F_Widget):
                                            pour l'activation:<hr> <b>{code}</b><hr>
                                            <h4>Contacts:</h4>{contact}"""
                                         .format(code=SettingsAdmin().select().get().clean_mac,
-                                         contact=CConstants.TEL_AUT))
+                                                contact=CConstants.TEL_AUT))
         self.name_field = LineEdit()
         self.license_field = QTextEdit()
         self.pixmap = QPixmap("")
@@ -101,7 +101,7 @@ class LicenseViewWidget(QDialog, F_Widget):
         editbox.addWidget(self.code_field, 1, 2)
         editbox.addWidget(self.image, 5, 1)
         editbox.addWidget(butt, 6, 1)
-        editbox.addWidget(cancel_but, 6, 0)
+        editbox.addWidget(cancel_but, 6, 2)
 
         self.topLeftGroupBoxBtt.setLayout(editbox)
 
