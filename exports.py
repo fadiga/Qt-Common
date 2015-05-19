@@ -15,7 +15,7 @@ from configuration import Config
 
 from Common.ui.util import raise_success, raise_error, uopen_file
 
-DATETIME = u"{}".format(unicode(datetime.now().strftime('%d-%m-%Y %Hh%M')))
+DATETIME = "{}".format(datetime.now().strftime('%d-%m-%Y %Hh%M'))
 LICENCE = "licence.txt"
 
 def export_database_as_file():

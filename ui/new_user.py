@@ -3,7 +3,6 @@
 # maintainer: Fad
 from __future__ import (unicode_literals, absolute_import, division, print_function)
 
-from sqlite3 import IntegrityError
 from PyQt4.QtGui import (QComboBox, QLabel, QVBoxLayout,
                          QGridLayout, QPixmap, QDialog)
 
@@ -85,6 +84,8 @@ class NewUserViewWidget(QDialog, F_Widget):
 
     def add_user(self):
         """ add User """
+
+        # from sqlite3 import IntegrityError
         username = unicode(self.username_field.text()).strip()
         password = unicode(self.password_field.text()).strip()
         password = Owner().crypt_password(password)
@@ -104,7 +105,7 @@ class NewUserViewWidget(QDialog, F_Widget):
                     raise_success(u"Confirmation", u"L'utilisateurs %s "
                                   u"a été enregistré" % ow.username)
 
-                except IntegrityError:
+                except:
                     raise
                     raise_error(u"Erreur", u"L'utilisateurs %s "
                                 u"existe déjà dans la base de donnée" % ow.username)
@@ -113,5 +114,5 @@ class NewUserViewWidget(QDialog, F_Widget):
 
     def goto_home(self):
 
-        from Common.ui.login_manage import LoginManageWidget
-        self.change_main_context(LoginManageWidget)
+        from Common.ui.admin import AdminViewWidget
+        self.change_main_context(AdminViewWidget)

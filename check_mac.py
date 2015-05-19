@@ -26,4 +26,4 @@ def get_mac():
                 adresse_mac = ligne.split('HWaddr')[1].strip()
         return adresse_mac
     except:
-        return None
+        return ""

@@ -23,6 +23,11 @@ from Common.ui.table import F_TableWidget
 
 from static import Constants
 
+try:
+    unicode
+except NameError:
+    unicode = str
+
 
 class AdminViewWidget(F_Widget):
 
@@ -117,8 +122,9 @@ class TrashTableWidget(F_TableWidget):
         self.refresh()
 
     def set_data_for(self):
-        self.data = [("", record.date, record.category, record.description)
-                     for record in Records.select().where(Records.trash==True).order_by(Records.category.asc())]
+        self.data = []
+        # self.data = [("", record.date, record.category, record.description)
+        #              for record in Records.select().where(Records.trash == True).order_by(Records.category.asc())]
 
     def getSelectTableItems(self):
         n = self.rowCount()
@@ -128,7 +134,8 @@ class TrashTableWidget(F_TableWidget):
             if not item:
                 pass
             elif item.checkState() == Qt.Checked:
-                ldata.append(Records.filter(description=str(self.item(i, 3).text())).get())
+                ldata.append("ee")
+                # ldata.append(Records.filter(description=str(self.item(i, 3).text())).get())
         return ldata
 
     def _item_for_data(self, row, column, data, context=None):

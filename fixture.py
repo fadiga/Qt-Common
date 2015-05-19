@@ -31,6 +31,5 @@ class AdminFixture(object):
         for f in self.LIST_CREAT:
             try:
                 f.save()
-                # print(u"{} est Creé".format(f.display_name()).encode('utf-8'))
-            except Exception, e:
+            except Exception as e:
                 print(e)

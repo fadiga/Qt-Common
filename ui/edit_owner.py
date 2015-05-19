@@ -118,5 +118,5 @@ class EditOwnerViewWidget(QDialog, F_Widget):
 
     def goto_back(self):
 
-        from Common.ui.login_manage import LoginManageWidget
-        self.change_main_context(LoginManageWidget)
+        from Common.ui.admin import AdminViewWidget
+        self.change_main_context(AdminViewWidget)

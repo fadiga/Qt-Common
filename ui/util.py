@@ -13,6 +13,11 @@ import datetime
 from PyQt4 import QtGui, QtCore
 from Common.ui.window import F_Window
 
+try:
+    unicode
+except NameError:
+    unicode = str
+
 
 class PDFFileUnavailable(IOError):
     pass
@@ -74,11 +79,13 @@ def raise_success(title, message):
     box.exec_()
 
 
-def formatted_number(number):
+def formatted_number(number, sep="."):
     """ """
-
+    locale_name, encoding = locale.getlocale()
     try:
-        return locale.format("%d", number, grouping=True).decode(locale.getlocale()[1])
+        return locale.format(u"%d", number, grouping=True).decode(locale.getlocale()[1])
+    except AttributeError:
+        return locale.format("%d", number, grouping=True)
     except:
         return "%s" % number
 
@@ -188,7 +195,7 @@ class WigglyWidget(QtGui.QWidget):
         self.timer = QtCore.QBasicTimer()
         self.text = QtCore.QString(test)
 
-        self.step = 0;
+        self.step = 0
         self.timer.start(60, self)
 
     def paintEvent(self, event):

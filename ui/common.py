@@ -10,7 +10,7 @@ from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QPalette,
                          QDateTimeEdit, QFont, QWidget, QTabBar,
                          QTextEdit, QColor, QIntValidator, QDoubleValidator,
                          QCommandLinkButton)
-from PyQt4.QtWebKit import QWebView
+# from PyQt4.QtWebKit import QWebView
 
 from configuration import Config
 from Common.periods import Period
@@ -72,14 +72,14 @@ class F_Widget(QWidget):
         return self.parentWidget().open_dialog(dialog, modal=modal, *args, **kwargs)
 
 
-class FWebView(QWebView):
+# class FWebView(QWebView):
 
-    def __init__(self, parent=0, *args, **kwargs):
-        QWebView.__init__(self, parent=parent, *args, **kwargs)
-        self.pp = parent
+#     def __init__(self, parent=0, *args, **kwargs):
+#         QWebView.__init__(self, parent=parent, *args, **kwargs)
+#         self.pp = parent
 
-    def change_main_context(self, context_widget, *args, **kwargs):
-        return self.parentWidget().change_context(context_widget, *args, **kwargs)
+#     def change_main_context(self, context_widget, *args, **kwargs):
+#         return self.parentWidget().change_context(context_widget, *args, **kwargs)
 
 
 class PyTextViewer(QTextEdit):
@@ -245,7 +245,7 @@ class Deleted_btt(Button):
                 padding:6px 24px;
                 text-decoration:none;
                 """
-        self.setStyleSheet(css)
+        # self.setStyleSheet(css)
 
 
 class Warning_btt(Button):
@@ -265,7 +265,7 @@ class Warning_btt(Button):
                     padding:6px 24px;
 
                 """
-        self.setStyleSheet(css)
+        # self.setStyleSheet(css)
 
 
 class Button_save(Button):

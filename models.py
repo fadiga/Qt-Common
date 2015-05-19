@@ -71,7 +71,7 @@ class Owner(BaseModel):
                                                       login_count=self.login_count)
 
     def crypt_password(self, password):
-        return hashlib.sha224(password).hexdigest()
+        return hashlib.sha224(str(password).encode("utf-8")).hexdigest()
 
     def save(self):
         if self.islog:
@@ -138,7 +138,7 @@ class SettingsAdmin(BaseModel):
 
     def is_valide_mac(self, license):
         """ check de license """
-        return license == hashlib.sha1(self.clean_mac).hexdigest()
+        return license == hashlib.md5(str(self.clean_mac).encode('utf-8')).hexdigest()
 
     @property
     def can_use(self):

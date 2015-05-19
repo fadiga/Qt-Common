@@ -11,6 +11,20 @@ from PyQt4.QtGui import (QTableWidget, QAbstractItemView, QLabel,
 
 from Common.ui.util import formatted_number
 
+try:
+    basestring
+except NameError:
+    # Python 3
+    basestring = unicode = str
+try:
+    long
+except NameError:
+    long = int
+try:
+    xrange
+except:
+    xrange = range
+    
 
 class FlexibleTable(QTableWidget):
     pass
@@ -306,6 +320,7 @@ class F_TableWidget(QTableWidget):
     data = property(**data())
 
     def _item_for_data(self, row, column, data, context=None):
+        
         if isinstance(data, (basestring, int)):
             if column in self.align_map.keys():
                 widget = self.widget_from_align(self.align_map[column])

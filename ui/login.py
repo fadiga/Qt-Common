@@ -4,7 +4,6 @@
 # maintainer: Fad
 from __future__ import (unicode_literals, absolute_import, division, print_function)
 
-from sqlite3 import IntegrityError
 from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QIcon, QPixmap,
                          QPushButton, QDialog, QLabel, QComboBox, QTextEdit)
 
@@ -17,6 +16,11 @@ from Common.ui.common import (FMainWindow, F_PageTitle, FormLabel, PyTextViewer,
 from Common.ui.util import raise_error, raise_success
 from Common.models import Owner, SettingsAdmin
 from configuration import Config
+
+try:
+    unicode
+except NameError:
+    unicode = str
 
 
 class LoginWidget(QDialog, FMainWindow):
@@ -49,7 +53,7 @@ class LoginWidget(QDialog, FMainWindow):
         vbox = QHBoxLayout()
         # vbox.addWidget(self.title)
 
-        self.sttg = SettingsAdmin.select().where(SettingsAdmin.id==1).get()
+        self.sttg = SettingsAdmin.select().where(SettingsAdmin.id == 1).get()
         if not self.sttg.can_use:
             self.activationGroupBox()
             vbox.addWidget(self.topLeftGroupBoxBtt)
@@ -104,7 +108,7 @@ class LoginWidget(QDialog, FMainWindow):
     def loginUserGroupBox(self):
         self.topLeftGroupBox = QGroupBox(self.tr("Identification"))
 
-        self.liste_username = Owner.select().where((Owner.isvisible==True))
+        self.liste_username = Owner.select().where((Owner.isvisible == True))
         #Combobox widget
         self.box_username = QComboBox()
         for index in self.liste_username:
@@ -218,7 +222,7 @@ class LoginWidget(QDialog, FMainWindow):
         password = Owner().crypt_password(password)
         # check completeness
         try:
-            owner = Owner.get(Owner.islog==True)
+            owner = Owner.get(Owner.islog == True)
             owner.islog = False
             owner.save()
         except:
@@ -228,8 +232,8 @@ class LoginWidget(QDialog, FMainWindow):
 
         self.pixmap = QPixmap(u"{}warning.png".format(Config.img_cmedia))
         try:
-            owner = Owner.select().where(Owner.username==username,
-                                         Owner.password==password).get()
+            owner = Owner.select().where(Owner.username == username,
+                                         Owner.password == password).get()
             owner.islog = True
         except:
             self.username_error.setToolTip("Identifiant ou mot de passe incorrect")
@@ -281,6 +285,7 @@ class LoginWidget(QDialog, FMainWindow):
 
     def add_user(self):
         """ add User """
+        # from sqlite3 import IntegrityError
         username = unicode(self.username_field.text()).strip()
         password = unicode(self.password_field.text()).strip()
         password = Owner().crypt_password(password)
@@ -293,15 +298,15 @@ class LoginWidget(QDialog, FMainWindow):
                 ow.password = password
                 # ow.phone = phone
                 ow.group = group
-                ow.islog=True
+                ow.islog = True
                 try:
                     ow.save()
                     self.accept()
                     self.close()
                     # raise_success(u"Confirmation", u"L'utilisateurs %s "
                     #               u"a été enregistré" % ow.username)
-                except IntegrityError:
-                    raise
+                except:
+                    #raise
                     raise_error(u"Erreur", u"L'utilisateurs %s "
                                 u"existe déjà dans la base de donnée" % ow.username)
 

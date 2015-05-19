@@ -62,7 +62,7 @@ class F_MenuBar(QMenuBar, F_Widget):
 
     def logout(self):
         from Common.ui.login import LoginWidget
-        # self.parent.restart()
+        self.parent.restart()
         # self.change_main_context(LoginWidget)
         # self.parent.setEnabled(False)
         LoginWidget().exec_()
