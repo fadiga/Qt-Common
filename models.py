@@ -15,23 +15,15 @@ from Common.check_mac import get_mac
 
 DB_FILE = "database.db"
 
+from Common import peewee
+print("Peewee version : " + peewee.__version__)
 
-def peewee_v():
-    # from configuration import Config
-    from static import Constants
-    try:
-        if Constants.PEEWEE_V == 224:
-            from Common import peewee224 as peewee
-    except AttributeError:
-        from Common import peewee
 
-    return peewee
-
-dbh = peewee_v().SqliteDatabase(DB_FILE)
+dbh = peewee.SqliteDatabase(DB_FILE)
 dbh.connect()
 
 
-class BaseModel(peewee_v().Model):
+class BaseModel(peewee.Model):
 
     class Meta:
         database = dbh
@@ -52,15 +44,15 @@ class Owner(BaseModel):
               (ADMIN, u"admin"),
               (ROOT, u"superuser"))
 
-    group = peewee_v().CharField(choices=GROUPS, default=USER)
-    islog = peewee_v().BooleanField(default=False)
-    phone = peewee_v().CharField(max_length=30, null=True, verbose_name=("Telephone"))
-    username = peewee_v().CharField(max_length=30, unique=True, verbose_name=("Nom d'utilisateur"))
-    password = peewee_v().CharField(max_length=150)
-    isactive = peewee_v().BooleanField(default=True)
-    isvisible = peewee_v().BooleanField(default=True)
-    last_login = peewee_v().DateTimeField(default=datetime.now())
-    login_count = peewee_v().IntegerField(default=0)
+    group = peewee.CharField(choices=GROUPS, default=USER)
+    islog = peewee.BooleanField(default=False)
+    phone = peewee.CharField(max_length=30, null=True, verbose_name=("Telephone"))
+    username = peewee.CharField(max_length=30, unique=True, verbose_name=("Nom d'utilisateur"))
+    password = peewee.CharField(max_length=150)
+    isactive = peewee.BooleanField(default=True)
+    isvisible = peewee.BooleanField(default=True)
+    last_login = peewee.DateTimeField(default=datetime.now())
+    login_count = peewee.IntegerField(default=0)
 
     def __str__(self):
         return u"{}".format(self.username)
@@ -91,13 +83,13 @@ class Organization(BaseModel):
                (DEFAULT, u"Par defaut"),
                (CURRENT, u"Actuel"),)
 
-    slug = peewee_v().CharField(choices=LCONFIG, default=DEFAULT)
-    login = peewee_v().BooleanField(default=True)
-    name_orga = peewee_v().CharField(verbose_name=(""))
-    phone = peewee_v().IntegerField(null=True, verbose_name=(""))
-    bp = peewee_v().CharField(null=True, verbose_name=(""))
-    email_org = peewee_v().CharField(null=True, verbose_name=(""))
-    adress_org = peewee_v().TextField(null=True, verbose_name=(""))
+    slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
+    login = peewee.BooleanField(default=True)
+    name_orga = peewee.CharField(verbose_name=(""))
+    phone = peewee.IntegerField(null=True, verbose_name=(""))
+    bp = peewee.CharField(null=True, verbose_name=(""))
+    email_org = peewee.CharField(null=True, verbose_name=(""))
+    adress_org = peewee.TextField(null=True, verbose_name=(""))
 
     def __str__(self):
         return self.display_name()
@@ -121,10 +113,10 @@ class Organization(BaseModel):
 
 class SettingsAdmin(BaseModel):
     """docstring for SettingsAdmin"""
-    user = peewee_v().CharField(default="User")
-    date = peewee_v().DateTimeField(default=datetime.now())
-    license = peewee_v().CharField(default=None, null=True)
-    tolerance = peewee_v().IntegerField(default=230)
+    user = peewee.CharField(default="User")
+    date = peewee.DateTimeField(default=datetime.now())
+    license = peewee.CharField(default=None, null=True)
+    tolerance = peewee.IntegerField(default=230)
 
     def __str__(self):
         return self.display_name()
@@ -148,8 +140,8 @@ class SettingsAdmin(BaseModel):
 
 
 class Version(BaseModel):
-    date = peewee_v().DateTimeField(default=datetime.now(), verbose_name="Date de Version")
-    number = peewee_v().IntegerField(default=1, verbose_name="Numéro de Version")
+    date = peewee.DateTimeField(default=datetime.now(), verbose_name="Date de Version")
+    number = peewee.IntegerField(default=1, verbose_name="Numéro de Version")
 
     def __str__(self):
         return u"{}/{}".format(self.number, self.date)
@@ -168,9 +160,9 @@ class FileJoin(BaseModel):
     class Meta:
         ordering = (('file_name', 'desc'))
 
-    file_name = peewee_v().CharField(max_length=200, null=True)
-    file_slug = peewee_v().CharField(max_length=200, null=True, unique=True)
-    on_created = peewee_v().DateTimeField(default=datetime.now)
+    file_name = peewee.CharField(max_length=200, null=True)
+    file_slug = peewee.CharField(max_length=200, null=True, unique=True)
+    on_created = peewee.DateTimeField(default=datetime.now)
 
     def __str__(self):
         return "{}({})".format(self.file_name, self.file_slug)
