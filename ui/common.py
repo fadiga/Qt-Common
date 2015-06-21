@@ -54,7 +54,8 @@ class F_Widget(QWidget):
 
         QWidget.__init__(self, parent=parent, *args, **kwargs)
         self.pp = parent
-
+        # self.wc = self.pp.wc - 100
+        # self.hc = self.pp.hc
         self.css = """
             QWidget{
                 /* background: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #4984C7, stop: 1 #ccf);*/
@@ -404,7 +405,7 @@ class F_PeriodTabBar(QTabBar):
     def build_tab_list(self):
         for index, period in enumerate(self.periods):
             self.setTabText(index, str(period.display_name()))
-            self.setTabToolTip(index, unicode(period))
+            self.setTabToolTip(index, str(period))
         self.setTabTextColor(1, QColor('SeaGreen'))
         self.setCurrentIndex(1)
 

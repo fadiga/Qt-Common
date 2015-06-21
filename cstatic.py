@@ -16,6 +16,9 @@ class CConstants(object):
 
     # type_period = W
 
+    import logging
+    logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
     file_img = os.path.join(os.path.dirname(os.path.abspath('__file__')), 'cimages/')
     # deployment
     if os.path.exists(file_img):

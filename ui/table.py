@@ -24,7 +24,7 @@ try:
     xrange
 except:
     xrange = range
-    
+
 
 class FlexibleTable(QTableWidget):
     pass
@@ -45,14 +45,12 @@ class F_TableWidget(QTableWidget):
         self._column_totals = {}
         self._total_label = u"TOTAL"
 
-        self.max_width = 0
-        self.max_height = 0
-        self.ecart = -20
         self.stretch_columns = []
         self.display_hheaders = True
         self.display_vheaders = True
         self.align_map = {}
         self.display_fixed = False
+        self.live_refresh = True
         self.sorter = False
 
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -67,6 +65,9 @@ class F_TableWidget(QTableWidget):
         self.setAlternatingRowColors(True)
         self.setAutoScroll(True)
 
+        self.wc = 800
+        self.hc = 500
+
     def dragMoveEvent(self, e):
         e.accept()
 
@@ -80,6 +81,17 @@ class F_TableWidget(QTableWidget):
         return locals()
 
     display_fixed = property(**_display_fixed())
+
+    def _live_refresh():
+
+        def fget(self):
+            return self._live_refresh
+
+        def fset(self, value):
+            self._live_refresh = value
+        return locals()
+
+    live_refresh = property(**_live_refresh())
 
     def _sorter():
         def fset(self, value):
@@ -112,33 +124,6 @@ class F_TableWidget(QTableWidget):
             del self._display_vheaders
         return locals()
     display_vheaders = property(**display_vheaders())
-
-    def max_width():
-
-        def fget(self):
-            return self._max_width
-
-        def fset(self, value):
-            self._max_width = value
-
-        def fdel(self):
-            del self._max_width
-        return locals()
-
-    max_width = property(**max_width())
-
-    def ecart():
-        def fget(self):
-            return self._ecart
-
-        def fset(self, value):
-            self._ecart = value
-
-        def fdel(self):
-            del self._ecart
-        return locals()
-
-    ecart = property(**ecart())
 
     def stretch_columns():
 
@@ -184,6 +169,14 @@ class F_TableWidget(QTableWidget):
         for index in range(self.rowCount(), -1, -1):
             self.removeRow(index)
 
+    def resizeEvent(self, event):
+        """lancé à chaque redimensionnement de la fenêtre"""
+         # trouve les dimensions du container
+        self.wc = self.width()
+        self.hc = self.height()
+        if self.live_refresh:
+            self.refresh()
+
     def refresh(self, resize=False):
         if not self.data:
             return
@@ -195,10 +188,10 @@ class F_TableWidget(QTableWidget):
         self.setRowCount(len(self.data))
         self.setColumnCount(len(self.hheaders))
         # self.setHorizontalHeaderLabels(self.hheaders)
-        for col in xrange(len(self.hheaders)):
+        for col in range(len(self.hheaders)):
             self.setHorizontalHeaderItem(col, QTableWidgetItem(self.hheaders[col]))
         # self.setVerticalHeaderLabels(self.vheaders)
-        for row in xrange(len(self.vheaders)):
+        for row in range(len(self.vheaders)):
             self.setVerticalHeaderItem(row, QTableWidgetItem(self.vheaders[row]))
 
         rowid = 0
@@ -248,16 +241,10 @@ class F_TableWidget(QTableWidget):
         self.verticalHeader().setVisible(self.display_vheaders)
         self.horizontalHeader().setVisible(self.display_hheaders)
 
-        # set a fixed outbox
-        # if self.max_width != 0:
-        if 0 != 0:
-            self.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
-        else:
-            # let parent & all set appropriate
-            self.max_width = self.parentWidget().maximumWidth() + self.ecart
+        self.max_width = self.wc
 
         # Pour l'horizontal
-        self.resize(self.max_width, self.size().height())
+        # self.resize(self.max_width, self.size().height())
 
         contented_width = 0
         for ind in range(0, self.horizontalHeader().count()):
@@ -320,7 +307,7 @@ class F_TableWidget(QTableWidget):
     data = property(**data())
 
     def _item_for_data(self, row, column, data, context=None):
-        
+
         if isinstance(data, (basestring, int)):
             if column in self.align_map.keys():
                 widget = self.widget_from_align(self.align_map[column])
