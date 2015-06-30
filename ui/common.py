@@ -21,7 +21,7 @@ class FMainWindow(QMainWindow):
         QMainWindow.__init__(self)
 
         self.setWindowIcon(QIcon.fromTheme('logo',
-                           QIcon(u"{}logo.png".format(Config.img_cmedia))))
+                           QIcon(u"{}logo.png".format(Config.img_media))))
         self.wc = 1100
         self.hc = 600
         self.resize(self.wc, self.hc)
@@ -253,8 +253,8 @@ class Warning_btt(Button):
 
     def __init__(self, *args, **kwargs):
         super(Warning_btt, self).__init__(*args, **kwargs)
-        # self.setIcon(QIcon.fromTheme('save', QIcon(u"{img_media}{img}".format(img_media=Config.img_media,
-                                                      # img='save.png'))))
+        self.setIcon(QIcon.fromTheme('save', QIcon(u"{img_media}{img}".format(img_media=Config.img_media,
+                                                      img='warning.png'))))
         css = """
                     background-color:#ffec64;
                     border-radius:6px;
@@ -274,7 +274,8 @@ class Button_save(Button):
     def __init__(self, *args, **kwargs):
         super(Button_save, self).__init__(*args, **kwargs)
 
-        self.setIcon(QIcon.fromTheme('document-save', QIcon('')))
+        self.setIcon(QIcon.fromTheme('', QIcon(u"{img_media}{img}".format(img_media=Config.img_media,
+                                                      img='save.png'))))
         css = """
         background-color:#dbe6c4;
         border-radius:6px;

@@ -24,7 +24,6 @@ class F_MenuBar(QMenuBar, F_Widget):
         #Menu File
         self.file_ = self.addMenu(u"&Fichier")
         # Export
-
         backup = self.file_.addMenu(u"&Basse de données")
 
         backup.addAction(u"Sauvegarder", self.goto_export_db)
@@ -96,28 +95,29 @@ class F_MenuBar(QMenuBar, F_Widget):
     #About
     def goto_about(self):
         QMessageBox.about(self, u"À propos",
-                                u""" <h2>{app_name}  version: {version_app} </h2>
-                                <hr>
-                                <h4><i>Logiciel de gestion d'archive.</i></h4>
-                                <ul><li></li> <li><b>Developpeur</b>: {autor} </li>
-                                    <li><b>Adresse: </b>{adress} </li>
-                                    <li><b>Tel: </b> {phone} </li>
-                                    <li><b>E-mail: </b> {email} <br/></li>
-                                    <li>{org_out}</li>
-                                </ul>
-                                <hr>
-                                <h3>Base de données</h3>
-                                <ul>
-                                    <li>Date de mise à jour: {m_date_db}</li>
-                                    <li>Version: {version_db}</li>
-                                </ul>
-                                """.format(email=Config.EMAIL_AUT,
-                                          app_name=Config.APP_NAME,
-                                          adress=Config.ADRESS_AUT,
-                                          autor=Config.AUTOR,
-                                          version_app=Config.APP_VERSION,
-                                          phone=Config.TEL_AUT,
-                                          org_out=Config.ORG_AUT,
-                                          version_db=Config.DB_VERS.display_name(),
-                                          m_date_db=Config.DB_VERS.date.strftime("%c")
-                                          ))
+                            u""" <h2>{app_name}  version: {version_app} </h2>
+                            <hr>
+                            <h4><i>Logiciel de {app_name}.</i></h4>
+                            <ul><li></li> <li><b>Developpeur</b>: {autor} </li>
+                                <li><b>Adresse: </b>{adress} </li>
+                                <li><b>Tel: </b> {phone} </li>
+                                <li><b>E-mail: </b> {email} <br/></li>
+                                <li>{org_out}</li>
+                            </ul>
+                            <hr>
+                            <h3>Base de données</h3>
+                            <ul>
+                                <li>Date de mise à jour: {m_date_db}</li>
+                                <li>Version: {version_db}</li>
+                            </ul>
+                            """.format(email=Config.EMAIL_AUT,
+                                      app_name=Config.APP_NAME,
+                                      adress=Config.ADRESS_AUT,
+                                      autor=Config.AUTOR,
+                                      version_app=Config.APP_VERSION,
+                                      phone=Config.TEL_AUT,
+                                      org_out=Config.ORG_AUT,
+                                      version_db=Config.DB_VERS.display_name(),
+                                      m_date_db=Config.DB_VERS.date.strftime("%c")
+                                      )
+                            )
