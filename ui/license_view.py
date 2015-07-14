@@ -11,17 +11,17 @@ from Common.cstatic import CConstants
 from Common.models import SettingsAdmin
 from Common.exports import export_license_as_file
 from Common.ui.util import raise_success
-from Common.ui.common import (F_Widget, Button_save, F_PageTitle,
+from Common.ui.common import (FWidget, Button_save, FPageTitle,
                               LineEdit, Button, FormLabel, PyTextViewer)
 
 
-class LicenseViewWidget(QDialog, F_Widget):
+class LicenseViewWidget(QDialog, FWidget):
     def __init__(self, parent=0, *args, **kwargs):
         QDialog.__init__(self, parent, *args, **kwargs)
 
         self.intro = FormLabel(u"<h3>Vous devez activé la license pour pouvoir"
                                u"<i>utiliser.</i></h3>")
-        self.title = F_PageTitle("")
+        self.title = FPageTitle("")
         self.title.setStyleSheet(""" background:
                                  url({}) no-repeat scroll 200px 50px #fff;
                                  border-radius: 14px 14px 8px 8px;

@@ -9,11 +9,11 @@ from PyQt4.QtCore import SIGNAL, SLOT
 
 from configuration import Config
 from Common.exports import export_database_as_file, export_backup, import_backup
-from Common.ui.common import F_Widget
+from Common.ui.common import FWidget
 from Common.ui.license_view import LicenseViewWidget
 
 
-class F_MenuBar(QMenuBar, F_Widget):
+class FMenuBar(QMenuBar, FWidget):
 
     def __init__(self, parent=None, admin=False, *args, **kwargs):
         QMenuBar.__init__(self, parent=parent, *args, **kwargs)

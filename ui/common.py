@@ -48,7 +48,7 @@ class FMainWindow(QMainWindow):
         d.exec_()
 
 
-class F_Widget(QWidget):
+class FWidget(QWidget):
 
     def __init__(self, parent=0, *args, **kwargs):
 
@@ -114,10 +114,10 @@ class TabPane(QTabBar):
         self.setLayout(box)
 
 
-class F_Label(QLabel):
+class FLabel(QLabel):
 
     def __init__(self, *args, **kwargs):
-        super(F_Label, self).__init__(*args, **kwargs)
+        super(FLabel, self).__init__(*args, **kwargs)
         # self.setFont(QFont("Times New Roman", 50))
         css = """font-size: 14px;
                 color: gry;
@@ -125,10 +125,10 @@ class F_Label(QLabel):
         self.setStyleSheet(css)
 
 
-class F_PageTitle(F_Label):
+class FPageTitle(FLabel):
 
     def __init__(self, *args, **kwargs):
-        super(F_PageTitle, self).__init__(*args, **kwargs)
+        super(FPageTitle, self).__init__(*args, **kwargs)
         # self.setFont(QFont("Times New Roman", 50))
         self.setAlignment(Qt.AlignCenter)
 
@@ -139,18 +139,18 @@ class F_PageTitle(F_Label):
         self.setStyleSheet(css)
 
 
-class F_BoxTitle(F_Label):
+class FBoxTitle(FLabel):
 
     def __init__(self, *args, **kwargs):
-        super(F_BoxTitle, self).__init__(*args, **kwargs)
+        super(FBoxTitle, self).__init__(*args, **kwargs)
         self.setFont(QFont("Times New Roman", 12, QFont.Bold, True))
         self.setAlignment(Qt.AlignLeft)
 
 
-class ErrorLabel(F_Label):
+class ErrorLabel(FLabel):
 
     def __init__(self, text, parent=None):
-        F_Label.__init__(self, text, parent)
+        FLabel.__init__(self, text, parent)
         font = QFont()
         self.setFont(font)
         red = QColor(Qt.red)
@@ -160,10 +160,10 @@ class ErrorLabel(F_Label):
         self.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
 
-class FormLabel(F_Label):
+class FormLabel(FLabel):
 
     def __init__(self, text, parent=None):
-        F_Label.__init__(self, text, parent)
+        FLabel.__init__(self, text, parent)
         font = QFont()
         font.setBold(True)
         self.setFont(font)
@@ -212,7 +212,7 @@ class Button(QCommandLinkButton):
         # self.setCheckable(True)
 
 
-class Button_rond(Button):
+class BttRond(Button):
 
     def __init__(self, *args, **kwargs):
         super(Button_rond, self).__init__(*args, **kwargs)
@@ -312,12 +312,24 @@ class Button_menu(Button):
         self.setFont(font)
 
 
-class Button_export(Button):
+class BttExportXLS(Button):
 
     def __init__(self, *args, **kwargs):
-        super(Button_export, self).__init__(*args, **kwargs)
-        self.setIcon(QIcon.fromTheme('xls', QIcon(u"{img_media}{img}".format(img_media=Config.img_media,
+        super(BttExportXLS, self).__init__(*args, **kwargs)
+        self.setIcon(QIcon.fromTheme('xls', QIcon(u"{img_media}{img}".format(img_media=Config.img_cmedia,
                                                       img='xls.png'))))
+        self.setFixedWidth(30)
+        self.setFixedHeight(30)
+
+
+class BttExportPDF(Button):
+
+    def __init__(self, *args, **kwargs):
+        super(BttExportXLS, self).__init__(*args, **kwargs)
+        self.setIcon(QIcon.fromTheme('', QIcon(u"{img_media}{img}".format(img_media=Config.img_cmedia,
+                                                      img='pdf.png'))))
+        self.setFixedWidth(30)
+        self.setFixedHeight(30)
 
 
 class LineEdit(QLineEdit):
@@ -355,7 +367,7 @@ class FloatLineEdit(LineEdit):
         self.setValidator(QDoubleValidator(0.1, 0.1, 100, self))
 
 
-class F_PeriodHolder(object):
+class FPeriodHolder(object):
 
     def __init__(self, main_date=date.today(), *args, **kwargs):
         self.duration = "week"
@@ -363,7 +375,7 @@ class F_PeriodHolder(object):
         self.periods_bar = self.gen_bar_for(self.main_date)
 
     def gen_bar_for(self, main_date):
-        return F_PeriodTabBar(parent=self, main_date=self.main_date)
+        return FPeriodTabBar(parent=self, main_date=self.main_date)
 
     def change_period(self, main_date):
         self.main_date = main_date
@@ -385,11 +397,11 @@ class FormatDate(QDateTimeEdit):
         self.setCalendarPopup(True)
 
 
-class F_PeriodTabBar(QTabBar):
+class FPeriodTabBar(QTabBar):
 
     def __init__(self, parent, main_date, *args, **kwargs):
 
-        super(F_PeriodTabBar, self).__init__(*args, **kwargs)
+        super(FPeriodTabBar, self).__init__(*args, **kwargs)
 
         for i in range(0, 3):
             self.addTab(u"{}".format(i))

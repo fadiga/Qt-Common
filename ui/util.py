@@ -11,7 +11,7 @@ import subprocess
 import datetime
 
 from PyQt4 import QtGui, QtCore
-from Common.ui.window import F_Window
+from Common.ui.window import FWindow
 
 try:
     unicode
@@ -65,7 +65,7 @@ def get_temp_filename(extension=None):
 def raise_error(title, message):
     box = QtGui.QMessageBox(QtGui.QMessageBox.Critical, title,
                             message, QtGui.QMessageBox.Ok,
-                            parent=F_Window.window)
+                            parent=FWindow.window)
     box.setWindowOpacity(0.9)
 
     box.exec_()
@@ -74,7 +74,7 @@ def raise_error(title, message):
 def raise_success(title, message):
     box = QtGui.QMessageBox(QtGui.QMessageBox.Information, title,
                             message, QtGui.QMessageBox.Ok,
-                            parent=F_Window.window)
+                            parent=FWindow.window)
     box.setWindowOpacity(0.9)
     box.exec_()
 

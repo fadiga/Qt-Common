@@ -11,10 +11,10 @@ from Common.models import Owner
 from Common.ui.util import raise_success, raise_error
 
 # from Common.ui.login import LoginWidget
-from Common.ui.common import (IntLineEdit, F_Widget, Button_save, LineEdit, Button)
+from Common.ui.common import (IntLineEdit, FWidget, Button_save, LineEdit, Button)
 
 
-class NewUserViewWidget(QDialog, F_Widget):
+class NewUserViewWidget(QDialog, FWidget):
     def __init__(self, pp, parent=0, *args, **kwargs):
         QDialog.__init__(self, parent, *args, **kwargs)
 

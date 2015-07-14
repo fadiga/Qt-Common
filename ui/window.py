@@ -1,4 +1,4 @@
 
 
-class F_Window(object):
+class FWindow(object):
     window = None

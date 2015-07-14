@@ -10,7 +10,7 @@ from PyQt4.QtGui import (QVBoxLayout, QFont, QGridLayout, QSplitter,
                          QListWidgetItem, QIcon, QPixmap, QLabel, QListWidget)
 
 from Common.ui.edit_owner import EditOwnerViewWidget
-from Common.ui.common import (F_Widget, F_Label, F_BoxTitle, Button,
+from Common.ui.common import (FWidget, FLabel, FBoxTitle, Button,
                               LineEdit, Button_save, FormLabel, IntLineEdit)
 
 from configuration import Config
@@ -19,7 +19,7 @@ from Common.models import Owner
 from Common.models import Organization
 from Common.tabpane import tabbox
 from Common.ui.util import (formatted_number, raise_success, raise_error)
-from Common.ui.table import F_TableWidget
+from Common.ui.table import FTableWidget
 
 from static import Constants
 
@@ -29,7 +29,7 @@ except NameError:
     unicode = str
 
 
-class AdminViewWidget(F_Widget):
+class AdminViewWidget(FWidget):
 
     def __init__(self, parent=0, *args, **kwargs):
         super(AdminViewWidget, self).__init__(parent=parent, *args, **kwargs)
@@ -99,11 +99,11 @@ class AdminViewWidget(F_Widget):
         # self.table_config.refresh_()
 
 
-class TrashTableWidget(F_TableWidget):
+class TrashTableWidget(FTableWidget):
 
     def __init__(self, parent, *args, **kwargs):
 
-        F_TableWidget.__init__(self, parent=parent, *args, **kwargs)
+        FTableWidget.__init__(self, parent=parent, *args, **kwargs)
 
         self.parent = parent
 
@@ -153,15 +153,15 @@ class TrashTableWidget(F_TableWidget):
         pass
 
 
-class OrganizationTableWidget(F_Widget):
+class OrganizationTableWidget(FWidget):
 
     def __init__(self, parent, *args, **kwargs):
-        super(F_Widget, self).__init__(parent=parent, *args, **kwargs)
+        super(FWidget, self).__init__(parent=parent, *args, **kwargs)
 
         self.organisation = Organization.get(id=1)
         self.parent = parent
         vbox = QVBoxLayout()
-        # vbox.addWidget(F_PageTitle(u"Utilisateur: %s " % self.organisation.name_orga))
+        # vbox.addWidget(FPageTitle(u"Utilisateur: %s " % self.organisation.name_orga))
 
         self.checked = QCheckBox("Active")
         if self.organisation.login:
@@ -232,10 +232,10 @@ class OrganizationTableWidget(F_Widget):
         return flag
 
 
-class LoginManageWidget(F_Widget):
+class LoginManageWidget(FWidget):
 
     def __init__(self, parent, *args, **kwargs):
-        super(F_Widget, self).__init__(parent=parent, *args, **kwargs)
+        super(FWidget, self).__init__(parent=parent, *args, **kwargs)
         self.parentWidget().setWindowTitle(Config.NAME_ORGA + u"  Gestion ")
         self.parent = parent
 
@@ -250,12 +250,12 @@ class LoginManageWidget(F_Widget):
         splitter_down.addWidget(self.operation)
 
         splitter_left = QSplitter(Qt.Vertical)
-        splitter_left.addWidget(F_BoxTitle(u""))
+        splitter_left.addWidget(FBoxTitle(u""))
         splitter_left.addWidget(self.table_owner)
         splitter_left.addWidget(splitter_down)
 
         splitter_rigth = QSplitter(Qt.Vertical)
-        splitter_rigth.addWidget(F_BoxTitle(u""))
+        splitter_rigth.addWidget(FBoxTitle(u""))
         splitter_rigth.addWidget(self.table_info)
         splitter_rigth.resize(900, 1000)
 
@@ -270,17 +270,17 @@ class LoginManageWidget(F_Widget):
         self.setLayout(vbox)
 
 
-class OperationWidget(F_Widget):
+class OperationWidget(FWidget):
     """docstring for OperationWidget"""
 
     def __init__(self, parent, *args, **kwargs):
-        super(F_Widget, self).__init__(parent=parent, *args, **kwargs)
+        super(FWidget, self).__init__(parent=parent, *args, **kwargs)
 
         vbox = QVBoxLayout(self)
         editbox = QGridLayout()
         self.parent = parent
 
-        self.empty = F_Label(u"")
+        self.empty = FLabel(u"")
         editbox.addWidget(self.empty, 1, 0)
 
         self.add_ow_but = Button(_(u"Nouvel utilisateur"))
@@ -358,22 +358,22 @@ class OwnerQListWidgetItem(QListWidgetItem):
             return self.owner
 
 
-class InfoTableWidget(F_Widget):
+class InfoTableWidget(FWidget):
 
     def __init__(self, parent, *args, **kwargs):
-        super(F_Widget, self).__init__(parent=parent, *args, **kwargs)
+        super(FWidget, self).__init__(parent=parent, *args, **kwargs)
 
         self.parent = parent
 
         self.refresh()
 
-        self.username_field = F_Label()
-        self.password_field = F_Label()
-        self.phone_field = F_Label()
-        self.group_field = F_Label()
-        self.isactive_field = F_Label()
-        self.last_login_field = F_Label()
-        self.login_count_field = F_Label()
+        self.username_field = FLabel()
+        self.password_field = FLabel()
+        self.phone_field = FLabel()
+        self.group_field = FLabel()
+        self.isactive_field = FLabel()
+        self.last_login_field = FLabel()
+        self.login_count_field = FLabel()
         self.pixmap = QPixmap("")
         self.image = QLabel(self)
         self.image.setPixmap(self.pixmap)

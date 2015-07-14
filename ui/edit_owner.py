@@ -11,17 +11,17 @@ from Common.models import Owner
 
 from Common.cstatic import CConstants
 from Common.ui.util import raise_success, raise_error
-from Common.ui.common import (F_Widget, Button_save, Button, IntLineEdit,
-                              F_PageTitle, LineEdit)
+from Common.ui.common import (FWidget, Button_save, Button, IntLineEdit,
+                              FPageTitle, LineEdit)
 
 
-class EditOwnerViewWidget(QDialog, F_Widget):
+class EditOwnerViewWidget(QDialog, FWidget):
     def __init__(self, pp, parent, *args, **kwargs):
         QDialog.__init__(self, parent=parent, *args, **kwargs)
 
         self.owner = pp.owner
         vbox = QVBoxLayout()
-        vbox.addWidget(F_PageTitle(u"Utilisateur: %s " % self.owner.username))
+        vbox.addWidget(FPageTitle(u"Utilisateur: %s " % self.owner.username))
 
         self.checked = QCheckBox("Active")
         if self.owner.isactive:

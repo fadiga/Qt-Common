@@ -10,7 +10,7 @@ from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QIcon, QPixmap,
 from PyQt4.QtCore import Qt
 
 from Common.cstatic import CConstants
-from Common.ui.common import (FMainWindow, F_PageTitle, FormLabel, PyTextViewer,
+from Common.ui.common import (FMainWindow, FPageTitle, FormLabel, PyTextViewer,
                               EnterTabbedLineEdit, ErrorLabel,
                               Button_save, LineEdit, Button)
 from Common.ui.util import raise_error, raise_success
@@ -34,7 +34,7 @@ class LoginWidget(QDialog, FMainWindow):
         self.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowTitleHint|Qt.WindowMaximizeButtonHint)
         self.intro = FormLabel(u"<h3>Vous devez vous identifier pour pouvoir<h3>"
                                u"<i>utiliser {}.</i>".format(Config.NAME_ORGA))
-        self.title = F_PageTitle(u"""<h4>{app_org}</h4>
+        self.title = FPageTitle(u"""<h4>{app_org}</h4>
                                  <b><li>{app_name}</li> </b>
                                  <ol><li>{org}</li><li><b>Version:
                                  </b> {version}</li></ol>

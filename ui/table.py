@@ -30,7 +30,7 @@ class FlexibleTable(QTableWidget):
     pass
 
 
-class F_TableWidget(QTableWidget):
+class FTableWidget(QTableWidget):
 
     SCROLL_WIDTH = 100
 
