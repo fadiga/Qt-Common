@@ -25,7 +25,7 @@ except NameError:
 
 class LoginWidget(QDialog, FMainWindow):
 
-    title = u"Identification"
+    # title = u"Identification"
 
     def __init__(self):
         QDialog.__init__(self)
@@ -49,9 +49,7 @@ class LoginWidget(QDialog, FMainWindow):
                                  width: 100%; height: auto;
                                  padding: 3.3em 1em 1em 100px;
                                  font: 12pt 'URW Bookman L';""".format(Config.APP_LOGO))
-
         vbox = QHBoxLayout()
-        # vbox.addWidget(self.title)
 
         self.sttg = SettingsAdmin.select().where(SettingsAdmin.id == 1).get()
         if not self.sttg.can_use:
@@ -136,6 +134,9 @@ class LoginWidget(QDialog, FMainWindow):
         self.login_button.setAutoDefault(True)
         self.login_button.clicked.connect(self.ckecklogin)
 
+        self.cancel_button = QPushButton(u"&Quiter")
+        self.cancel_button.clicked.connect(self.cancel)
+
         # login error
         self.login_error = ErrorLabel("")
 
@@ -150,6 +151,7 @@ class LoginWidget(QDialog, FMainWindow):
         gridbox.addWidget(self.password_field, 2, 1)
         gridbox.addWidget(self.password_error, 2, 2)
         gridbox.addWidget(self.login_button, 3, 1)
+        gridbox.addWidget(self.cancel_button, 3, 2)
         gridbox.addWidget(self.login_error, 4, 1)
 
         gridbox.setColumnStretch(2, 1)
@@ -206,10 +208,6 @@ class LoginWidget(QDialog, FMainWindow):
     def cancel(self):
         self.close()
 
-    def goto_home(self):
-        from ui.home import HomeViewWidget
-        self.change_context(HomeViewWidget)
-
     def goto_new_user(self):
         from Common.ui.new_user import NewUserViewWidget
         self.open_dialog(NewUserViewWidget, modal=True, go_home=True)
@@ -251,7 +249,6 @@ class LoginWidget(QDialog, FMainWindow):
 
         # Le droit de reset des mots de passes
         # Une page special
-        # self.goto_home()
 
         self.accept()
 

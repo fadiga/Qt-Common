@@ -167,7 +167,7 @@ class FormLabel(FLabel):
         font = QFont()
         font.setBold(True)
         self.setFont(font)
-        self.setAlignment(Qt.AlignLeft)
+        self.setAlignment(Qt.AlignLeft | Qt.AlignCenter)
 
 
 class Button(QCommandLinkButton):
@@ -318,8 +318,8 @@ class BttExportXLS(Button):
         super(BttExportXLS, self).__init__(*args, **kwargs)
         self.setIcon(QIcon.fromTheme('xls', QIcon(u"{img_media}{img}".format(img_media=Config.img_cmedia,
                                                       img='xls.png'))))
-        self.setFixedWidth(30)
-        self.setFixedHeight(30)
+        self.setFixedWidth(35)
+        self.setFixedHeight(35)
 
 
 class BttExportPDF(Button):

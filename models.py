@@ -10,7 +10,6 @@ import hashlib
 
 from datetime import datetime
 
-# from Common import peewee224 as peewee
 from Common.check_mac import get_mac
 
 DB_FILE = "database.db"
@@ -31,6 +30,13 @@ class BaseModel(peewee.Model):
     @classmethod
     def all(cls):
         return list(cls.select())
+
+    def get_or_none(self, obj):
+        try:
+            return obj.get()
+        except Exception as e:
+            # print("get_or_none : ", e)
+            return None
 
 
 class Owner(BaseModel):
@@ -130,7 +136,10 @@ class SettingsAdmin(BaseModel):
 
     def is_valide_mac(self, license):
         """ check de license """
-        return license == hashlib.md5(str(self.clean_mac).encode('utf-8')).hexdigest()
+        return license == self.generator_lcse(self.clean_mac)
+
+    def generator_lcse(self, value):
+        return hashlib.md5(str(value).encode('utf-8')).hexdigest()
 
     @property
     def can_use(self):

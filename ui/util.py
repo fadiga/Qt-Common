@@ -8,7 +8,7 @@ import os, sys
 import locale
 import tempfile
 import subprocess
-import datetime
+from datetime import datetime
 
 from PyQt4 import QtGui, QtCore
 from Common.ui.window import FWindow
@@ -128,45 +128,13 @@ def is_int(val):
         return 0
 
 
-def date_datetime(dat):
-    "reçoit une date return une datetime"
-    dat = str(unicode(dat))
-    day, month, year = dat.split('/')
-    dt = datetime.datetime.now()
-    return datetime.datetime(int(year), int(month), int(day),
-                             int(dt.hour), int(dt.minute),
-                             int(dt.second), int(dt.microsecond))
-
-
 def alerte():
     pass
-
-
-def date_end(dat):
-    dat = str(unicode(dat))
-    day, month, year = dat.split('/')
-    return datetime.datetime(int(year), int(month), int(day), 23, 59, 59)
-
-
-def date_on(dat):
-    dat = str(unicode(dat))
-    day, month, year = dat.split('/')
-    return datetime.datetime(int(year), int(month), int(day), 0, 0, 0)
-
-
-def date_start_end(date, st):
-    day, month, year = str(unicode(date)).split('/')
-    # return datetime(int(year), int(month), int(day), if st: 0 else 23, if st: 0 else 59, if st: 0 59)
-
 
 def format_date(dat):
     dat = str(dat)
     day, month, year = dat.split('/')
     return '-'.join([year, month, day])
-
-
-def show_date(dat):
-    return dat.strftime(u"%c")
 
 
 def to_jstimestamp(adate):
@@ -179,7 +147,7 @@ def to_timestamp(dt):
     Return a timestamp for the given datetime object.
     """
     if not dt is None:
-        return (dt - datetime.datetime(1970, 1, 1)).total_seconds()
+        return (dt - datetime(1970, 1, 1)).total_seconds()
 
 
 class WigglyWidget(QtGui.QWidget):
@@ -254,7 +222,7 @@ def get_path(path, filename):
 
 def slug_mane_file(file_name):
     return u"{fname}_{timestamp}.{extension}".format(fname=file_name.replace(" ", "_"),
-                                  timestamp=to_jstimestamp(datetime.datetime.now()),
+                                  timestamp=to_jstimestamp(datetime.now()),
                                   extension=file_name.split(".")[-1])
 
 
@@ -263,3 +231,32 @@ def normalize(s):
         return s.encode('utf8', 'ignore')
     else:
         return str(s)
+
+def str_date_split(date):
+    try:
+        return date.split('/')
+    except AttributeError:
+        return date.day, date.month, date.year
+
+def date_on_or_end(dat, on=True):
+    day, month, year = str_date_split(dat)
+    if on:
+        hour, second, micro_second = 0, 0, 0
+    else:
+        hour, second, micro_second = 23, 59, 59
+    return datetime(int(year), int(month), int(day), int(hour),
+        int(second), int(micro_second))
+
+def show_date(dat, time=True):
+    if isinstance(dat, str):
+        dat = date_to_datetime(dat)
+
+    return dat.strftime(u"%A le %d %b %Y a %Hh:%Mmn") if time else dat.strftime("%A le %d %b %Y")
+
+def date_to_datetime(dat):
+    "reçoit une date return une datetime"
+    day, month, year = str_date_split(dat)
+    dt = datetime.now()
+    return datetime(int(year), int(month), int(day),
+                    int(dt.hour), int(dt.minute),
+                    int(dt.second), int(dt.microsecond))

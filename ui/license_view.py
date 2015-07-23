@@ -3,6 +3,11 @@
 # maintainer: Fad
 from __future__ import (unicode_literals, absolute_import, division, print_function)
 
+try:
+    unicode
+except NameError:
+    unicode = str
+
 # from sqlite3 import IntegrityError
 from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QPixmap,
                          QDialog, QLabel, QTextEdit)
@@ -75,7 +80,7 @@ class LicenseViewWidget(QDialog, FWidget):
         self.topLeftGroupBoxBtt = QGroupBox(self.tr("Nouvelle license"))
         self.setWindowTitle(u"License")
         # self.parentWidget().setWindowTitle(u"Activation de la license")
-
+        self.cpt = 0
         self.code_field = PyTextViewer(u"""Vous avez besoin du code ci desous
                                            pour l'activation:<hr> <b>{code}</b><hr>
                                            <h4>Contacts:</h4>{contact}"""
@@ -87,8 +92,8 @@ class LicenseViewWidget(QDialog, FWidget):
         self.image = QLabel(self)
         self.image.setPixmap(self.pixmap)
 
-        butt = Button_save(u"Enregistrer")
-        butt.clicked.connect(self.add_lience)
+        self.butt = Button_save(u"Enregistrer")
+        self.butt.clicked.connect(self.add_lience)
 
         cancel_but = Button(u"Annuler")
         cancel_but.clicked.connect(self.cancel)
@@ -100,7 +105,7 @@ class LicenseViewWidget(QDialog, FWidget):
         editbox.addWidget(self.license_field, 1, 1)
         editbox.addWidget(self.code_field, 1, 2)
         editbox.addWidget(self.image, 5, 1)
-        editbox.addWidget(butt, 6, 1)
+        editbox.addWidget(self.butt, 6, 1)
         editbox.addWidget(cancel_but, 6, 2)
 
         self.topLeftGroupBoxBtt.setLayout(editbox)
@@ -151,3 +156,8 @@ class LicenseViewWidget(QDialog, FWidget):
                            machine.\n Elle doit être bien gardé""".format(license))
             open("licence.txt", "a")
             self.accept()
+        else:
+            self.cpt += 1
+            if self.cpt == 15:
+                print(self.cpt)
+                raise ValueError(SettingsAdmin().generator_lcse(SettingsAdmin().select().get().clean_mac))
