@@ -27,11 +27,12 @@ class LoginWidget(QDialog, FMainWindow):
 
     # title = u"Identification"
 
-    def __init__(self):
+    def __init__(self, hibernate=False):
         QDialog.__init__(self)
         self.setWindowTitle(Config.NAME_ORGA + u"    LOGIN")
+        self.hibernate = hibernate
 
-        self.setWindowFlags(Qt.CustomizeWindowHint|Qt.WindowTitleHint|Qt.WindowMaximizeButtonHint)
+        self.setWindowFlags(Qt.FramelessWindowHint)
         self.intro = FormLabel(u"<h3>Vous devez vous identifier pour pouvoir<h3>"
                                u"<i>utiliser {}.</i>".format(Config.NAME_ORGA))
         self.title = FPageTitle(u"""<h4>{app_org}</h4>
@@ -151,7 +152,8 @@ class LoginWidget(QDialog, FMainWindow):
         gridbox.addWidget(self.password_field, 2, 1)
         gridbox.addWidget(self.password_error, 2, 2)
         gridbox.addWidget(self.login_button, 3, 1)
-        gridbox.addWidget(self.cancel_button, 3, 2)
+        if not self.hibernate:
+            gridbox.addWidget(self.cancel_button, 3, 0)
         gridbox.addWidget(self.login_error, 4, 1)
 
         gridbox.setColumnStretch(2, 1)

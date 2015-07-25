@@ -61,10 +61,7 @@ class FMenuBar(QMenuBar, FWidget):
 
     def logout(self):
         from Common.ui.login import LoginWidget
-        self.parent.restart()
-        # self.change_main_context(LoginWidget)
-        # self.parent.setEnabled(False)
-        LoginWidget().exec_()
+        LoginWidget(hibernate=True).exec_()
 
     #Export the database.
     def goto_export_db(self):
