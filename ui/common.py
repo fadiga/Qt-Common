@@ -51,8 +51,13 @@ class FMainWindow(QMainWindow):
         d.exec_()
 
     def Notify(self, msg):
+        # import sys
+        # from PyQt4.QtGui import QApplication
+        # app = QApplication(sys.argv)
         myapp = Notification(msg)
         myapp.exec_()
+        # myapp.open()
+        # sys.exit(app.exec_())
 
 
 class FWidget(QWidget):

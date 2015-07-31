@@ -14,10 +14,9 @@ class CConstants(object):
     W = "week"
     M = "month"
 
-    # type_period = W
-
     import logging
-    logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S')
 
     file_img = os.path.join(os.path.dirname(os.path.abspath('__file__')), 'cimages/')
     # deployment

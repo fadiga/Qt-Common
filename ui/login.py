@@ -126,13 +126,14 @@ class LoginWidget(QDialog, FMainWindow):
         # self.password_field.setEchoMode(LineEdit.PasswordEchoOnEdit)
         self.password_label = FormLabel(u"&Mot de &passe")
         self.password_label.setBuddy(self.password_field)
+
         self.password_error = ErrorLabel(u"")
 
         # login button
         self.login_button = QPushButton(u"&S'identifier")
         self.login_button.setIcon(QIcon.fromTheme('save',
                                   QIcon(u"{}login.png".format(Config.img_cmedia))))
-        self.login_button.setAutoDefault(True)
+        # self.login_button.setAutoDefault(True)
         self.login_button.clicked.connect(self.ckecklogin)
 
         self.cancel_button = QPushButton(u"&Quiter")
