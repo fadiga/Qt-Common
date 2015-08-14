@@ -2,9 +2,11 @@
 # -*- coding: utf8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
-from __future__ import (unicode_literals, absolute_import, division, print_function)
+from __future__ import (
+    unicode_literals, absolute_import, division, print_function)
 
-import os, sys
+import os
+import sys
 import locale
 import tempfile
 import subprocess
@@ -19,8 +21,22 @@ except NameError:
     unicode = str
 
 
-class PDFFileUnavailable(IOError):
-    pass
+def check_is_empty(field):
+    stylerreur = ""
+    flag = False
+    field.setToolTip("")
+    if len(field.text()) == 0:
+        field.setToolTip("Champs requis")
+        stylerreur = "background-color: red;"
+        flag = True
+    field.setStyleSheet(stylerreur)
+    return flag
+
+
+def field_error(field, msg):
+    field.setToolTip(msg)
+    field.setStyleSheet("background-color: red;")
+    return False
 
 
 def uopen_prefix(platform=sys.platform):
@@ -50,7 +66,8 @@ def openFile(file):
 def uopen_file(filename):
     if not os.path.exists(filename):
         raise IOError(u"Fichier %s non valable." % filename)
-    subprocess.call('%(cmd)s %(file)s' % {'cmd': uopen_prefix(), 'file': filename}, shell=True)
+    subprocess.call('%(cmd)s %(file)s' %
+                    {'cmd': uopen_prefix(), 'file': filename}, shell=True)
 
 
 def get_temp_filename(extension=None):
@@ -103,7 +120,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         self.show(mss)
 
     def click_trap(self, value):
-        #left click!
+        # left click!
         if value == self.Trigger:
             self.left_menu.exec_(QtGui.QCursor.pos())
 
@@ -119,7 +136,7 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
 def is_int(val):
 
     try:
-        val = unicode(val).split()
+        val = str(val).split()
         v = ''
         for i in val:
             v += i
@@ -130,6 +147,7 @@ def is_int(val):
 
 def alerte():
     pass
+
 
 def format_date(dat):
     dat = str(dat)
@@ -151,6 +169,7 @@ def to_timestamp(dt):
 
 
 class WigglyWidget(QtGui.QWidget):
+
     def __init__(self, test, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
@@ -167,7 +186,8 @@ class WigglyWidget(QtGui.QWidget):
         self.timer.start(60, self)
 
     def paintEvent(self, event):
-        sineTable = [0, 38, 71, 92, 100, 92, 71, 38, 0, -38, -71, -92, -100, -92, -71, -38]
+        sineTable = [0, 38, 71, 92, 100, 92, 71, 38,
+                     0, -38, -71, -92, -100, -92, -71, -38]
 
         metrics = QtGui.QFontMetrics(self.font())
         x = (self.width() - metrics.width(self.text)) / 2
@@ -180,7 +200,8 @@ class WigglyWidget(QtGui.QWidget):
             index = (self.step + i) % 16
             color.setHsv((15 - index) * 16, 255, 191)
             painter.setPen(color)
-            painter.drawText(x, y - ((sineTable[index] * metrics.height()) / 400), QtCore.QString(self.text[i]))
+            painter.drawText(
+                x, y - ((sineTable[index] * metrics.height()) / 400), QtCore.QString(self.text[i]))
             x += metrics.width(self.text[i])
 
     def setText(self, newText):
@@ -194,18 +215,18 @@ class WigglyWidget(QtGui.QWidget):
             QtGui.QWidget.timerEvent(event)
 
 
-def import_file(path_filename, filename):
+def copy_file(dest, path_filename):
     """ Copy the file, rename file in banc and return new name of the doc
         created folder banc doc if not existe
     """
     import shutil
-    from static import Constants
-    destination = Constants.des_image_record
-    if not os.path.exists(destination):
-        os.mkdir(destination)
-    shutil.copyfile(path_filename, get_path(destination, filename))
+    dest = os.path.join(os.path.dirname(os.path.abspath('__file__')), dest)
+    filename = os.path.basename(path_filename)
+    if not os.path.exists(dest):
+        os.makedirs(dest)
+    shutil.copyfile(path_filename, get_path(dest, filename))
 
-    return rename_file(destination, filename, slug_mane_file(filename))
+    return rename_file(dest, filename, slug_mane_file(filename))
 
 
 def rename_file(path, old_filename, new_filename):
@@ -221,9 +242,8 @@ def get_path(path, filename):
 
 
 def slug_mane_file(file_name):
-    return u"{fname}_{timestamp}.{extension}".format(fname=file_name.replace(" ", "_"),
-                                  timestamp=to_jstimestamp(datetime.now()),
-                                  extension=file_name.split(".")[-1])
+    return u"{timestamp}_{fname}".format(fname=file_name.replace(" ", "_"),
+                                         timestamp=to_jstimestamp(datetime.now()))
 
 
 def normalize(s):
@@ -232,11 +252,13 @@ def normalize(s):
     else:
         return str(s)
 
+
 def str_date_split(date):
     try:
         return date.split('/')
     except AttributeError:
         return date.day, date.month, date.year
+
 
 def date_on_or_end(dat, on=True):
     day, month, year = str_date_split(dat)
@@ -245,13 +267,15 @@ def date_on_or_end(dat, on=True):
     else:
         hour, second, micro_second = 23, 59, 59
     return datetime(int(year), int(month), int(day), int(hour),
-        int(second), int(micro_second))
+                    int(second), int(micro_second))
+
 
 def show_date(dat, time=True):
     if isinstance(dat, str):
         dat = date_to_datetime(dat)
 
     return dat.strftime(u"%A le %d %b %Y a %Hh:%Mmn") if time else dat.strftime("%A le %d %b %Y")
+
 
 def date_to_datetime(dat):
     "reçoit une date return une datetime"

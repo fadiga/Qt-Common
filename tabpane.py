@@ -12,7 +12,7 @@ def tabbox(*args):
     params:  (widget, title) title is the string """
     tab_widget = QTabWidget()
     tab_widget.setMovable(True)
-    tab_widget.setAutoFillBackground(True)
+    # tab_widget.setAutoFillBackground(True)
     # tab_widget.setTabShape(QTabWidget.Triangular)
     # tab_widget.setTabPosition(QTabWidget.West)
 

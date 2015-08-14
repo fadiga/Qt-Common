@@ -20,57 +20,67 @@ except Exception as e:
     OS = 1
 
 
-class Notification(QtGui.QDialog):
+class Notification(QtGui.QWidget):
     closed = QtCore.pyqtSignal()
 
-    def __init__(self, mssg='' ,parent=None):
-        QtGui.QDialog.__init__(self,parent)
-        # self.parent = parent
-        self.mssg = mssg
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        self.createNotification(self.mssg)
-        css = """
-                color: white;
-                background: black;
-              """
-        self.setStyleSheet(css)
+    def __init__(self, mssg,  parent=None, type_mssg="", *args, **kwargs):
+        super(Notification, self).__init__(parent=parent, *args, **kwargs)
 
-    def createNotification(self, mssg):
+        self.mssg = str(mssg)
+        print(mssg)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        if type_mssg == "success":
+            background = "green"
+        elif type_mssg == "error":
+            background = "red"
+        elif type_mssg == "warring":
+            background = "yellow"
+        else:
+            background = "black"
+
+        css = """ color: white; background: {}; """.format(background)
+        self.setStyleSheet(css)
+        self.createNotification()
+        self.show()
+
+    def createNotification(self):
+        # print("createNotification")
         global OS
-        if (OS!= 1):
+        if (OS != 1):
             user32 = windll.user32
-            #Get X coordinate of screen
+            # Get X coordinate of screen
             self.x = user32.GetSystemMetrics(0)
         else:
             cp = QtGui.QDesktopWidget().availableGeometry()
             self.x = cp.width()
+        self.y = 2
 
-        #Set the opacity
+        # Set the opacity
         self.f = 1.0
 
-        #Set the message
-        vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(QtGui.QLabel(mssg))
-        self.setLayout(vbox)
-
-        #Start Worker
-        self.workThread = WorkThread()
-        self.connect(self.workThread, QtCore.SIGNAL("update(QString)"),
-                     self.animate)
-        self.connect(self.workThread, QtCore.SIGNAL("vanish(QString)"),
-                     self.disappear)
-        self.connect(self.workThread, QtCore.SIGNAL("finished()"),
-                     self.done)
+        # Start Worker
+        self.workThread = WorkThread(self)
+        self.connect(
+            self.workThread, QtCore.SIGNAL("update(QString)"), self.animate)
+        self.connect(
+            self.workThread, QtCore.SIGNAL("vanish(QString)"), self.disappear)
+        self.connect(self.workThread, QtCore.SIGNAL("finished()"), self.done)
 
         self.workThread.start()
+
+        vbox = QtGui.QVBoxLayout()
+        # Set the message
+        vbox.addWidget(QtGui.QLabel(self.mssg))
+        self.setLayout(vbox)
+
         return
 
-    #Quit when done
+    # Quit when done
     def done(self):
         self.hide()
         return
 
-    #Reduce opacity of the window
+    # Reduce opacity of the window
     def disappear(self):
         self.f -= 0.02
         self.setWindowOpacity(self.f)
@@ -78,23 +88,27 @@ class Notification(QtGui.QDialog):
 
     #Move in animation
     def animate(self):
-        self.move(self.x,0)
+        # print(x)
+        self.move(self.x, self.y)
         self.x -= 1
         return
 
+# The Worker
 
-#The Worker
+
 class WorkThread(QtCore.QThread):
-    def __init__(self):
-        QtCore.QThread.__init__(self)
+
+    def __init__(self, mv):
+        super(QtCore.QThread, self).__init__()
 
     def run(self):
-        #Bring em in :D
-        for i in range(336):
-            time.sleep(0.0001)
-            self.emit(QtCore.SIGNAL('update(QString)'), "ping")
-        #Hide u bitch :P
-        for j in range(50):
-            time.sleep(0.1)
-            self.emit(QtCore.SIGNAL('vanish(QString)'), "ping")
-        return
+        while True:
+            # Bring em in :D
+            for i in range(336):
+                time.sleep(0.0001)
+                self.emit(QtCore.SIGNAL('update(QString)'), "ping")
+            # Hide u bitch :P
+            for j in range(50):
+                time.sleep(0.1)
+                self.emit(QtCore.SIGNAL('vanish(QString)'), "ping")
+            return

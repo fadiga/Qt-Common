@@ -9,6 +9,7 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath('__file__')))
 
 
 class CConstants(object):
+
     """ """
     # PERIODS
     W = "week"
@@ -18,13 +19,13 @@ class CConstants(object):
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S')
 
-    file_img = os.path.join(os.path.dirname(os.path.abspath('__file__')), 'cimages/')
+    file_img = os.path.join(
+        os.path.dirname(os.path.abspath('__file__')), 'cimages/')
     # deployment
     if os.path.exists(file_img):
         img_cmedia = file_img
     else:
         img_cmedia = os.path.join(ROOT_DIR, "Common/cimages/")
-
     # ------------------------- Autor --------------------------#
     AUTOR = u"Fadiga Ibrahima"
     EMAIL_AUT = u"ibfadiga@gmail.com"
@@ -37,11 +38,7 @@ class CConstants(object):
 
     APP_NAME = u"Projet en dev"
     APP_DATE = u"02/2013"
-
-    license = {'e8:11:32:6c:30:28': 'Fad ubuntu 13.10',
-               '30:85:a9:17:b1:00': 'ASUS Bureau',
-               'E8-11-32-6C-30-28': 'Fad Wind',
-               '08:00:27:38:F8:23': 'Fad Wind Virtual'}
+    DEBUG = False
 
     APP_LOGO = os.path.join(img_cmedia, "logo.png")
     APP_LOGO_ICO = os.path.join(img_cmedia, "logo.ico")

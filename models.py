@@ -2,7 +2,8 @@
 # -*- coding: utf8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
-from __future__ import (unicode_literals, absolute_import, division, print_function)
+from __future__ import (
+    unicode_literals, absolute_import, division, print_function)
 
 import os
 import time
@@ -11,6 +12,7 @@ import hashlib
 from datetime import datetime
 
 from Common.check_mac import get_mac
+from Common.ui.util import get_path, copy_file
 
 DB_FILE = "database.db"
 
@@ -40,23 +42,22 @@ class BaseModel(peewee.Model):
 
 
 class Owner(BaseModel):
+
     """ The web user who is also owner of the Organization
     """
 
-    USER = 0
-    ADMIN = 1
-    ROOT = 2
-    GROUPS = ((USER, u"user"),
-              (ADMIN, u"admin"),
-              (ROOT, u"superuser"))
+    USER = u"Utilisateur"
+    ADMIN = u"Administrateur"
+    ROOT = u"superuser"
 
-    group = peewee.CharField(choices=GROUPS, default=USER)
+    username = peewee.CharField(
+        max_length=30, unique=True, verbose_name=("Identifiant"))
+    group = peewee.CharField(default=USER)
     islog = peewee.BooleanField(default=False)
-    phone = peewee.CharField(max_length=30, null=True, verbose_name=("Telephone"))
-    username = peewee.CharField(max_length=30, unique=True, verbose_name=("Nom d'utilisateur"))
+    phone = peewee.CharField(
+        max_length=30, null=True, verbose_name=("Telephone"))
     password = peewee.CharField(max_length=150)
     isactive = peewee.BooleanField(default=True)
-    isvisible = peewee.BooleanField(default=True)
     last_login = peewee.DateTimeField(default=datetime.now())
     login_count = peewee.IntegerField(default=0)
 
@@ -64,9 +65,8 @@ class Owner(BaseModel):
         return u"{}".format(self.username)
 
     def display_name(self):
-        return u"{name}/{group}/{login_count}".format(name=self.username,
-                                                      group=self.group,
-                                                      login_count=self.login_count)
+        return u"{name}/{group}/{login_count}".format(
+            name=self.username, group=self.group, login_count=self.login_count)
 
     def crypt_password(self, password):
         return hashlib.sha224(str(password).encode("utf-8")).hexdigest()
@@ -81,6 +81,7 @@ class Owner(BaseModel):
 
 
 class Organization(BaseModel):
+
     """docstring for Organization"""
     PREV = 0
     CURRENT = 1
@@ -90,7 +91,6 @@ class Organization(BaseModel):
                (CURRENT, u"Actuel"),)
 
     slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
-    login = peewee.BooleanField(default=True)
     name_orga = peewee.CharField(verbose_name=(""))
     phone = peewee.IntegerField(null=True, verbose_name=(""))
     bp = peewee.CharField(null=True, verbose_name=(""))
@@ -118,11 +118,14 @@ class Organization(BaseModel):
 
 
 class SettingsAdmin(BaseModel):
+
     """docstring for SettingsAdmin"""
     user = peewee.CharField(default="User")
     date = peewee.DateTimeField(default=datetime.now())
     license = peewee.CharField(default=None, null=True)
+    login = peewee.BooleanField(default=True)
     tolerance = peewee.IntegerField(default=230)
+    style_number = peewee.IntegerField(default=1)
 
     def __str__(self):
         return self.display_name()
@@ -149,7 +152,8 @@ class SettingsAdmin(BaseModel):
 
 
 class Version(BaseModel):
-    date = peewee.DateTimeField(default=datetime.now(), verbose_name="Date de Version")
+    date = peewee.DateTimeField(
+        default=datetime.now(), verbose_name="Date de Version")
     number = peewee.IntegerField(default=1, verbose_name="Numéro de Version")
 
     def __str__(self):
@@ -166,6 +170,8 @@ class Version(BaseModel):
 
 class FileJoin(BaseModel):
 
+    DEST_FILES = "Files"
+
     class Meta:
         ordering = (('file_name', 'desc'))
 
@@ -174,15 +180,22 @@ class FileJoin(BaseModel):
     on_created = peewee.DateTimeField(default=datetime.now)
 
     def __str__(self):
-        return "{}({})".format(self.file_name, self.file_slug)
+        return "{} {}".format(self.file_name, self.file_slug)
+
+    def save(self):
+        self.file_slug = copy_file(self.DEST_FILES, self.file_slug)
+        print("SAVE", self.file_slug)
+        super(FileJoin, self).save()
 
     def display_name(self):
         return u"{}".format(self.file_name)
 
     @property
     def get_file(self):
-        from static import Constants
-        return os.path.join(Constants.des_image_record, self.file_slug)
+        print("get_file")
+        return os.path.join(
+            os.path.join(os.path.dirname(os.path.abspath('__file__')),
+                         self.DEST_FILES), self.file_slug)
 
     def show_file(self):
         from Common.ui.util import uopen_file
@@ -231,3 +244,13 @@ class FileJoin(BaseModel):
 
         taille = round(taille_oct / q, 2)
         return "{} {}".format(taille, unit)
+
+
+class History(object):
+
+    date = peewee.DateTimeField(default=datetime.now())
+    data = peewee.CharField()
+    action = peewee.CharField()
+
+    def __str__(self, arg):
+        return "{} à {} par {}".format(date=self.date, action=self.action)

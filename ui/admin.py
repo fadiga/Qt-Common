@@ -2,23 +2,24 @@
 # -*- coding: utf8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
-from __future__ import (unicode_literals, absolute_import, division, print_function)
+from __future__ import (
+    unicode_literals, absolute_import, division, print_function)
 
 from PyQt4.QtCore import Qt, SIGNAL
 from PyQt4.QtGui import (QVBoxLayout, QFont, QGridLayout, QSplitter,
                          QFrame, QCheckBox, QMessageBox, QTextEdit,
                          QListWidgetItem, QIcon, QPixmap, QLabel, QListWidget)
 
-from Common.ui.edit_owner import EditOwnerViewWidget
+from Common.ui.user_add_or_edit import NewOrEditUserViewWidget
 from Common.ui.common import (FWidget, FLabel, FBoxTitle, Button,
                               LineEdit, Button_save, FormLabel, IntLineEdit)
 
 from configuration import Config
 from Common.models import Owner
 
-from Common.models import Organization
+from Common.models import Organization, SettingsAdmin
 from Common.tabpane import tabbox
-from Common.ui.util import (formatted_number, raise_success, raise_error)
+from Common.ui.util import (formatted_number, raise_error)
 from Common.ui.table import FTableWidget
 
 from static import Constants
@@ -36,7 +37,8 @@ class AdminViewWidget(FWidget):
 
         self.parent = parent
 
-        self.parentWidget().setWindowTitle(Constants.APP_NAME + u"    ADMINISTRATION")
+        self.parentWidget().setWindowTitle(
+            Constants.APP_NAME + u"    ADMINISTRATION")
 
         editbox = QGridLayout()
         table_config = QVBoxLayout()
@@ -54,11 +56,11 @@ class AdminViewWidget(FWidget):
         gridbox = QGridLayout()
         # gridbox.addWidget(self.bttrestor, 0 , 1)
         # gridbox.addWidget(self.bttempty, 0 , 2)
-        # table_trash = QVBoxLayout()
+        history_table = QVBoxLayout()
 
-        # self.table_trash = TrashTableWidget(parent=self)
-        # table_trash.addLayout(gridbox)
-        # table_trash.addWidget(self.table_trash)
+        self.history_table = TrashTableWidget(parent=self)
+        history_table.addLayout(gridbox)
+        history_table.addWidget(self.history_table)
 
         table_login = QVBoxLayout()
         self.table_login = LoginManageWidget(parent=self)
@@ -66,7 +68,7 @@ class AdminViewWidget(FWidget):
         table_login.addWidget(self.table_login)
 
         tab_widget = tabbox((table_config, _(u"Gestion de l'organisation")),
-                            # (table_trash, _(u"Corbeille")),
+                            (history_table, _(u"Historique")),
                             (table_login, _(u"Gestion d'Utilisateurs")),
                             )
 
@@ -79,24 +81,20 @@ class AdminViewWidget(FWidget):
         self.bttempty.setEnabled(True)
 
     def restorseleted(self):
-        for doc in self.table_trash.getSelectTableItems():
+        for doc in self.history_table.getSelectTableItems():
             doc.isnottrash()
-            self.table_trash.refresh_()
+            self.history_table.refresh_()
 
     def deletedseleted(self):
         reply = QMessageBox.question(self, 'Suppression definitive',
-                self.tr("Voulez vous vraiment le supprimer? "),
-                 QMessageBox.Yes, QMessageBox.No)
+                                     self.tr(
+                                         "Voulez vous vraiment le supprimer? "),
+                                     QMessageBox.Yes, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
-            for doc in self.table_trash.getSelectTableItems():
+            for doc in self.history_table.getSelectTableItems():
                 doc.remove_doc()
-                self.table_trash.refresh_()
-
-    def goto_new_user(self):
-        from Common.ui.new_user import NewUserViewWidget
-        self.parent.open_dialog(NewUserViewWidget, modal=True, go_home=False)
-        # self.table_config.refresh_()
+                self.history_table.refresh_()
 
 
 class TrashTableWidget(FTableWidget):
@@ -107,7 +105,8 @@ class TrashTableWidget(FTableWidget):
 
         self.parent = parent
 
-        self.hheaders = [_(u"Selection"),_(u"Date"), _(u"categorie"), _(u"Description")]
+        self.hheaders = [
+            _(u"Selection"), _(u"Date"), _(u"categorie"), _(u"Description")]
         self.stretch_columns = [0]
         self.align_map = {0: 'l'}
         self.ecart = -5
@@ -124,7 +123,8 @@ class TrashTableWidget(FTableWidget):
     def set_data_for(self):
         self.data = []
         # self.data = [("", record.date, record.category, record.description)
-        #              for record in Records.select().where(Records.trash == True).order_by(Records.category.asc())]
+        # for record in Records.select().where(Records.trash ==
+        # True).order_by(Records.category.asc())]
 
     def getSelectTableItems(self):
         n = self.rowCount()
@@ -144,10 +144,11 @@ class TrashTableWidget(FTableWidget):
             editor = QCheckBox()
             if data == 2:
                 editor.setCheckState(2)
-            self.connect(editor, SIGNAL('stateChanged(int)'), self.parent.enablebtt)
+            self.connect(
+                editor, SIGNAL('stateChanged(int)'), self.parent.enablebtt)
             return editor
         return super(TrashTableWidget, self)._item_for_data(row, column,
-                                                             data, context)
+                                                            data, context)
 
     def click_item(self, row, column, *args):
         pass
@@ -164,7 +165,7 @@ class OrganizationTableWidget(FWidget):
         # vbox.addWidget(FPageTitle(u"Utilisateur: %s " % self.organisation.name_orga))
 
         self.checked = QCheckBox("Active")
-        if self.organisation.login:
+        if SettingsAdmin.select().where(SettingsAdmin.login == True).count() != 0:
             self.checked.setCheckState(Qt.Checked)
         # self.setCellWidget(nb_rows, 2, checked)
         self.checked.setToolTip(u"""Cocher si vous voulez pour deactive
@@ -217,18 +218,20 @@ class OrganizationTableWidget(FWidget):
             org.email_org = email_org
             org.bp = bp
             org.adress_org = adress_org
-            org.login = login
             org.save()
-            raise_success(u"Confirmation", u"Le Compte %s "
-                          u"a été mise à jour" % org.name_orga)
+            sttg = SettingsAdmin.get(id=1)
+            sttg.login = login
+            sttg.save()
+            self.parent.parent.Notify(u"Le Compte %s a été mise à jour" %
+                                      org.name_orga, "success")
         else:
             raise_error(u"Error", u"Mot de passe pas correct")
 
     def check_impty(self):
-        flag = True
+        flag = False
         for field in [self.name_orga, self.phone, self.bp, self.email_org]:
             if field.text() == "":
-                flag = False
+                flag = True
         return flag
 
 
@@ -244,7 +247,7 @@ class LoginManageWidget(FWidget):
         self.operation = OperationWidget(parent=self)
 
         splitter = QSplitter(Qt.Horizontal)
-        splitter.setFrameShape(QFrame.StyledPanel)
+        # splitter.setFrameShape(QFrame.StyledPanel)
 
         splitter_down = QSplitter(Qt.Vertical)
         splitter_down.addWidget(self.operation)
@@ -271,6 +274,7 @@ class LoginManageWidget(FWidget):
 
 
 class OperationWidget(FWidget):
+
     """docstring for OperationWidget"""
 
     def __init__(self, parent, *args, **kwargs):
@@ -285,7 +289,7 @@ class OperationWidget(FWidget):
 
         self.add_ow_but = Button(_(u"Nouvel utilisateur"))
         self.add_ow_but.setIcon(QIcon.fromTheme('',
-                                     QIcon(u"{}user_add.png".format(Config.img_cmedia))))
+                                                QIcon(u"{}user_add.png".format(Config.img_cmedia))))
         self.add_ow_but.clicked.connect(self.add_owner)
 
         editbox.addWidget(self.add_ow_but, 2, 0)
@@ -294,12 +298,14 @@ class OperationWidget(FWidget):
         self.setLayout(vbox)
 
     def add_owner(self):
-        from Common.ui.new_user import NewUserViewWidget
-        self.parent.parent.open_dialog(NewUserViewWidget, modal=True, pp=self.parent.table_owner)
+        self.parent.parent.open_dialog(
+            NewOrEditUserViewWidget, modal=True, pp=self.parent.table_owner)
 
 
 class OwnerTableWidget(QListWidget):
+
     """docstring for OwnerTableWidget"""
+
     def __init__(self, parent, *args, **kwargs):
         super(OwnerTableWidget, self).__init__(parent)
         self.parent = parent
@@ -312,15 +318,15 @@ class OwnerTableWidget(QListWidget):
         """ Rafraichir la liste des groupes"""
         self.clear()
         self.addItem(OwnerQListWidgetItem(-1))
-        for owner in Owner.select().where((Owner.isvisible==True)):
+        for owner in Owner.select():
             self.addItem(OwnerQListWidgetItem(owner))
 
     def handleClicked(self):
-        owner = self.currentItem()
-        if isinstance(owner, int):
+        owner_item = self.currentItem()
+        if isinstance(owner_item, int):
             return
         self.parent.table_info.edit_ow_but.setEnabled(True)
-        self.parent.table_info.refresh_(owner)
+        self.parent.table_info.refresh_(owner_item.owner)
 
 
 class OwnerQListWidgetItem(QListWidgetItem):
@@ -333,7 +339,7 @@ class OwnerQListWidgetItem(QListWidgetItem):
         if isinstance(owner, int):
             logo = ""
         else:
-            logo = "user_active" if self.owner.isactive else "user-offline"
+            logo = "user_active" if self.owner.isactive else "user_deactive"
         icon = QIcon()
         icon.addPixmap(QPixmap(u"{}{}.png".format(Config.img_cmedia, logo)),
                        QIcon.Normal, QIcon.Off)
@@ -347,7 +353,8 @@ class OwnerQListWidgetItem(QListWidgetItem):
             font = QFont()
             font.setBold(True)
             self.setFont(font)
-            self.setTextAlignment(Qt.AlignHCenter|Qt.AlignVCenter|Qt.AlignCenter)
+            self.setTextAlignment(
+                Qt.AlignHCenter | Qt.AlignVCenter | Qt.AlignCenter)
             self.setText(u"Utilisateurs")
 
     @property
@@ -379,7 +386,7 @@ class InfoTableWidget(FWidget):
         self.image.setPixmap(self.pixmap)
         self.edit_ow_but = Button(u"Mettre à jour")
         self.edit_ow_but.setIcon(QIcon.fromTheme('document-new',
-                                     QIcon(u"{}edit_user.png".format(Config.img_cmedia))))
+                                                 QIcon(u"{}edit_user.png".format(Config.img_cmedia))))
         self.edit_ow_but.setEnabled(False)
         self.edit_ow_but.clicked.connect(self.edit_owner)
 
@@ -399,7 +406,7 @@ class InfoTableWidget(FWidget):
 
     def refresh_(self, owner):
         self.refresh()
-        self.owner = owner.owner
+        self.owner = owner
 
         if isinstance(self.owner, int):
             return
@@ -408,15 +415,18 @@ class InfoTableWidget(FWidget):
                   self.login_count_field]:
             i.setText("")
 
-        self.username_field.setText("<h2>Nom:  {}</h2>".format(self.owner.username))
-        self.isactive_field.setText("<b>Active:</b> {}".format(self.owner.isactive))
-        self.phone_field.setText(u"<b>Numéro tel:</b> {}".format(self.owner.phone))
+        self.username_field.setText(
+            "<h2>Nom:  {}</h2>".format(self.owner.username))
+        self.isactive_field.setText(
+            "<b>Active:</b> {}".format(self.owner.isactive))
+        self.phone_field.setText(
+            u"<b>Numéro tel:</b> {}".format(self.owner.phone))
         self.last_login_field.setText(u"<b>Dernière login:</b> {}".format(
                                       self.owner.last_login.strftime(u"%c")))
         self.login_count_field.setText("<b>Numbre de connexion:</b> {}"
-                                      .format(self.owner.login_count))
+                                       .format(self.owner.login_count))
         self.group_field.setText("<b>Groupe:</b> {}".format(self.owner.group))
 
     def edit_owner(self):
-        self.parent.parent.open_dialog(EditOwnerViewWidget,
-                                modal=True, pp=self.parent.table_info)
+        self.parent.parent.open_dialog(NewOrEditUserViewWidget, owner=self.owner,
+                                       modal=True, pp=self.parent.table_info)

@@ -1,12 +1,8 @@
 #!usr/bin/env python
 # -*- coding: utf8 -*-
 # maintainer: Fad
-from __future__ import (unicode_literals, absolute_import, division, print_function)
-
-try:
-    unicode
-except NameError:
-    unicode = str
+from __future__ import (
+    unicode_literals, absolute_import, division, print_function)
 
 # from sqlite3 import IntegrityError
 from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QPixmap,
@@ -15,12 +11,12 @@ from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QPixmap,
 from Common.cstatic import CConstants
 from Common.models import SettingsAdmin
 from Common.exports import export_license_as_file
-from Common.ui.util import raise_success
 from Common.ui.common import (FWidget, Button_save, FPageTitle,
                               LineEdit, Button, FormLabel, PyTextViewer)
 
 
 class LicenseViewWidget(QDialog, FWidget):
+
     def __init__(self, parent=0, *args, **kwargs):
         QDialog.__init__(self, parent, *args, **kwargs)
 
@@ -37,7 +33,7 @@ class LicenseViewWidget(QDialog, FWidget):
 
         vbox = QHBoxLayout()
         vbox.addWidget(self.title)
-        self.sttg = SettingsAdmin().select().where(SettingsAdmin.id==1).get()
+        self.sttg = SettingsAdmin().select().where(SettingsAdmin.id == 1).get()
         if self.sttg.can_use:
             self.showLicenseGroupBox()
             vbox.addWidget(self.topLeftGroupBox)
@@ -84,8 +80,8 @@ class LicenseViewWidget(QDialog, FWidget):
         self.code_field = PyTextViewer(u"""Vous avez besoin du code ci desous
                                            pour l'activation:<hr> <b>{code}</b><hr>
                                            <h4>Contacts:</h4>{contact}"""
-                                        .format(code=SettingsAdmin().select().get().clean_mac,
-                                                contact=CConstants.TEL_AUT))
+                                       .format(code=SettingsAdmin().select().get().clean_mac,
+                                               contact=CConstants.TEL_AUT))
         self.name_field = LineEdit()
         self.license_field = QTextEdit()
         self.pixmap = QPixmap("")
@@ -120,8 +116,7 @@ class LicenseViewWidget(QDialog, FWidget):
         sttg.license = None
         sttg.save()
         self.cancel()
-        raise_success("Suppression de la license",
-                     u"La license a été bien supprimée")
+        self.parent.Notify(u"La license a été bien supprimée", "warring")
 
     def check_license(self, license):
 
@@ -141,8 +136,8 @@ class LicenseViewWidget(QDialog, FWidget):
 
     def add_lience(self):
         """ add User """
-        name = unicode(self.name_field.text()).strip()
-        license = unicode(self.license_field.toPlainText())
+        name = str(self.name_field.text()).strip()
+        license = str(self.license_field.toPlainText())
         self.check_license(license)
 
         if self.flog:
@@ -151,13 +146,13 @@ class LicenseViewWidget(QDialog, FWidget):
             sttg.license = license
             sttg.save()
             self.cancel()
-            raise_success(u"Confirmation",
-                          u"""La license (<b>{}</b>) à éte bien enregistré pour cette
-                           machine.\n Elle doit être bien gardé""".format(license))
+            self.parent.Notify(u"""La license (<b>{}</b>) à éte bien enregistré pour cette
+                           machine.\n Elle doit être bien gardé""".format(license), "success")
             open("licence.txt", "a")
             self.accept()
         else:
             self.cpt += 1
             if self.cpt == 15:
                 print(self.cpt)
-                raise ValueError(SettingsAdmin().generator_lcse(SettingsAdmin().select().get().clean_mac))
+                raise ValueError(
+                    SettingsAdmin().generator_lcse(SettingsAdmin().select().get().clean_mac))
