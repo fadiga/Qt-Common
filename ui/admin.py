@@ -6,9 +6,9 @@ from __future__ import (
     unicode_literals, absolute_import, division, print_function)
 
 from PyQt4.QtCore import Qt, SIGNAL
-from PyQt4.QtGui import (QVBoxLayout, QFont, QGridLayout, QSplitter,
-                         QFrame, QCheckBox, QMessageBox, QTextEdit,
-                         QListWidgetItem, QIcon, QPixmap, QLabel, QListWidget)
+from PyQt4.QtGui import (QVBoxLayout, QHBoxLayout, QFont, QGridLayout, QSplitter,
+                         QFrame, QCheckBox, QMessageBox, QTextEdit, QFormLayout,
+                         QListWidgetItem, QIcon, QPixmap, QListWidget)
 
 from Common.ui.user_add_or_edit import NewOrEditUserViewWidget
 from Common.ui.common import (FWidget, FLabel, FBoxTitle, Button,
@@ -54,8 +54,6 @@ class AdminViewWidget(FWidget):
         self.bttempty.setEnabled(False)
         # Grid
         gridbox = QGridLayout()
-        # gridbox.addWidget(self.bttrestor, 0 , 1)
-        # gridbox.addWidget(self.bttempty, 0 , 2)
         history_table = QVBoxLayout()
 
         self.history_table = TrashTableWidget(parent=self)
@@ -135,7 +133,8 @@ class TrashTableWidget(FTableWidget):
                 pass
             elif item.checkState() == Qt.Checked:
                 ldata.append("ee")
-                # ldata.append(Records.filter(description=str(self.item(i, 3).text())).get())
+                # ldata.append(Records.filter(description=str(self.item(i,
+                # 3).text())).get())
         return ldata
 
     def _item_for_data(self, row, column, data, context=None):
@@ -162,7 +161,8 @@ class OrganizationTableWidget(FWidget):
         self.organisation = Organization.get(id=1)
         self.parent = parent
         vbox = QVBoxLayout()
-        # vbox.addWidget(FPageTitle(u"Utilisateur: %s " % self.organisation.name_orga))
+        # vbox.addWidget(FPageTitle(u"Utilisateur: %s " %
+        # self.organisation.name_orga))
 
         self.checked = QCheckBox("Active")
         if SettingsAdmin.select().where(SettingsAdmin.login == True).count() != 0:
@@ -176,27 +176,18 @@ class OrganizationTableWidget(FWidget):
         self.adress_org = QTextEdit(self.organisation.adress_org)
         self.email_org = LineEdit(self.organisation.email_org)
 
-        formbox = QVBoxLayout()
-        editbox = QGridLayout()
-
-        editbox.addWidget(FormLabel(u"Non de l'organisation: "), 0, 0)
-        editbox.addWidget(self.name_orga, 0, 1)
-        editbox.addWidget(FormLabel(u"Activer le login"), 1, 0)
-        editbox.addWidget(self.checked, 1, 1)
-        editbox.addWidget(FormLabel(u"B.P:"), 2, 0)
-        editbox.addWidget(self.bp, 2, 1)
-        editbox.addWidget(FormLabel(u"Tel:"), 3, 0)
-        editbox.addWidget(self.phone, 3, 1)
-        editbox.addWidget(FormLabel(u"E-mail:"), 4, 0)
-        editbox.addWidget(self.email_org, 4, 1)
-        editbox.addWidget(FormLabel(u"Adresse complete:"), 5, 0)
-        editbox.addWidget(self.adress_org, 5, 1)
+        formbox = QFormLayout()
+        formbox.addRow(FormLabel(u"Nom de l'organisation:"), self.name_orga)
+        formbox.addRow(FormLabel(u"Activer le login"), self.checked)
+        formbox.addRow(FormLabel(u"B.P:"), self.bp)
+        formbox.addRow(FormLabel(u"Tel:"), self.phone)
+        formbox.addRow(FormLabel(u"E-mail:"), self.email_org)
+        formbox.addRow(FormLabel(u"Adresse complete:"), self.adress_org)
 
         butt = Button_save(u"Enregistrer")
         butt.clicked.connect(self.save_edit)
-        editbox.addWidget(butt, 8, 1)
+        formbox.addRow("", butt)
 
-        formbox.addLayout(editbox)
         vbox.addLayout(formbox)
         self.setLayout(vbox)
 
@@ -245,31 +236,17 @@ class LoginManageWidget(FWidget):
         self.table_owner = OwnerTableWidget(parent=self)
         self.table_info = InfoTableWidget(parent=self)
         self.operation = OperationWidget(parent=self)
+        # self.operation.
 
-        splitter = QSplitter(Qt.Horizontal)
-        # splitter.setFrameShape(QFrame.StyledPanel)
-
-        splitter_down = QSplitter(Qt.Vertical)
-        splitter_down.addWidget(self.operation)
-
-        splitter_left = QSplitter(Qt.Vertical)
-        splitter_left.addWidget(FBoxTitle(u""))
-        splitter_left.addWidget(self.table_owner)
-        splitter_left.addWidget(splitter_down)
-
-        splitter_rigth = QSplitter(Qt.Vertical)
-        splitter_rigth.addWidget(FBoxTitle(u""))
-        splitter_rigth.addWidget(self.table_info)
-        splitter_rigth.resize(900, 1000)
-
-        splitter.addWidget(splitter_left)
-        splitter.addWidget(splitter_rigth)
-
-        gridbox = QGridLayout()
-        gridbox.addWidget(splitter, 2, 0, 5, 4)
-
-        vbox = QVBoxLayout(self)
-        vbox.addLayout(gridbox)
+        splitter = QSplitter(Qt.Vertical)
+        _splitter = QSplitter(Qt.Horizontal)
+        _splitter.addWidget(self.table_owner)
+        _splitter.addWidget(self.table_info)
+        splitter.addWidget(_splitter)
+        splitter.addWidget(self.operation)
+        # self.operation.resize(10, 10)
+        vbox = QHBoxLayout(self)
+        vbox.addWidget(splitter)
         self.setLayout(vbox)
 
 
@@ -281,20 +258,18 @@ class OperationWidget(FWidget):
         super(FWidget, self).__init__(parent=parent, *args, **kwargs)
 
         vbox = QVBoxLayout(self)
-        editbox = QGridLayout()
+        gridbox = QGridLayout()
         self.parent = parent
 
-        self.empty = FLabel(u"")
-        editbox.addWidget(self.empty, 1, 0)
-
         self.add_ow_but = Button(_(u"Nouvel utilisateur"))
-        self.add_ow_but.setIcon(QIcon.fromTheme('',
-                                                QIcon(u"{}user_add.png".format(Config.img_cmedia))))
+        self.add_ow_but.setIcon(
+            QIcon.fromTheme('', QIcon(u"{}user_add.png".format(Config.img_cmedia))))
         self.add_ow_but.clicked.connect(self.add_owner)
 
-        editbox.addWidget(self.add_ow_but, 2, 0)
+        gridbox.addWidget(self.add_ow_but, 0, 0)
 
-        vbox.addLayout(editbox)
+        gridbox.setColumnStretch(1, 5)
+        vbox.addLayout(gridbox)
         self.setLayout(vbox)
 
     def add_owner(self):
@@ -374,34 +349,20 @@ class InfoTableWidget(FWidget):
 
         self.refresh()
 
-        self.username_field = FLabel()
-        self.password_field = FLabel()
-        self.phone_field = FLabel()
-        self.group_field = FLabel()
-        self.isactive_field = FLabel()
-        self.last_login_field = FLabel()
-        self.login_count_field = FLabel()
-        self.pixmap = QPixmap("")
-        self.image = QLabel(self)
-        self.image.setPixmap(self.pixmap)
+        self.details = FLabel()
         self.edit_ow_but = Button(u"Mettre à jour")
         self.edit_ow_but.setIcon(QIcon.fromTheme('document-new',
                                                  QIcon(u"{}edit_user.png".format(Config.img_cmedia))))
         self.edit_ow_but.setEnabled(False)
         self.edit_ow_but.clicked.connect(self.edit_owner)
 
-        self.editbox = QGridLayout()
-        self.editbox.addWidget(self.edit_ow_but, 0, 3)
-        self.editbox.addWidget(self.username_field, 0, 0)
-        self.editbox.addWidget(self.group_field, 1, 0)
-        self.editbox.addWidget(self.login_count_field, 2, 0)
-        self.editbox.addWidget(self.isactive_field, 3, 0)
-        self.editbox.addWidget(self.last_login_field, 4, 0)
-        self.editbox.addWidget(self.phone_field, 5, 0)
-        self.editbox.setColumnStretch(4, 2)
-        self.editbox.setRowStretch(6, 2)
+        self.formbox = QGridLayout()
+        self.formbox.addWidget(self.details, 0, 0)
+        self.formbox.addWidget(self.edit_ow_but, 0, 1)
+        # self.formbox.ColumnStretch(4, 2)
+        # self.formbox.RowStretch(6, 2)
         vbox = QVBoxLayout()
-        vbox.addLayout(self.editbox)
+        vbox.addLayout(self.formbox)
         self.setLayout(vbox)
 
     def refresh_(self, owner):
@@ -410,22 +371,19 @@ class InfoTableWidget(FWidget):
 
         if isinstance(self.owner, int):
             return
-
-        for i in [self.isactive_field, self.phone_field, self.last_login_field,
-                  self.login_count_field]:
-            i.setText("")
-
-        self.username_field.setText(
-            "<h2>Nom:  {}</h2>".format(self.owner.username))
-        self.isactive_field.setText(
-            "<b>Active:</b> {}".format(self.owner.isactive))
-        self.phone_field.setText(
-            u"<b>Numéro tel:</b> {}".format(self.owner.phone))
-        self.last_login_field.setText(u"<b>Dernière login:</b> {}".format(
-                                      self.owner.last_login.strftime(u"%c")))
-        self.login_count_field.setText("<b>Numbre de connexion:</b> {}"
-                                       .format(self.owner.login_count))
-        self.group_field.setText("<b>Groupe:</b> {}".format(self.owner.group))
+        self.details.setText(
+            """<h2>Nom:  {username}</h2>
+                <h4><b>Active:</b> {isactive}</h4>
+                <h4><b>Numéro tel:</b> {phone}</h4>
+                <h4><b>Dernière login:</b> {last_login}</h4>
+                <h4><b>Nombre de connexion:</b> {login_count}</h4>
+                <h4><b>Groupe:</b> {group}</h4>
+            """.format(group=self.owner.group,
+                       login_count=self.owner.login_count,
+                       last_login=self.owner.last_login.strftime(u"%c"),
+                       phone=self.owner.phone,
+                       isactive=self.owner.isactive,
+                       username=self.owner.username))
 
     def edit_owner(self):
         self.parent.parent.open_dialog(NewOrEditUserViewWidget, owner=self.owner,

@@ -24,19 +24,38 @@ except NameError:
 def check_is_empty(field):
     stylerreur = ""
     flag = False
+    containt = ""
+    # if isinstance(field, )
     field.setToolTip("")
-    if len(field.text()) == 0:
+    if isinstance(field, QtGui.QTextEdit):
+        containt = field.toPlainText()
+    else:
+        containt = field.text()
+
+    if len(containt) == 0:
         field.setToolTip("Champs requis")
-        stylerreur = "background-color: red;"
+        stylerreur = "background-color: #fff79a;"
         flag = True
     field.setStyleSheet(stylerreur)
     return flag
 
 
 def field_error(field, msg):
-    field.setToolTip(msg)
-    field.setStyleSheet("background-color: red;")
+    field.setStyleSheet("background-color: #fff79a;")
+    field.setToolTip("%s" % msg)
     return False
+
+
+def check_field(field, msg, condition):
+    stylerreur = ""
+    flag = False
+    field.setToolTip("")
+    if condition:
+        field.setToolTip(msg)
+        stylerreur = "background-color: #fff79a;"
+        flag = True
+    field.setStyleSheet(stylerreur)
+    return flag
 
 
 def uopen_prefix(platform=sys.platform):

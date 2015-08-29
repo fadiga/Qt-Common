@@ -2,12 +2,13 @@
 # -*- coding: utf8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
-from __future__ import (unicode_literals, absolute_import, division, print_function)
+from __future__ import (
+    unicode_literals, absolute_import, division, print_function)
 
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import (QTableWidget, QAbstractItemView, QLabel,
                          QHeaderView, QTableWidgetItem, QWidget,
-                         QPushButton)
+                         QPushButton, QFont)
 
 from Common.ui.util import formatted_number
 
@@ -171,7 +172,7 @@ class FTableWidget(QTableWidget):
 
     def resizeEvent(self, event):
         """lancé à chaque redimensionnement de la fenêtre"""
-         # trouve les dimensions du container
+        # trouve les dimensions du container
         self.wc = self.width()
         self.hc = self.height()
         if self.live_refresh:
@@ -189,10 +190,12 @@ class FTableWidget(QTableWidget):
         self.setColumnCount(len(self.hheaders))
         # self.setHorizontalHeaderLabels(self.hheaders)
         for col in range(len(self.hheaders)):
-            self.setHorizontalHeaderItem(col, QTableWidgetItem(self.hheaders[col]))
+            self.setHorizontalHeaderItem(
+                col, QTableWidgetItem(self.hheaders[col]))
         # self.setVerticalHeaderLabels(self.vheaders)
         for row in range(len(self.vheaders)):
-            self.setVerticalHeaderItem(row, QTableWidgetItem(self.vheaders[row]))
+            self.setVerticalHeaderItem(
+                row, QTableWidgetItem(self.vheaders[row]))
 
         rowid = 0
         for row in self.data:
@@ -270,15 +273,17 @@ class FTableWidget(QTableWidget):
                 indiv_extra = 0
 
             for colnum in to_stretch:
-                self.horizontalHeader().resizeSection(colnum, self.horizontalHeader().sectionSize(colnum) + indiv_extra)
+                self.horizontalHeader().resizeSection(
+                    colnum, self.horizontalHeader().sectionSize(colnum) + indiv_extra)
 
         self.horizontalHeader().update()
         self.update()
-        ### HEIGHT
+        # HEIGHT
         rows_with_widgets = []
         for rowid in range(0, len(self.data)):
             for colid in range(0, len(self.data[rowid])):
-                #if not isinstance(self.item(rowid, colid), QTableWidgetItem) and not rowid in rows_with_widgets:
+                # if not isinstance(self.item(rowid, colid), QTableWidgetItem)
+                # and not rowid in rows_with_widgets:
                 if isinstance(self.item(rowid, colid), (QPushButton, None.__class__)) and not rowid in rows_with_widgets:
                     rows_with_widgets.append(rowid)
 
@@ -405,6 +410,26 @@ class FlexibleWidget(QTableWidgetItem):
         pass
 
 
+class TotalsWidget(QTableWidgetItem):
+
+    def __init__(self, *args, **kwargs):
+        super(TotalsWidget, self).__init__(*args, **kwargs)
+
+        self.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+
+        font = QFont()
+        font.setBold(True)
+        # font.setWeight(90)
+        self.setFont(font)
+
+        self.setFlags(Qt.ItemIsEnabled |
+                      Qt.ItemIsSelectable |
+                      Qt.ItemIsEditable)
+
+    def live_refresh(self):
+        pass
+
+
 class FlexibleReadOnlyWidget(FlexibleWidget):
 
     def __init__(self, *args, **kwargs):
@@ -419,12 +444,14 @@ class FlexibleReadOnlyWidget(FlexibleWidget):
 
 
 class FlexibleReadOnlyWidgetAL(FlexibleReadOnlyWidget):
+
     def __init__(self, *args, **kwargs):
         super(FlexibleReadOnlyWidgetAL, self).__init__(*args, **kwargs)
         self.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
 
 class FlexibleReadOnlyWidgetAR(FlexibleReadOnlyWidget):
+
     def __init__(self, *args, **kwargs):
         super(FlexibleReadOnlyWidgetAR, self).__init__(*args, **kwargs)
         self.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)

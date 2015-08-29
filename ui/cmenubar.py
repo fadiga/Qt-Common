@@ -12,6 +12,7 @@ from configuration import Config
 from Common.exports import export_database_as_file, export_backup, import_backup
 from Common.ui.common import FWidget
 from Common.ui.license_view import LicenseViewWidget
+from models import SettingsAdmin
 
 
 class FMenuBar(QMenuBar, FWidget):
@@ -35,7 +36,7 @@ class FMenuBar(QMenuBar, FWidget):
 
         admin_ = QAction(QIcon.fromTheme('emblem-system', QIcon('')),
                          u"Gestion Admistration", self)
-        admin_.setShortcut("Ctrl+A")
+        admin_.setShortcut("Ctrl+G")
         self.connect(admin_, SIGNAL("triggered()"), self.goto_admin)
         admin.addAction(admin_)
 
@@ -44,6 +45,30 @@ class FMenuBar(QMenuBar, FWidget):
         license.setShortcut("Ctrl+L")
         self.connect(license, SIGNAL("triggered()"), self.goto_license)
         admin.addAction(license)
+
+        preference = self.addMenu(u"Préference")
+        _theme = preference.addMenu("Theme")
+        list_theme = [
+            {"name": u"Default", "icon": '', "admin": False,
+                "shortcut": "", "style_number": 1},
+            {"name": u"Kad", "icon": '', "admin": False,
+                "shortcut": "", "style_number": 2},
+            {"name": u"fat", "icon": '', "admin": False,
+                "shortcut": "", "style_number": 3},
+        ]
+
+        for m in list_theme:
+            icon = ""
+            if int(m.get('style_number')) == SettingsAdmin.get(id=1).style_number:
+                icon = "accept"
+            el_menu = QAction(
+                QIcon("{}{}.png".format(Config.img_cmedia, icon)), m.get('name'), self)
+            el_menu.setShortcut(m.get("shortcut"))
+            self.connect(
+                el_menu, SIGNAL("triggered()"), lambda m=m: self.change_theme(
+                    int(m.get('style_number'))))
+            _theme.addSeparator()
+            _theme.addAction(el_menu)
 
         # logout
         lock = QAction(
@@ -89,31 +114,28 @@ class FMenuBar(QMenuBar, FWidget):
     def goto_license(self):
         self.open_dialog(LicenseViewWidget, modal=True)
 
-    # Aide
-    def goto_help(self):
-        self.open_dialog(HTMLEditor, modal=True)
-
-    def theme1(self):
-        self.change_theme(1)
-
-    def theme2(self):
-        self.change_theme(2)
-
-    def theme3(self):
-        self.change_theme(3)
-
     def change_theme(self, style_number):
-        from models import SettingsAdmin
         sttg = SettingsAdmin.get(id=1)
         sttg.style_number = style_number
         sttg.save()
         self.restart()
 
+    # def choise_theme(self):
+    #     from models import SettingsAdmin
+
     def restart(self):
         print("restart")
         import subprocess
         self.parent.close()
-        subprocess.call("python " + Config.NAME_MAIN, shell=True)
+        subprocess.call(
+            "python.exe " + Config.NAME_MAIN, shell=True)
+
+    def goto(self, goto):
+        self.change_main_context(goto)
+
+    # Aide
+    def goto_help(self):
+        self.open_dialog(HTMLView, modal=True)
 
     # About
     def goto_about(self):

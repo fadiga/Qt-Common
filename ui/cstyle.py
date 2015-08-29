@@ -79,5 +79,4 @@ class CSS(object):
     appStyle = ""
 
     dict_style = {1: appStyle, 2: appStyle_fat, 3: appStyle_kadi}
-    # list_style = [(i) for i in dict_style.keys()]
     appStyle = dict_style.get(SettingsAdmin.get(id=1).style_number)

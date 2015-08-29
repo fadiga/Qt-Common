@@ -11,7 +11,8 @@ from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QPalette,
                          QDateTimeEdit, QFont, QWidget, QTabBar, QToolButton,
                          QTextEdit, QColor, QIntValidator, QDoubleValidator,
                          QCommandLinkButton, QRadialGradient, QPainter, QBrush,
-                         QPainterPath, QPen, QPushButton)
+                         QPainterPath, QPen, QPushButton, QStringListModel,
+                         QCompleter, QComboBox, QSortFilterProxyModel)
 # from PyQt4.QtWebKit import QWebView
 
 from configuration import Config
@@ -137,6 +138,11 @@ class FLabel(QLabel):
                 color: gry;
               """
         # self.setStyleSheet(css)
+        font = QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.setFont(font)
+        self.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
 
 
 class FPageTitle(FLabel):
@@ -181,7 +187,7 @@ class FormLabel(FLabel):
         font = QFont()
         font.setBold(True)
         self.setFont(font)
-        self.setAlignment(Qt.AlignLeft | Qt.AlignCenter)
+        self.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
 
 class QBadgeButton (QPushButton):
@@ -412,9 +418,9 @@ class Button_menu(Button):
         font.setBold(True)
         font.setItalic(True)
         font.setUnderline(True)
-        # font.setWeight(40)
-        font.setStrikeOut(False)
-        font.setKerning(True)
+        font.setWeight(40)
+        # font.setStrikeOut(False)
+        # font.setKerning(True)
         self.setFont(font)
 
 
@@ -432,8 +438,8 @@ class BttExportXLS(Button):
 
     def __init__(self, *args, **kwargs):
         super(BttExportXLS, self).__init__(*args, **kwargs)
-        self.setIcon(QIcon.fromTheme('xls', QIcon(u"{img_media}{img}".format(img_media=Config.img_cmedia,
-                                                                             img='xls.png'))))
+        self.setIcon(QIcon.fromTheme('xls', QIcon(
+            u"{img_media}{img}".format(img_media=Config.img_cmedia, img='xls.png'))))
         self.setFixedWidth(35)
         self.setFixedHeight(35)
 
@@ -442,8 +448,8 @@ class BttExportPDF(Button):
 
     def __init__(self, *args, **kwargs):
         super(BttExportXLS, self).__init__(*args, **kwargs)
-        self.setIcon(QIcon.fromTheme('', QIcon(u"{img_media}{img}".format(img_media=Config.img_cmedia,
-                                                                          img='pdf.png'))))
+        self.setIcon(QIcon.fromTheme('', QIcon(
+            u"{img_media}{img}".format(img_media=Config.img_cmedia, img='pdf.png'))))
         self.setFixedWidth(30)
         self.setFixedHeight(30)
 
@@ -589,3 +595,54 @@ class EnterDoesTab(QWidget):
 
 class EnterTabbedLineEdit(LineEdit, EnterDoesTab):
     pass
+
+from PyQt4.QtGui import QCompleter, QComboBox, QSortFilterProxyModel
+
+try:
+    unicode
+except:
+    unicode = str
+
+
+class ExtendedComboBox(QComboBox):
+
+    def __init__(self, parent=None):
+        super(ExtendedComboBox, self).__init__(parent)
+
+        self.setFocusPolicy(Qt.StrongFocus)
+        self.setEditable(True)
+
+        # add a filter model to filter matching items
+        self.pFilterModel = QSortFilterProxyModel(self)
+        self.pFilterModel.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        self.pFilterModel.setSourceModel(self.model())
+
+        # add a completer, which uses the filter model
+        self.completer = QCompleter(self.pFilterModel, self)
+        # always show all (filtered) completions
+        self.completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
+        self.setCompleter(self.completer)
+        # connect signals
+        self.lineEdit().textEdited[unicode].connect(
+            self.pFilterModel.setFilterFixedString)
+        self.completer.activated.connect(self.on_completer_activated)
+    # on selection of an item from the completer, select the corresponding
+    # item from combobox
+
+    def on_completer_activated(self, text):
+        if text:
+            index = self.findText(text)
+            self.setCurrentIndex(index)
+
+    # on model change, update the models of the filter and completer as well
+    def setModel(self, model):
+        super(ExtendedComboBox, self).setModel(model)
+        self.pFilterModel.setSourceModel(model)
+        self.completer.setModel(self.pFilterModel)
+
+    # on model column change, update the model column of the filter and
+    # completer as well
+    def setModelColumn(self, column):
+        self.completer.setCompletionColumn(column)
+        self.pFilterModel.setFilterKeyColumn(column)
+        super(ExtendedComboBox, self).setModelColumn(column)

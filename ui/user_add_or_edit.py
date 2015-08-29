@@ -9,7 +9,7 @@ from PyQt4.QtGui import (QComboBox, QVBoxLayout, QCheckBox,
                          QFormLayout, QDialog)
 
 from Common.cstatic import CConstants
-from Common.ui.util import check_is_empty, field_error
+from Common.ui.util import check_is_empty, field_error, check_field
 from Common import peewee
 from Common.models import Owner
 
@@ -75,7 +75,7 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
         cancel_but.clicked.connect(self.cancel)
 
         formbox.addRow(FLabel(u"Identifiant"), self.username_field)
-        formbox.addRow(FLabel(u"Mot de &passe"), self.password_field)
+        formbox.addRow(FLabel(u"Mot de passe"), self.password_field)
         if self.new:
             formbox.addRow(
                 FLabel(u"Verification du Mot de passe"), self.password_field_v)
@@ -106,11 +106,12 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
         self.password = str(self.password_field.text())
         self.password_v = str(
             self.password_field_v.text()) if self.new else self.owner.password
+        print(self.password_v)
+        print(self.password)
 
-        if (self.password != self.password_v):
-            field_error(
-                self.password_field, "Les mots de passe sont differents" if self.new else "Mot de passe incorrect")
-            return False
+        if check_field(self.password_field_v,
+                       "Les mots de passe sont differents" if self.new else "Mot de passe incorrect", self.password != self.password_v):
+            return
         return True
 
     def add_or_edit_user(self):
@@ -130,7 +131,8 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
         ow = self.owner
         ow.username = username
         ow.password = Owner().crypt_password(
-            username) if self.new else password
+            password) if self.new else password
+
         ow.phone = phone
         ow.group = group
         ow.isactive = status
@@ -140,8 +142,8 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
             self.accept()
             if self.pp:
                 self.pp.refresh_(ow)
-            self.parent.Notify("L'identifiant %s a été enregistré" %
-                               ow.username, "success")
+                self.parent.Notify("L'identifiant %s a été enregistré" %
+                                   ow.username, "success")
         except peewee.IntegrityError as e:
             field_error(
                 self.name_field, u"L'utilisateurs %s existe déjà dans la base de donnée" % ow.username)

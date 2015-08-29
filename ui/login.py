@@ -105,35 +105,30 @@ class LoginWidget(QDialog, FMainWindow):
 
         # username field
         self.username_field = self.box_username
-        self.username_error = ErrorLabel(u"")
-
         # password field
         self.password_field = EnterTabbedLineEdit()
         self.password_field.setEchoMode(LineEdit.Password)
-        # self.password_field.setEchoMode(LineEdit.PasswordEchoOnEdit)
-
-        self.password_error = ErrorLabel(u"")
-
+        self.password_field.setFocus()
         # login button
         self.login_button = QPushButton(u"&S'identifier")
-        self.login_button.setIcon(QIcon.fromTheme('save',
-                                                  QIcon(u"{}login.png".format(Config.img_cmedia))))
-        self.login_button.setAutoDefault(True)
+        self.login_button.setIcon(
+            QIcon.fromTheme('save', QIcon(u"{}login.png".format(Config.img_cmedia))))
         self.login_button.clicked.connect(self.login)
 
-        self.cancel_button = QPushButton(u"&Quiter")
+        self.cancel_button = QPushButton(u"&Fermer")
         self.cancel_button.clicked.connect(self.cancel)
+        self.cancel_button.setFlat(True)
 
         # login error
         self.login_error = ErrorLabel("")
 
-        gridbox = QGridLayout()
         formbox = QFormLayout()
 
         # grid layout
         formbox.addRow(FormLabel(u"Identifiant"), self.username_field)
         formbox.addRow(FormLabel(u"Mot de passe"), self.password_field)
-        formbox.addRow(self.cancel_button, self.login_button)
+        formbox.addRow(FormLabel(''), self.login_button)
+        formbox.addRow(FormLabel(''), self.cancel_button)
         if self.hibernate:
             self.cancel_button.setEnabled(False)
 

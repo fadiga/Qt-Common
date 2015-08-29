@@ -79,6 +79,9 @@ class Owner(BaseModel):
             stt.save()
         super(Owner, self).save()
 
+    def is_login(self):
+        return Owner.select().get(islog=True)
+
 
 class Organization(BaseModel):
 
