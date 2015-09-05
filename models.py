@@ -74,9 +74,6 @@ class Owner(BaseModel):
     def save(self):
         if self.islog:
             self.login_count += 1
-            stt = SettingsAdmin().select().get()
-            stt.tolerance -= 1
-            stt.save()
         super(Owner, self).save()
 
     def is_login(self):
@@ -149,6 +146,9 @@ class SettingsAdmin(BaseModel):
 
     @property
     def can_use(self):
+        self.tolerance -= 1
+        self.save()
+        print("trial - {}".format(self.tolerance))
         if self.is_valide_mac(self.license) or self.tolerance >= 0:
             return True
         return False

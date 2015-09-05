@@ -106,8 +106,6 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
         self.password = str(self.password_field.text())
         self.password_v = str(
             self.password_field_v.text()) if self.new else self.owner.password
-        print(self.password_v)
-        print(self.password)
 
         if check_field(self.password_field_v,
                        "Les mots de passe sont differents" if self.new else "Mot de passe incorrect", self.password != self.password_v):

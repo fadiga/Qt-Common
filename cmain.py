@@ -25,7 +25,8 @@ def cmain():
             return True
     elif Owner().select().where(Owner.isactive == True).count() == 0:
         if NewOrEditUserViewWidget().exec_() == QDialog.Accepted:
-            return True
+            if LoginWidget().exec_() == QDialog.Accepted:
+                return True
     elif not settg.login:
         return True
     elif LoginWidget().exec_() == QDialog.Accepted:

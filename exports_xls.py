@@ -42,6 +42,8 @@ def align_style(val):
         return int_align
     except ValueError:
         return str_align
+    except TypeError:
+        return "ERROR"
     else:
         return 0
 
@@ -74,7 +76,7 @@ def export_dynamic_data(dict_data):
     extend_rows = dict_data.get("extend_rows")
     others = dict_data.get("others")
     footers = dict_data.get("footers")
-    print(dict_data)
+    exclude_row = dict_data.get("exclude_row")
 
     if date_ == "None":
         date_ = date.today().strftime("%A le %d/%m/%Y")
@@ -93,20 +95,22 @@ def export_dynamic_data(dict_data):
     rowx += 3
     sheet.write_merge(rowx, rowx, 0, end_colx, title, style_title)
     rowx += 2
-    # sheet.write(rowx, 0, u"Date : ", style_label)
-    print(rowx)
     sheet.write_merge(
         rowx, rowx, 0, end_colx, date_, style_label)
     rowx += 2
     for colx, val_center in enumerate(headers):
         sheet.write(rowx, colx, val_center, style_headers)
     rowx += 1
+
+    pattern = dft_pattern
     for elt in data:
-        if int(rowx) % 2 == 0:
-            pattern = dft_pattern
-        else:
-            pattern = _pattern.format(color="0x01F")
+        if exclude_row:
+            elt = elt[:-1]
+        if int(rowx) % 2 != 0:
+            pattern = _pattern.format(color="67")
         for colx, val in enumerate(elt):
+            # if not isinstance(val, int) or not isinstance(val, str):
+            #     continue
             sheet.write(rowx, colx, val,
                         xlwt.easyxf(pattern + value_font + align_style(val) + _borders))
         rowx += 1
