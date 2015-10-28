@@ -139,7 +139,7 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
             self.close()
             self.accept()
             if self.pp:
-                self.pp.refresh_(ow)
+                self.pp.refresh_()
                 self.parent.Notify("L'identifiant %s a été enregistré" %
                                    ow.username, "success")
         except peewee.IntegrityError as e:

@@ -504,8 +504,9 @@ class IntLineEdit(LineEdit):
 
     def __init__(self, parent=None):
         LineEdit.__init__(self, parent)
-        self.setValidator(QIntValidator(0, 100000000, self))
+        self.setValidator(QIntValidator(self))
         self.setAlignment(Qt.AlignRight)
+        self.setText(self.text().replace(" ", ""))
 
 
 class FloatLineEdit(LineEdit):

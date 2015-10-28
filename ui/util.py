@@ -245,7 +245,8 @@ def date_on_or_end(dat, on=True):
 def show_date(dat, time=True):
     if isinstance(dat, str):
         dat = date_to_datetime(dat)
-
+    if not dat:
+        return "pas de date"
     return dat.strftime(u"%A le %d %b %Y a %Hh:%Mmn") if time else dat.strftime("%A le %d %b %Y")
 
 

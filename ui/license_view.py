@@ -152,7 +152,7 @@ class LicenseViewWidget(QDialog, FWidget):
             self.accept()
         else:
             self.cpt += 1
-            if self.cpt == 15:
+            if self.cpt == 105:
                 print(self.cpt)
                 raise ValueError(
                     SettingsAdmin().generator_lcse(SettingsAdmin().select().get().clean_mac))

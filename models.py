@@ -41,136 +41,6 @@ class BaseModel(peewee.Model):
             return None
 
 
-class Owner(BaseModel):
-
-    """ The web user who is also owner of the Organization
-    """
-
-    USER = u"Utilisateur"
-    ADMIN = u"Administrateur"
-    ROOT = u"superuser"
-
-    username = peewee.CharField(
-        max_length=30, unique=True, verbose_name=("Identifiant"))
-    group = peewee.CharField(default=USER)
-    islog = peewee.BooleanField(default=False)
-    phone = peewee.CharField(
-        max_length=30, null=True, verbose_name=("Telephone"))
-    password = peewee.CharField(max_length=150)
-    isactive = peewee.BooleanField(default=True)
-    last_login = peewee.DateTimeField(default=datetime.now())
-    login_count = peewee.IntegerField(default=0)
-
-    def __str__(self):
-        return u"{}".format(self.username)
-
-    def display_name(self):
-        return u"{name}/{group}/{login_count}".format(
-            name=self.username, group=self.group, login_count=self.login_count)
-
-    def crypt_password(self, password):
-        return hashlib.sha224(str(password).encode("utf-8")).hexdigest()
-
-    def save(self):
-        if self.islog:
-            self.login_count += 1
-        super(Owner, self).save()
-
-    def is_login(self):
-        return Owner.select().get(islog=True)
-
-
-class Organization(BaseModel):
-
-    """docstring for Organization"""
-    PREV = 0
-    CURRENT = 1
-    DEFAULT = 2
-    LCONFIG = ((PREV, u"Precedent"),
-               (DEFAULT, u"Par defaut"),
-               (CURRENT, u"Actuel"),)
-
-    slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
-    name_orga = peewee.CharField(verbose_name=(""))
-    phone = peewee.IntegerField(null=True, verbose_name=(""))
-    bp = peewee.CharField(null=True, verbose_name=(""))
-    email_org = peewee.CharField(null=True, verbose_name=(""))
-    adress_org = peewee.TextField(null=True, verbose_name=(""))
-
-    def __str__(self):
-        return self.display_name()
-
-    def change_prev(self):
-        self.slug = self.PREV
-        self.save()
-
-    def display_name(self):
-        return u"{}/{}/{}".format(self.name_orga, self.phone, self.email_org)
-
-    @classmethod
-    def get_or_create(cls, name_orga, typ):
-        try:
-            ctct = cls.get(name_orga=name_orga, type_=typ)
-            print(ctct)
-        except cls.DoesNotExist:
-            ctct = cls.create(name_orga=name_orga, type_=typ)
-        return ctct
-
-
-class SettingsAdmin(BaseModel):
-
-    """docstring for SettingsAdmin"""
-    user = peewee.CharField(default="User")
-    date = peewee.DateTimeField(default=datetime.now())
-    license = peewee.CharField(default=None, null=True)
-    login = peewee.BooleanField(default=True)
-    tolerance = peewee.IntegerField(default=230)
-    style_number = peewee.IntegerField(default=1)
-
-    def __str__(self):
-        return self.display_name()
-
-    def display_name(self):
-        return u"{}/{}/{}".format(self.user, self.date, self.license)
-
-    @property
-    def clean_mac(self):
-        return get_mac().replace(":", "").replace("-", "")
-
-    def is_valide_mac(self, license):
-        """ check de license """
-        return license == self.generator_lcse(self.clean_mac)
-
-    def generator_lcse(self, value):
-        return hashlib.md5(str(value).encode('utf-8')).hexdigest()
-
-    @property
-    def can_use(self):
-        self.tolerance -= 1
-        self.save()
-        print("trial - {}".format(self.tolerance))
-        if self.is_valide_mac(self.license) or self.tolerance >= 0:
-            return True
-        return False
-
-
-class Version(BaseModel):
-    date = peewee.DateTimeField(
-        default=datetime.now(), verbose_name="Date de Version")
-    number = peewee.IntegerField(default=1, verbose_name="Numéro de Version")
-
-    def __str__(self):
-        return u"{}/{}".format(self.number, self.date)
-
-    def display_name(self):
-        return u"V-{}".format(self.number)
-
-    def update_v(self):
-        self.number += 1
-        self.date = datetime.now()
-        self.save()
-
-
 class FileJoin(BaseModel):
 
     DEST_FILES = "Files"
@@ -247,6 +117,138 @@ class FileJoin(BaseModel):
 
         taille = round(taille_oct / q, 2)
         return "{} {}".format(taille, unit)
+
+
+class Owner(BaseModel):
+
+    """ The web user who is also owner of the Organization
+    """
+
+    USER = u"Utilisateur"
+    ADMIN = u"Administrateur"
+    ROOT = u"superuser"
+
+    username = peewee.CharField(
+        max_length=30, unique=True, verbose_name=("Identifiant"))
+    group = peewee.CharField(default=USER)
+    islog = peewee.BooleanField(default=False)
+    phone = peewee.CharField(
+        max_length=30, null=True, verbose_name=("Telephone"))
+    password = peewee.CharField(max_length=150)
+    isactive = peewee.BooleanField(default=True)
+    last_login = peewee.DateTimeField(default=datetime.now())
+    login_count = peewee.IntegerField(default=0)
+
+    def __str__(self):
+        return u"{}".format(self.username)
+
+    def display_name(self):
+        return u"{name}/{group}/{login_count}".format(
+            name=self.username, group=self.group, login_count=self.login_count)
+
+    def crypt_password(self, password):
+        return hashlib.sha224(str(password).encode("utf-8")).hexdigest()
+
+    def save(self):
+        if self.islog:
+            self.login_count += 1
+        super(Owner, self).save()
+
+    def is_login(self):
+        return Owner.select().get(islog=True)
+
+
+class Organization(BaseModel):
+
+    """docstring for Organization"""
+    PREV = 0
+    CURRENT = 1
+    DEFAULT = 2
+    LCONFIG = ((PREV, u"Precedent"),
+               (DEFAULT, u"Par defaut"),
+               (CURRENT, u"Actuel"),)
+
+    slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
+    name_orga = peewee.CharField(verbose_name=(""))
+    phone = peewee.IntegerField(null=True, verbose_name=(""))
+    bp = peewee.CharField(null=True, verbose_name=(""))
+    email_org = peewee.CharField(null=True, verbose_name=(""))
+    adress_org = peewee.TextField(null=True, verbose_name=(""))
+    # file_join = peewee.ForeignKeyField(
+    #     FileJoin, null=True, verbose_name=("image de la societe"))
+
+    def __str__(self):
+        return self.display_name()
+
+    def change_prev(self):
+        self.slug = self.PREV
+        self.save()
+
+    def display_name(self):
+        return u"{}/{}/{}".format(self.name_orga, self.phone, self.email_org)
+
+    @classmethod
+    def get_or_create(cls, name_orga, typ):
+        try:
+            ctct = cls.get(name_orga=name_orga, type_=typ)
+            print(ctct)
+        except cls.DoesNotExist:
+            ctct = cls.create(name_orga=name_orga, type_=typ)
+        return ctct
+
+
+class SettingsAdmin(BaseModel):
+
+    """docstring for SettingsAdmin"""
+    user = peewee.CharField(default="User")
+    date = peewee.DateTimeField(default=datetime.now())
+    license = peewee.CharField(default=None, null=True)
+    login = peewee.BooleanField(default=True)
+    tolerance = peewee.IntegerField(default=360)
+    style_number = peewee.IntegerField(default=1)
+
+    def __str__(self):
+        return self.display_name()
+
+    def display_name(self):
+        return u"{}/{}/{}".format(self.user, self.date, self.license)
+
+    @property
+    def clean_mac(self):
+        return get_mac().replace(":", "").replace("-", "")
+
+    def is_valide_mac(self, license):
+        """ check de license """
+        return license == self.generator_lcse(self.clean_mac)
+
+    def generator_lcse(self, value):
+        return hashlib.md5(str(value).encode('utf-8')).hexdigest()
+
+    @property
+    def can_use(self):
+        self.tolerance -= 1
+        self.save()
+        print("trial - {}".format(self.tolerance))
+        if self.is_valide_mac(self.license) or self.tolerance >= 0:
+            return True
+        return False
+
+
+class Version(BaseModel):
+    date = peewee.DateTimeField(
+        default=datetime.now(), verbose_name="Date de Version")
+    number = peewee.IntegerField(default=1, verbose_name="Numéro de Version")
+
+    def __str__(self):
+        return u"{}/{}".format(self.number, self.date)
+
+    def display_name(self):
+        return u"V-{}".format(self.number)
+
+    def update_v(self):
+        self.number += 1
+        self.date = datetime.now()
+        self.save()
 
 
 class History(object):
