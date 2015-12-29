@@ -104,7 +104,7 @@ def export_dynamic_data(dict_data):
     worksheet.fit_num_pages = 1
 
     worksheet.insert_image('A1:B2', os.path.join(
-        Config.img_media, 'org_logo.png'), {'x_offset': 0.5, 'y_offset': 0.5})
+        Config.img_media, 'org_logo.png'), {'x_offset': 1.5, 'y_offset': 0.5})
     for col in widths:
         w = (120 / len(headers))
         worksheet.set_column(col, col, w)
@@ -143,6 +143,7 @@ def export_dynamic_data(dict_data):
     # continue
     #         worksheet.write(rowx, colx, val, workbook.add_format(style_label))
     #     rowx += 1
+    rowx += len(data)
     if extend_rows:
         worksheet.write(rowx, extend_rows[0][0] - 1, "Totals",
                         workbook.add_format(style_label))

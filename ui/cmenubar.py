@@ -13,6 +13,7 @@ from Common.exports import export_database_as_file, export_backup, import_backup
 from Common.ui.common import FWidget
 from Common.ui.license_view import LicenseViewWidget
 from models import SettingsAdmin
+from Common.ui.qss import dict_style
 
 
 class FMenuBar(QMenuBar, FWidget):
@@ -29,7 +30,7 @@ class FMenuBar(QMenuBar, FWidget):
         backup = self.file_.addMenu(u"&Basse de données")
 
         backup.addAction(u"Sauvegarder", self.goto_export_db)
-        backup.addAction(u"Importer", self.import_backup)
+        backup.addAction(u"Importer", self.goto_import_backup)
 
         # Comptes utilisateur
         admin = self.file_.addMenu(u"Outils")
@@ -48,21 +49,15 @@ class FMenuBar(QMenuBar, FWidget):
 
         preference = self.addMenu(u"Préference")
         _theme = preference.addMenu("Theme")
-        list_theme = [
-            {"name": u"Default", "icon": '', "admin": False,
-                "shortcut": "", "style_number": 1},
-            {"name": u"Kad", "icon": '', "admin": False,
-                "shortcut": "", "style_number": 2},
-            {"name": u"fat", "icon": '', "admin": False,
-                "shortcut": "", "style_number": 3},
-        ]
+        list_theme = [({"name": dict_style[k][0], "icon": '', "admin": False,
+                        "shortcut": "", "style_number": k}) for k in dict_style]
 
         for m in list_theme:
             icon = ""
             if int(m.get('style_number')) == SettingsAdmin.get(id=1).style_number:
                 icon = "accept"
-            el_menu = QAction(
-                QIcon("{}{}.png".format(Config.img_cmedia, icon)), m.get('name'), self)
+            el_menu = QAction(QIcon("{}{}.png".format(
+                Config.img_cmedia, icon)), m.get('name'), self)
             el_menu.setShortcut(m.get("shortcut"))
             self.connect(
                 el_menu, SIGNAL("triggered()"), lambda m=m: self.change_theme(
@@ -99,11 +94,11 @@ class FMenuBar(QMenuBar, FWidget):
         export_backup(folder=Config.des_image_record,
                       dst_folder=Config.ARMOIRE)
 
-    def import_backup(self):
-        QMessageBox.about(self, u"Fonctionalité",
-                                u"<h3>Cette fonction n'est pas fini... </h3>")
-        # import_backup(folder=Config.des_image_record,
-        #               dst_folder=Config.ARMOIRE)
+    def goto_import_backup(self):
+        # QMessageBox.about(self, u"Fonctionalité",
+        # u"<h3>Cette fonction n'est pas fini... </h3>")
+        import_backup(folder=Config.des_image_record,
+                      dst_folder=Config.ARMOIRE)
     # Admin
 
     def goto_admin(self):

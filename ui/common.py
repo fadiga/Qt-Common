@@ -24,6 +24,7 @@ class FMainWindow(QMainWindow):
     def __init__(self, parent=0, *args, **kwargs):
         QMainWindow.__init__(self)
 
+        # self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setWindowIcon(QIcon.fromTheme('logo',
                                            QIcon(u"{}logo.png".format(Config.img_media))))
 
@@ -358,7 +359,7 @@ class Deleted_btt(Button):
                 padding:6px 24px;
                 text-decoration:none;
                 """
-        self.setStyleSheet(css)
+        # self.setStyleSheet(css)
 
 
 class Warning_btt(Button):

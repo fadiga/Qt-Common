@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # maintainer: Fad
-from __future__ import (unicode_literals, absolute_import, division, print_function)
+from __future__ import (
+    unicode_literals, absolute_import, division, print_function)
 
-import shutil, errno
+import shutil
+import errno
 import os
 
 from datetime import datetime
@@ -18,11 +20,12 @@ from Common.ui.util import raise_success, raise_error, uopen_file
 DATETIME = "{}".format(datetime.now().strftime('%d-%m-%Y %Hh%M'))
 LICENCE = "licence.txt"
 
+
 def export_database_as_file():
     destination = QFileDialog.getSaveFileName(QWidget(),
-                            u"Sauvegarder la base de Donnée.",
-                            u"Sauvegarde du {} {}.db"
-                            .format(DATETIME, Config.NAME_ORGA), "*.db")
+                                              u"Sauvegarder la base de Donnée.",
+                                              u"Sauvegarde du {} {}.db"
+                                              .format(DATETIME, Config.NAME_ORGA), "*.db")
     if not destination:
         return None
     try:
@@ -38,13 +41,14 @@ def export_database_as_file():
 
 def export_backup(folder=None, dst_folder=None):
 
-    directory = str(QFileDialog.getExistingDirectory(QWidget(), "Select Directory"))
-    path_backup = u"{path}-{date}-{name}".format(path=os.path.join(directory, 'BACKUP'), date=DATETIME, name=Config.NAME_ORGA)
+    directory = str(QFileDialog.getExistingDirectory(
+        QWidget(), "Select Directory"))
+    path_backup = u"{path}-{date}-{name}".format(path=os.path.join(
+        directory, 'BACKUP'), date=DATETIME, name=Config.NAME_ORGA)
 
     if not directory:
         return None
     try:
-
         shutil.copyfile(DB_FILE, os.path.join(path_backup, DB_FILE))
     except IOError:
         print("Error of copy database file")
@@ -65,7 +69,8 @@ def export_backup(folder=None, dst_folder=None):
 def import_backup(folder=None, dst_folder=None):
     home_path = os.path.dirname(os.path.abspath('__file__'))
     shutil.copy(DB_FILE, home_path, "{}.old".format(DB_FILE))
-    directory = str(QFileDialog.getExistingDirectory(QWidget(), "Select Directory"))
+    directory = str(QFileDialog.getExistingDirectory(
+        QWidget(), "Select Directory"))
     shutil.copy(os.path.join(directory, DB_FILE), home_path, DB_FILE)
     copyanything(os.path.join(directory, folder),
                  os.path.join(home_path, dst_folder))
@@ -89,9 +94,9 @@ def copyanything(src, dest):
 def export_license_as_file():
 
     from models import SettingsAdmin
-    sttg = SettingsAdmin().select().where(SettingsAdmin.id==1).get()
+    sttg = SettingsAdmin().select().where(SettingsAdmin.id == 1).get()
 
-    flcce=open(LICENCE, 'w')
+    flcce = open(LICENCE, 'w')
     flcce.write(sttg.license)
     flcce.close()
     fil = os.path.join(os.path.dirname(os.path.abspath('__file__')), LICENCE)

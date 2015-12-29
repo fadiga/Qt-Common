@@ -27,7 +27,6 @@ class Notification(QtGui.QWidget):
         super(Notification, self).__init__(parent=parent, *args, **kwargs)
 
         self.mssg = str(mssg)
-        print(mssg)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         if type_mssg == "success":
             background = "green"
