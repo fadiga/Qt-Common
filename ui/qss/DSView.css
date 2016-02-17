@@ -4,7 +4,8 @@ palette {
 }
 
 QMainWindow {
-    icon-size: 48px, 48px;
+    icon-size: 28px, 28px;
+    background: #000333
 }
 
 QDialog {

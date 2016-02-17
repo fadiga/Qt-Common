@@ -43,7 +43,7 @@ class FMenuBar(QMenuBar, FWidget):
 
         license = QAction(QIcon.fromTheme('emblem-system', QIcon('')),
                           u"Licience", self)
-        license.setShortcut("Ctrl+L")
+        license.setShortcut("Alt+L")
         self.connect(license, SIGNAL("triggered()"), self.goto_license)
         admin.addAction(license)
 
