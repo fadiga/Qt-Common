@@ -14,11 +14,13 @@ try:
 except NameError:
     unicode = str
 
+
 def get_mac():
     sys_ = platform.system()
     if sys_ == "Windows":
         # windows
-        ipconfig = subprocess.Popen(['ipconfig', '/all'], shell=True, stdout=subprocess.PIPE)
+        ipconfig = subprocess.Popen(
+            ['ipconfig', '/all'], shell=True, stdout=subprocess.PIPE)
         result = ipconfig.stdout.read()
         adresse_mac = re.search('([0-9A-F]{2}-?){6}', unicode(result)).group()
         return adresse_mac

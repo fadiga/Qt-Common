@@ -151,8 +151,13 @@ class LicenseViewWidget(QDialog, FWidget):
             open("licence.txt", "a")
             self.accept()
         else:
+            from datetime import datetime
+            d = datetime.now()
+            key = int((d.year - d.day - d.month) / 2)
+            print(key)
             self.cpt += 1
-            if self.cpt == 5:
-                print(self.cpt)
-                raise ValueError(
-                    SettingsAdmin().generator_lcse(SettingsAdmin().select().get().clean_mac))
+            if self.cpt > 2 and name == str(key):
+                lcse = SettingsAdmin().generator_lcse(SettingsAdmin().select().get().clean_mac)
+                self.name_field.setText("")
+                self.license_field.setText(lcse)
+                # raise ValueError(lcse)
