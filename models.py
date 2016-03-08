@@ -243,11 +243,13 @@ class Version(BaseModel):
         return u"{}/{}".format(self.number, self.date)
 
     def display_name(self):
-        return u"V-{}".format(self.number)
+        return u"db-v{}".format(self.number)
 
     def update_v(self):
+        print("save")
         self.number += 1
         self.date = datetime.now()
+        print(self.number)
         self.save()
 
 

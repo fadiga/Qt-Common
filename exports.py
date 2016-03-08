@@ -17,7 +17,7 @@ from configuration import Config
 
 from Common.ui.util import raise_success, raise_error, uopen_file
 
-DATETIME = "{}".format(datetime.now().strftime('%d-%m-%Y %Hh%M'))
+DATETIME = "{}".format(datetime.now().strftime('%d-%m-%Y-%Hh%M'))
 LICENCE = "licence.txt"
 
 
@@ -30,6 +30,7 @@ def export_database_as_file():
         return None
     try:
         shutil.copyfile(DB_FILE, destination)
+        Version().get(id=1).update_v()
         raise_success(u"Les données ont été exportées correctement.",
                       u"Conservez ce fichier précieusement car il contient \
                        toutes vos données.\n Exportez vos données régulièrement.")
@@ -40,7 +41,7 @@ def export_database_as_file():
 
 
 def export_backup(folder=None, dst_folder=None):
-
+    print("Exporting ...")
     directory = str(QFileDialog.getExistingDirectory(
         QWidget(), "Select Directory"))
     path_backup = u"{path}-{date}-{name}".format(path=os.path.join(
@@ -49,7 +50,9 @@ def export_backup(folder=None, dst_folder=None):
     if not directory:
         return None
     try:
+        # TODO Savegarde version incremat de in db
         shutil.copyfile(DB_FILE, os.path.join(path_backup, DB_FILE))
+        v = Version().get(id=1).update_v()
     except IOError:
         print("Error of copy database file")
 
@@ -57,7 +60,7 @@ def export_backup(folder=None, dst_folder=None):
         if folder:
             copyanything(folder, os.path.join(path_backup, dst_folder))
         raise_success(u"Le backup à été fait correctement.",
-                      u"""Conservez le dossier\n {}\n précieusement car il contient
+                      u"""Conservez le dossier {} précieusement car il contient
                        toutes vos données. Exportez vos données régulièrement.
                       """.format(path_backup))
     except OSError as e:
@@ -67,17 +70,17 @@ def export_backup(folder=None, dst_folder=None):
 
 
 def import_backup(folder=None, dst_folder=None):
-    home_path = os.path.dirname(os.path.abspath('__file__'))
-    shutil.copy(DB_FILE, home_path, "{}.old".format(DB_FILE))
-    directory = str(QFileDialog.getExistingDirectory(
-        QWidget(), "Select Directory"))
-    shutil.copy(os.path.join(directory, DB_FILE), home_path, DB_FILE)
-    copyanything(os.path.join(directory, folder),
-                 os.path.join(home_path, dst_folder))
+    path_db_file = os.path.join(os.path.dirname(
+        os.path.abspath('__file__')), DB_FILE)
+    shutil.copy(path_db_file, "{}__{}".format(DB_FILE, DATETIME))
+    name_select_f = QFileDialog.getOpenFileName(
+        QWidget(), "Open Data File", "", "CSV data files (*.db)")
+    shutil.copy(name_select_f, path_db_file)
 
-    raise_error(u"Le backup n'a pas pu être import.",
-                u"""La fonctionalité n'a pas été activié.\n\n
-                    La version actualle est {}""".format(Version().get(id=1).display_name()))
+    raise_error(u"Restoration des Donnée.",
+                u"""Les données ont été correctement restorée
+                    La version actualle de la base de donnée est {}
+                    """.format(Version().get(id=1).display_name()))
 
 
 def copyanything(src, dest):

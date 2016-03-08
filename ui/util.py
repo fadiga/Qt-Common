@@ -257,3 +257,7 @@ def date_to_datetime(dat):
     return datetime(int(year), int(month), int(day),
                     int(dt.hour), int(dt.minute),
                     int(dt.second), int(dt.microsecond))
+
+
+def getlog(text):
+    return "Log-{}".format(text)

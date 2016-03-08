@@ -22,7 +22,6 @@ from Common.tabpane import tabbox
 from Common.ui.util import (formatted_number, raise_error)
 from Common.ui.table import FTableWidget
 
-from static import Constants
 
 try:
     unicode
@@ -38,7 +37,7 @@ class AdminViewWidget(FWidget):
         self.parent = parent
 
         self.parentWidget().setWindowTitle(
-            Constants.APP_NAME + u"    ADMINISTRATION")
+            Config.APP_NAME + u"    ADMINISTRATION")
 
         editbox = QGridLayout()
         table_config = QVBoxLayout()

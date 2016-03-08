@@ -19,7 +19,7 @@ class LicenseViewWidget(QDialog, FWidget):
 
     def __init__(self, parent=0, *args, **kwargs):
         QDialog.__init__(self, parent, *args, **kwargs)
-
+        self.parent = parent
         self.intro = FormLabel(u"<h3>Vous devez activé la license pour pouvoir"
                                u"<i>utiliser.</i></h3>")
         self.title = FPageTitle("")
@@ -75,7 +75,7 @@ class LicenseViewWidget(QDialog, FWidget):
     def activationGroupBox(self):
         self.topLeftGroupBoxBtt = QGroupBox(self.tr("Nouvelle license"))
         self.setWindowTitle(u"License")
-        # self.parentWidget().setWindowTitle(u"Activation de la license")
+        self.setWindowTitle(u"Activation de la license")
         self.cpt = 0
         self.code_field = PyTextViewer(u"""Vous avez besoin du code ci desous
                                            pour l'activation:<hr> <b>{code}</b><hr>
@@ -115,8 +115,8 @@ class LicenseViewWidget(QDialog, FWidget):
         sttg.tolerance = 0
         sttg.license = None
         sttg.save()
-        self.cancel()
         self.parent.Notify(u"La license a été bien supprimée", "warring")
+        self.cancel()
 
     def check_license(self, license):
 
@@ -146,8 +146,11 @@ class LicenseViewWidget(QDialog, FWidget):
             sttg.license = license
             sttg.save()
             self.cancel()
-            self.parent.Notify(u"""La license (<b>{}</b>) à éte bien enregistré pour cette
-                           machine.\n Elle doit être bien gardé""".format(license), "success")
+            try:
+                self.parent.Notify(u"""La license (<b>{}</b>) à éte bien enregistré pour cette
+                               machine.\n Elle doit être bien gardé""".format(license), "success")
+            except:
+                pass
             open("licence.txt", "a")
             self.accept()
         else:

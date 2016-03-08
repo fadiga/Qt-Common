@@ -33,7 +33,7 @@ class Notification(QtGui.QWidget):
         elif type_mssg == "error":
             background = "red"
         elif type_mssg == "warring":
-            background = "yellow"
+            background = "grey"
         else:
             background = "black"
 
