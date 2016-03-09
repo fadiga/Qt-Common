@@ -8,12 +8,12 @@ from __future__ import (
 import xlsxwriter
 import os
 
-from datetime import date
+from datetime import date, datetime
 
 from Common.ui.util import openFile
 from configuration import Config
 
-style_org = {'align': 'center', 'valign': 'vcenter',
+style_org = {'align': 'center', 'valign': 'vcenter', 'font_size': 26,
              'border': 1,  'font_color': 'blue', 'bold': True}
 
 style_title = {"border": 1, }
@@ -81,6 +81,15 @@ def export_dynamic_data(dict_data):
     workbook = xlsxwriter.Workbook(file_name)
     worksheet = workbook.add_worksheet(sheet_name)
     worksheet.fit_num_pages = 1
+
+    format1 = workbook.add_format(
+        {'num_format': '#,##0{}'.format(Config.DEVISE)})
+    # date = datetime.strptime('2011-01-01', "%Y-%m-%d")
+
+    # worksheet.conditional_format('A112:F10', {'type':     'date',
+    #                                           'criteria': 'greater than',
+    #                                           'value':    date,
+    #                                           'format':   format1})
     style_def = workbook.add_format({})
     rowx = 1
     end_colx = len(headers) - 1
@@ -115,7 +124,8 @@ def export_dynamic_data(dict_data):
         "B{}:{}{}".format(rowx, dict_alph.get(end_colx), rowx), date_, workbook.add_format({'align': 'right'}))
     rowx += 1
     worksheet.add_table(
-        'A{}:{}{}'.format(rowx, dict_alph.get(end_colx), end_row_table), {'autofilter': 0, 'data': data, 'columns': columns})
+        'A{}:{}{}'.format(rowx, dict_alph.get(end_colx), end_row_table),
+        {'autofilter': 0, 'data': data, 'columns': columns})
 
     rowx = end_row_table
     if extend_rows:

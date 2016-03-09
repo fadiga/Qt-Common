@@ -11,6 +11,7 @@ import hashlib
 
 from datetime import datetime
 
+# from playhouse.migrate import *
 from Common.check_mac import get_mac
 from Common.ui.util import get_path, copy_file
 
@@ -21,6 +22,8 @@ print("Peewee version : " + peewee.__version__)
 
 
 dbh = peewee.SqliteDatabase(DB_FILE)
+# migrator = peewee.SqliteMigrator(dbh)
+
 dbh.connect()
 
 

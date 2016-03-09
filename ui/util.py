@@ -118,8 +118,13 @@ def raise_success(title, message):
 def formatted_number(number, sep="."):
     """ """
     locale_name, encoding = locale.getlocale()
+    # print(locale_name, encoding)
+    locale_name = "fr_FR"
+    encoding = "cp1252"
+    # encoding = None
+
     try:
-        return locale.format(u"%d", number, grouping=True).decode(locale.getlocale()[1])
+        return locale.format(u"%d", number, grouping=True).decode(encoding)
     except AttributeError:
         return locale.format("%d", number, grouping=True)
     except:

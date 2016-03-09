@@ -55,6 +55,8 @@ def export_backup(folder=None, dst_folder=None):
         v = Version().get(id=1).update_v()
     except IOError:
         print("Error of copy database file")
+    except Exception as e:
+        print(e)
 
     try:
         if folder:
@@ -72,7 +74,7 @@ def export_backup(folder=None, dst_folder=None):
 def import_backup(folder=None, dst_folder=None):
     path_db_file = os.path.join(os.path.dirname(
         os.path.abspath('__file__')), DB_FILE)
-    shutil.copy(path_db_file, "{}__{}".format(DB_FILE, DATETIME))
+    shutil.copy(path_db_file, "{}__{}.old".format(DB_FILE, DATETIME))
     name_select_f = QFileDialog.getOpenFileName(
         QWidget(), "Open Data File", "", "CSV data files (*.db)")
     shutil.copy(name_select_f, path_db_file)

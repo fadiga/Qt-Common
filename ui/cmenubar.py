@@ -121,9 +121,15 @@ class FMenuBar(QMenuBar, FWidget):
     def restart(self):
         print("restart")
         import subprocess
+        import sys
         self.parent.close()
-        subprocess.call(
-            "python.exe " + Config.NAME_MAIN, shell=True)
+        try:
+            subprocess.Popen(
+                [sys.executable, Config.NAME_MAIN.replace("py", "exe")])
+        except Exception as e:
+            print(e)
+            subprocess.call(
+                "python.exe " + Config.NAME_MAIN, shell=True)
 
     def goto(self, goto):
         self.change_main_context(goto)
