@@ -5,6 +5,8 @@
 from __future__ import (
     unicode_literals, absolute_import, division, print_function)
 
+import datetime
+
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import (QTableWidget, QAbstractItemView, QLabel,
                          QHeaderView, QTableWidgetItem, QWidget,
@@ -65,9 +67,8 @@ class FTableWidget(QTableWidget):
         self.setStyleSheet("color: #2C2C2C;")
         self.setAlternatingRowColors(True)
         self.setAutoScroll(True)
-
-        self.wc = 800
-        self.hc = 500
+        self.wc = self.width()
+        self.hc = self.height()
 
     def dragMoveEvent(self, e):
         e.accept()
@@ -219,7 +220,7 @@ class FTableWidget(QTableWidget):
                     # something failed, let's build a QTableWidgetItem
                     else:
                         self.setItem(rowid, colid,
-                                     QTableWidgetItem(u"%s" % ui_item))
+                                     QTableWidgetItem(u"%s" % ui_item, ))
                 colid += 1
             rowid += 1
 
@@ -313,7 +314,7 @@ class FTableWidget(QTableWidget):
 
     def _item_for_data(self, row, column, data, context=None):
 
-        if isinstance(data, (basestring, int)):
+        if isinstance(data, (basestring, int, float)):
             if column in self.align_map.keys():
                 widget = self.widget_from_align(self.align_map[column])
             else:
@@ -379,12 +380,14 @@ class FTableWidget(QTableWidget):
         ''' formats input value for string in table widget
 
             override it to add more formats'''
-
         if isinstance(value, basestring):
             return value
-
         if isinstance(value, (int, float, long)):
             return formatted_number(value)
+        elif isinstance(value, datetime.datetime):
+            return value.strftime("%A %d/%m/%Y à %Hh:%Mmn")
+        elif isinstance(value, datetime.date):
+            return value.strftime("%A %d/%m/%Y")
 
         if value == None:
             return ''

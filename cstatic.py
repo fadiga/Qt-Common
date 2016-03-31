@@ -39,6 +39,7 @@ class CConstants(object):
     APP_NAME = u"Projet en dev"
     APP_DATE = u"02/2013"
     DEBUG = False
-    DEVISE = " F CFA"
+    DEVISE = "F"
+    NUMBER_FORMAT = "#,##0 F"
     APP_LOGO = os.path.join(img_cmedia, "logo.png")
     APP_LOGO_ICO = os.path.join(img_cmedia, "logo.ico")

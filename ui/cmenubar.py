@@ -68,10 +68,17 @@ class FMenuBar(QMenuBar, FWidget):
         # logout
         lock = QAction(
             QIcon("{}login.png".format(Config.img_cmedia)), "Verrouiller", self)
-        lock.setShortcut("Ctrl+l")
+        lock.setShortcut("Ctrl+V")
         lock.setToolTip(u"Verrouile l'application")
         self.connect(lock, SIGNAL("triggered()"), self.logout)
         self.file_.addAction(lock)
+        # R
+        log_file = QAction(
+            QIcon(), "Log ", self)
+        log_file.setShortcut("Ctrl+l")
+        log_file.setToolTip(u"Verrouile l'application")
+        self.connect(log_file, SIGNAL("triggered()"), self.open_logo_file)
+        admin.addAction(log_file)
 
         # Exit
         exit_ = QAction(
@@ -127,7 +134,7 @@ class FMenuBar(QMenuBar, FWidget):
             subprocess.Popen(
                 [sys.executable, Config.NAME_MAIN.replace("py", "exe")])
         except Exception as e:
-            print(e)
+            # print(e)
             subprocess.call(
                 "python.exe " + Config.NAME_MAIN, shell=True)
 
@@ -137,6 +144,11 @@ class FMenuBar(QMenuBar, FWidget):
     # Aide
     def goto_help(self):
         self.open_dialog(HTMLView, modal=True)
+
+    def open_logo_file(self):
+        from Common.ui import util
+        util.uopen_file("main.log")
+        # open("main.log", "a")
 
     # About
     def goto_about(self):

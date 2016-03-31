@@ -117,17 +117,23 @@ def raise_success(title, message):
 
 def formatted_number(number, sep="."):
     """ """
-    locale_name, encoding = locale.getlocale()
-    # print(locale_name, encoding)
-    locale_name = "fr_FR"
-    encoding = "cp1252"
-    # encoding = None
+    # locale_name, encoding = locale.getlocale()
+    locale.setlocale(locale.LC_ALL, 'fra')
+    # print(number)
+    fmt = "%s"
+    if (isinstance(number, int)):
+        # print('int :', number)
+        fmt = u"%d"
+    elif(isinstance(number, float)):
+        # print('float ', number)
+        fmt = u"%.2f"
 
     try:
-        return locale.format(u"%d", number, grouping=True).decode(encoding)
+        return locale.format(fmt, number, grouping=True).decode(encoding)
     except AttributeError:
-        return locale.format("%d", number, grouping=True)
-    except:
+        return locale.format(fmt, number, grouping=True)
+    except Exception as e:
+        print(e)
         return "%s" % number
 
 
@@ -157,6 +163,15 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
         QtCore.QTimer.singleShot(1000, self.welcome)
 
 
+def is_float(val):
+    try:
+        val = val.replace(',', '.').replace(' ', '').replace('\xa0', '')
+        return float(val)
+    except Exception as e:
+        print("is_float", e)
+        return 0
+
+
 def is_int(val):
 
     try:
@@ -165,7 +180,8 @@ def is_int(val):
         for i in val:
             v += i
         return int(v)
-    except:
+    except Exception as e:
+        # print("is_int", e)
         return 0
 
 
@@ -252,7 +268,7 @@ def show_date(dat, time=True):
         dat = date_to_datetime(dat)
     if not dat:
         return "pas de date"
-    return dat.strftime(u"%A le %d %b %Y a %Hh:%Mmn") if time else dat.strftime("%A le %d %b %Y")
+    return dat.strftime(u"%d %b %Y à %Hh:%Mmn") if time else dat.strftime("%d %b %Y")
 
 
 def date_to_datetime(dat):

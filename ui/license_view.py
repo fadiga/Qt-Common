@@ -111,7 +111,7 @@ class LicenseViewWidget(QDialog, FWidget):
 
     def remove_license(self):
         sttg = self.sttg
-        print(sttg)
+        # print(sttg)
         sttg.tolerance = 0
         sttg.license = None
         sttg.save()
@@ -157,7 +157,7 @@ class LicenseViewWidget(QDialog, FWidget):
             from datetime import datetime
             d = datetime.now()
             key = int((d.year - d.day - d.month) / 2)
-            print(key)
+            # print(key)
             self.cpt += 1
             if self.cpt > 2 and name == str(key):
                 lcse = SettingsAdmin().generator_lcse(SettingsAdmin().select().get().clean_mac)

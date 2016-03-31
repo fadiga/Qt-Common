@@ -25,6 +25,8 @@ import re
 import sys
 import threading
 import uuid
+from bisect import bisect_left
+from bisect import bisect_right
 from collections import deque
 from collections import namedtuple
 try:
@@ -35,7 +37,7 @@ from copy import deepcopy
 from functools import wraps
 from inspect import isclass
 
-__version__ = '2.6.1'
+__version__ = '2.8.0'
 __all__ = [
     'BareField',
     'BigIntegerField',
@@ -50,10 +52,12 @@ __all__ = [
     'DateField',
     'DateTimeField',
     'DecimalField',
+    'DeferredRelation',
     'DoesNotExist',
     'DoubleField',
     'DQ',
     'Field',
+    'FixedCharField',
     'FloatField',
     'fn',
     'ForeignKeyField',
@@ -77,6 +81,7 @@ __all__ = [
     'ProgrammingError',
     'Proxy',
     'R',
+    'SmallIntegerField',
     'SqliteDatabase',
     'SQL',
     'TextField',
@@ -106,6 +111,7 @@ def with_metaclass(meta, base=object):
 
 PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
+PY26 = sys.version_info[:2] == (2, 6)
 if PY3:
     import builtins
     from collections import Callable
@@ -133,12 +139,17 @@ else:
 
 # By default, peewee supports Sqlite, MySQL and Postgresql.
 try:
+    from pysqlite2 import dbapi2 as pysq3
+except ImportError:
+    pysq3 = None
+try:
     import sqlite3
 except ImportError:
-    try:
-        from pysqlite2 import dbapi2 as sqlite3
-    except ImportError:
-        sqlite3 = None
+    sqlite3 = pysq3
+else:
+    if pysq3 and pysq3.sqlite_version_info >= sqlite3.sqlite_version_info:
+        sqlite3 = pysq3
+
 try:
     from psycopg2cffi import compat
     compat.register()
@@ -156,6 +167,80 @@ except ImportError:
         import pymysql as mysql
     except ImportError:
         mysql = None
+
+try:
+    from playhouse._speedups import format_date_time
+    from playhouse._speedups import sort_models_topologically
+    from playhouse._speedups import strip_parens
+except ImportError:
+    def format_date_time(value, formats, post_process=None):
+        post_process = post_process or (lambda x: x)
+        for fmt in formats:
+            try:
+                return post_process(datetime.datetime.strptime(value, fmt))
+            except ValueError:
+                pass
+        return value
+
+    def sort_models_topologically(models):
+        """Sort models topologically so that parents will precede children."""
+        models = set(models)
+        seen = set()
+        ordering = []
+        def dfs(model):
+            if model in models and model not in seen:
+                seen.add(model)
+                for foreign_key in model._meta.reverse_rel.values():
+                    dfs(foreign_key.model_class)
+                ordering.append(model)  # parent will follow descendants
+        # Order models by name and table initially to guarantee total ordering.
+        names = lambda m: (m._meta.name, m._meta.db_table)
+        for m in sorted(models, key=names, reverse=True):
+            dfs(m)
+        return list(reversed(ordering))
+
+    def strip_parens(s):
+        # Quick sanity check.
+        if not s or s[0] != '(':
+            return s
+
+        ct = i = 0
+        l = len(s)
+        while i < l:
+            if s[i] == '(' and s[l - 1] == ')':
+                ct += 1
+                i += 1
+                l -= 1
+            else:
+                break
+        if ct:
+            # If we ever end up with negatively-balanced parentheses, then we
+            # know that one of the outer parentheses was required.
+            unbalanced_ct = 0
+            required = 0
+            for i in range(ct, l - ct):
+                if s[i] == '(':
+                    unbalanced_ct += 1
+                elif s[i] == ')':
+                    unbalanced_ct -= 1
+                if unbalanced_ct < 0:
+                    required += 1
+                    unbalanced_ct = 0
+                if required == ct:
+                    break
+            ct -= required
+        if ct > 0:
+            return s[ct:-ct]
+        return s
+
+try:
+    from playhouse._speedups import _DictQueryResultWrapper
+    from playhouse._speedups import _ModelQueryResultWrapper
+    from playhouse._speedups import _SortedFieldList
+    from playhouse._speedups import _TuplesQueryResultWrapper
+except ImportError:
+    _DictQueryResultWrapper = _ModelQueryResultWrapper = _SortedFieldList =\
+            _TuplesQueryResultWrapper = None
 
 if sqlite3:
     sqlite3.register_adapter(decimal.Decimal, str)
@@ -246,6 +331,12 @@ JOIN_INNER = JOIN.INNER
 JOIN_LEFT_OUTER = JOIN.LEFT_OUTER
 JOIN_FULL = JOIN.FULL
 
+RESULTS_NAIVE = 1
+RESULTS_MODELS = 2
+RESULTS_TUPLES = 3
+RESULTS_DICTS = 4
+RESULTS_AGGREGATE_MODELS = 5
+
 # To support "django-style" double-underscore filters, create a mapping between
 # operation name and operation code, e.g. "__eq" == OP.EQ.
 DJANGO_MAP = {
@@ -320,6 +411,16 @@ class Proxy(object):
         if attr not in self.__slots__:
             raise AttributeError('Cannot set attribute on proxy.')
         return super(Proxy, self).__setattr__(attr, value)
+
+class DeferredRelation(object):
+    def set_field(self, model_class, field, name):
+        self.model_class = model_class
+        self.field = field
+        self.name = name
+
+    def set_model(self, rel_model):
+        self.field.rel_model = rel_model
+        self.field.add_to_class(self.model_class, self.name)
 
 class _CDescriptor(object):
     def __get__(self, instance, instance_type=None):
@@ -461,48 +562,6 @@ class Node(object):
     def concat(self, rhs):
         return Expression(self, OP.CONCAT, rhs)
 
-class Expression(Node):
-    """A binary expression, e.g `foo + 1` or `bar < 7`."""
-    _node_type = 'expression'
-
-    def __init__(self, lhs, op, rhs, flat=False):
-        super(Expression, self).__init__()
-        self.lhs = lhs
-        self.op = op
-        self.rhs = rhs
-        self.flat = flat
-
-    def clone_base(self):
-        return Expression(self.lhs, self.op, self.rhs, self.flat)
-
-class DQ(Node):
-    """A "django-style" filter expression, e.g. {'foo__eq': 'x'}."""
-    def __init__(self, **query):
-        super(DQ, self).__init__()
-        self.query = query
-
-    def clone_base(self):
-        return DQ(**self.query)
-
-class Param(Node):
-    """
-    Arbitrary parameter passed into a query. Instructs the query compiler to
-    specifically treat this value as a parameter, useful for `list` which is
-    special-cased for `IN` lookups.
-    """
-    _node_type = 'param'
-
-    def __init__(self, value, conv=None):
-        self.value = value
-        self.conv = conv
-        super(Param, self).__init__()
-
-    def clone_base(self):
-        return Param(self.value, self.conv)
-
-class Passthrough(Param):
-    _node_type = 'passthrough'
-
 class SQL(Node):
     """An unescaped SQL string, with optional parameters."""
     _node_type = 'sql'
@@ -515,6 +574,20 @@ class SQL(Node):
     def clone_base(self):
         return SQL(self.value, *self.params)
 R = SQL  # backwards-compat.
+
+class Entity(Node):
+    """A quoted-name or entity, e.g. "table"."column"."""
+    _node_type = 'entity'
+
+    def __init__(self, *path):
+        super(Entity, self).__init__()
+        self.path = path
+
+    def clone_base(self):
+        return Entity(*self.path)
+
+    def __getattr__(self, attr):
+        return Entity(*filter(None, self.path + (attr,)))
 
 class Func(Node):
     """An arbitrary SQL function call."""
@@ -554,6 +627,68 @@ class Func(Node):
 # API.  So instead of `Func("LOWER", param)`, `fn.LOWER(param)`.
 fn = Func(None)
 
+class Expression(Node):
+    """A binary expression, e.g `foo + 1` or `bar < 7`."""
+    _node_type = 'expression'
+
+    def __init__(self, lhs, op, rhs, flat=False):
+        super(Expression, self).__init__()
+        self.lhs = lhs
+        self.op = op
+        self.rhs = rhs
+        self.flat = flat
+
+    def clone_base(self):
+        return Expression(self.lhs, self.op, self.rhs, self.flat)
+
+class Param(Node):
+    """
+    Arbitrary parameter passed into a query. Instructs the query compiler to
+    specifically treat this value as a parameter, useful for `list` which is
+    special-cased for `IN` lookups.
+    """
+    _node_type = 'param'
+
+    def __init__(self, value, conv=None):
+        self.value = value
+        self.conv = conv
+        super(Param, self).__init__()
+
+    def clone_base(self):
+        return Param(self.value, self.conv)
+
+class Passthrough(Param):
+    _node_type = 'passthrough'
+
+class Clause(Node):
+    """A SQL clause, one or more Node objects joined by spaces."""
+    _node_type = 'clause'
+
+    glue = ' '
+    parens = False
+
+    def __init__(self, *nodes, **kwargs):
+        if 'glue' in kwargs:
+            self.glue = kwargs['glue']
+        if 'parens' in kwargs:
+            self.parens = kwargs['parens']
+        super(Clause, self).__init__()
+        self.nodes = list(nodes)
+
+    def clone_base(self):
+        clone = Clause(*self.nodes)
+        clone.glue = self.glue
+        clone.parens = self.parens
+        return clone
+
+class CommaClause(Clause):
+    """One or more Node objects joined by commas, no parens."""
+    glue = ', '
+
+class EnclosedClause(CommaClause):
+    """One or more Node objects joined by commas and enclosed in parens."""
+    parens = True
+
 class Window(Node):
     def __init__(self, partition_by=None, order_by=None):
         super(Window, self).__init__()
@@ -576,49 +711,17 @@ class Window(Node):
     def clone_base(self):
         return Window(self.partition_by, self.order_by)
 
-class Clause(Node):
-    """A SQL clause, one or more Node objects joined by spaces."""
-    _node_type = 'clause'
+def Check(value):
+    return SQL('CHECK (%s)' % value)
 
-    glue = ' '
-    parens = False
-
-    def __init__(self, *nodes):
-        super(Clause, self).__init__()
-        self.nodes = list(nodes)
+class DQ(Node):
+    """A "django-style" filter expression, e.g. {'foo__eq': 'x'}."""
+    def __init__(self, **query):
+        super(DQ, self).__init__()
+        self.query = query
 
     def clone_base(self):
-        clone = Clause(*self.nodes)
-        clone.glue = self.glue
-        clone.parens = self.parens
-        return clone
-
-class CommaClause(Clause):
-    """One or more Node objects joined by commas, no parens."""
-    glue = ', '
-
-class EnclosedClause(CommaClause):
-    """One or more Node objects joined by commas and enclosed in parens."""
-    parens = True
-
-class Entity(Node):
-    """A quoted-name or entity, e.g. "table"."column"."""
-    _node_type = 'entity'
-
-    def __init__(self, *path):
-        super(Entity, self).__init__()
-        self.path = path
-
-    def clone_base(self):
-        return Entity(*self.path)
-
-    def __getattr__(self, attr):
-        return Entity(*filter(None, self.path + (attr,)))
-
-class Check(SQL):
-    """Check constraint, usage: `Check('price > 10')`."""
-    def __init__(self, value):
-        super(Check, self).__init__('CHECK (%s)' % value)
+        return DQ(**self.query)
 
 class _StripParens(Node):
     _node_type = 'strip_parens'
@@ -628,10 +731,20 @@ class _StripParens(Node):
         self.node = node
 
 JoinMetadata = namedtuple('JoinMetadata', (
-    'src_model', 'dest_model', 'src', 'dest', 'attr', 'primary_key',
-    'foreign_key', 'is_backref', 'alias'))
+    'src_model',  # Source Model class.
+    'dest_model',   # Dest Model class.
+    'src',   # Source, may be Model, ModelAlias
+    'dest',  # Dest, may be Model, ModelAlias, or SelectQuery.
+    'attr',  # Attribute name joined instance(s) should be assigned to.
+    'primary_key',  # Primary key being joined on.
+    'foreign_key',  # Foreign key being joined from.
+    'is_backref',  # Is this a backref, i.e. 1 -> N.
+    'alias',  # Explicit alias given to join expression.
+    'is_self_join',  # Is this a self-join?
+    'is_expression',  # Is the join ON clause an Expression?
+))
 
-class Join(namedtuple('_Join', ('dest', 'join_type', 'on'))):
+class Join(namedtuple('_Join', ('src', 'dest', 'join_type', 'on'))):
     def get_foreign_key(self, source, dest, field=None):
         if isinstance(source, SelectQuery) or isinstance(dest, SelectQuery):
             return None, None
@@ -649,45 +762,64 @@ class Join(namedtuple('_Join', ('dest', 'join_type', 'on'))):
     def model_from_alias(self, model_or_alias):
         if isinstance(model_or_alias, ModelAlias):
             return model_or_alias.model_class
+        elif isinstance(model_or_alias, SelectQuery):
+            return model_or_alias.model_class
         return model_or_alias
 
-    def join_metadata(self, source):
-        src = self.model_from_alias(source)
+    def _join_metadata(self):
+        # Get the actual tables being joined.
+        src = self.model_from_alias(self.src)
         dest = self.model_from_alias(self.dest)
 
         join_alias = isinstance(self.on, Node) and self.on._alias or None
+        is_expression = isinstance(self.on, (Expression, Func, SQL))
 
-        target_attr = to_field = None
         on_field = isinstance(self.on, (Field, FieldProxy)) and self.on or None
         if on_field:
             fk_field = on_field
             is_backref = on_field.name not in src._meta.fields
         else:
-            fk_field, is_backref = self.get_foreign_key(source, dest, self.on)
+            fk_field, is_backref = self.get_foreign_key(src, dest, self.on)
             if fk_field is None and self.on is not None:
-                fk_field, is_backref = self.get_foreign_key(source, dest)
+                fk_field, is_backref = self.get_foreign_key(src, dest)
 
         if fk_field is not None:
-            to_field = fk_field.to_field.name
-            if is_backref:
-                target_attr = dest._meta.db_table
-            else:
-                target_attr = fk_field.name
-        elif isinstance(self.on, Expression) and hasattr(self.on.lhs, 'name'):
-            target_attr = self.on.lhs.name
+            primary_key = fk_field.to_field
         else:
-            target_attr = dest._meta.db_table
+            primary_key = None
+
+        if not join_alias:
+            if fk_field is not None:
+                if is_backref:
+                    target_attr = dest._meta.db_table
+                else:
+                    target_attr = fk_field.name
+            else:
+                try:
+                    target_attr = self.on.lhs.name
+                except AttributeError:
+                    target_attr = dest._meta.db_table
+        else:
+            target_attr = None
 
         return JoinMetadata(
             src_model=src,
             dest_model=dest,
-            src=source,
+            src=self.src,
             dest=self.dest,
             attr=join_alias or target_attr,
-            primary_key=to_field,
+            primary_key=primary_key,
             foreign_key=fk_field,
             is_backref=is_backref,
-            alias=join_alias)
+            alias=join_alias,
+            is_self_join=src is dest,
+            is_expression=is_expression)
+
+    @property
+    def metadata(self):
+        if not hasattr(self, '_cached_metadata'):
+            self._cached_metadata = self._join_metadata()
+        return self._cached_metadata
 
 class FieldDescriptor(object):
     # Fields are exposed as descriptors in order to control access to the
@@ -771,9 +903,7 @@ class Field(Node):
         if not self.verbose_name:
             self.verbose_name = re.sub('_+', ' ', name).title()
 
-        model_class._meta.fields[self.name] = self
-        model_class._meta.columns[self.db_column] = self
-
+        model_class._meta.add_field(self)
         setattr(model_class, name, FieldDescriptor(self))
         self._is_bound = True
 
@@ -833,12 +963,23 @@ class Field(Node):
 class BareField(Field):
     db_field = 'bare'
 
+    def __init__(self, coerce=None, *args, **kwargs):
+        super(BareField, self).__init__(*args, **kwargs)
+        if coerce is not None:
+            self.coerce = coerce
+
+    def clone_base(self, **kwargs):
+        return super(BareField, self).clone_base(coerce=self.coerce, **kwargs)
+
 class IntegerField(Field):
     db_field = 'int'
     coerce = int
 
 class BigIntegerField(IntegerField):
     db_field = 'bigint'
+
+class SmallIntegerField(IntegerField):
+    db_field = 'smallint'
 
 class PrimaryKeyField(IntegerField):
     db_field = 'primary_key'
@@ -917,6 +1058,15 @@ class CharField(Field):
     def coerce(self, value):
         return coerce_to_unicode(value or '')
 
+class FixedCharField(CharField):
+    db_field = 'fixed_char'
+
+    def python_value(self, value):
+        value = super(FixedCharField, self).python_value(value)
+        if value:
+            value = value.strip()
+        return value
+
 class TextField(Field):
     db_field = 'text'
 
@@ -925,29 +1075,34 @@ class TextField(Field):
 
 class BlobField(Field):
     db_field = 'blob'
+    _constructor = binary_construct
+
+    def add_to_class(self, model_class, name):
+        self._constructor = model_class._meta.database.get_binary_type()
+        return super(BlobField, self).add_to_class(model_class, name)
 
     def db_value(self, value):
+        if isinstance(value, unicode_type):
+            value = value.encode('raw_unicode_escape')
         if isinstance(value, basestring):
-            return binary_construct(value)
+            return self._constructor(value)
         return value
 
 class UUIDField(Field):
     db_field = 'uuid'
 
     def db_value(self, value):
-        return None if value is None else str(value)
+        if isinstance(value, uuid.UUID):
+            return value.hex
+        try:
+            return uuid.UUID(value).hex
+        except:
+            return value
 
     def python_value(self, value):
+        if isinstance(value, uuid.UUID):
+            return value
         return None if value is None else uuid.UUID(value)
-
-def format_date_time(value, formats, post_process=None):
-    post_process = post_process or (lambda x: x)
-    for fmt in formats:
-        try:
-            return post_process(datetime.datetime.strptime(value, fmt))
-        except ValueError:
-            pass
-    return value
 
 def _date_part(date_part):
     def dec(self):
@@ -1017,11 +1172,14 @@ class TimeField(_BaseFormattedField):
     ]
 
     def python_value(self, value):
-        if value and isinstance(value, basestring):
-            pp = lambda x: x.time()
-            return format_date_time(value, self.formats, pp)
-        elif value and isinstance(value, datetime.datetime):
-            return value.time()
+        if value:
+            if isinstance(value, basestring):
+                pp = lambda x: x.time()
+                return format_date_time(value, self.formats, pp)
+            elif isinstance(value, datetime.datetime):
+                return value.time()
+        if value is not None and isinstance(value, datetime.timedelta):
+            return (datetime.datetime.min + value).time()
         return value
 
     hour = property(_date_part('hour'))
@@ -1085,18 +1243,19 @@ class ObjectIdDescriptor(object):
 
     def __get__(self, instance, instance_type=None):
         if instance is not None:
-            return instance._data[self.attr_name]
+            return instance._data.get(self.attr_name)
 
 class ForeignKeyField(IntegerField):
     def __init__(self, rel_model, related_name=None, on_delete=None,
                  on_update=None, extra=None, to_field=None, *args, **kwargs):
-        if rel_model != 'self' and not isinstance(rel_model, Proxy) and not \
+        if rel_model != 'self' and not \
+                isinstance(rel_model, (Proxy, DeferredRelation)) and not \
                 issubclass(rel_model, Model):
             raise TypeError('Unexpected value for `rel_model`.  Expected '
-                            '`Model`, `Proxy` or "self"')
+                            '`Model`, `Proxy`, `DeferredRelation`, or "self"')
         self.rel_model = rel_model
         self._related_name = related_name
-        self.deferred = isinstance(rel_model, Proxy)
+        self.deferred = isinstance(rel_model, (Proxy, DeferredRelation))
         self.on_delete = on_delete
         self.on_update = on_update
         self.extra = extra
@@ -1132,6 +1291,9 @@ class ForeignKeyField(IntegerField):
                 self.add_to_class(model_class, name)
             self.rel_model.attach_callback(callback)
             return
+        elif isinstance(self.rel_model, DeferredRelation):
+            self.rel_model.set_field(model_class, self, name)
+            return
 
         self.name = name
         self.model_class = model_class
@@ -1139,11 +1301,9 @@ class ForeignKeyField(IntegerField):
         if not self.verbose_name:
             self.verbose_name = re.sub('_+', ' ', name).title()
 
-        model_class._meta.fields[self.name] = self
-        model_class._meta.columns[self.db_column] = self
+        model_class._meta.add_field(self)
 
         self.related_name = self._get_related_name()
-
         if self.rel_model == 'self':
             self.rel_model = self.model_class
 
@@ -1196,6 +1356,11 @@ class ForeignKeyField(IntegerField):
         if isinstance(value, self.rel_model):
             value = value._get_pk_value()
         return self.to_field.db_value(value)
+
+    def python_value(self, value):
+        if isinstance(value, self.rel_model):
+            return value
+        return self.to_field.python_value(value)
 
 
 class CompositeKey(object):
@@ -1269,9 +1434,11 @@ class QueryCompiler(object):
         'datetime': 'DATETIME',
         'decimal': 'DECIMAL',
         'double': 'REAL',
+        'fixed_char': 'CHAR',
         'float': 'REAL',
         'int': 'INTEGER',
         'primary_key': 'INTEGER',
+        'smallint': 'SMALLINT',
         'string': 'VARCHAR',
         'text': 'TEXT',
         'time': 'TIME',
@@ -1346,47 +1513,13 @@ class QueryCompiler(object):
         return '%s%s%s' % (self.quote_char, s, self.quote_char)
 
     def get_column_type(self, f):
-        return self._field_map[f]
+        return self._field_map[f] if f in self._field_map else f.upper()
 
     def get_op(self, q):
         return self._op_map[q]
 
     def _sorted_fields(self, field_dict):
         return sorted(field_dict.items(), key=lambda i: i[0]._sort_key)
-
-    def _clean_extra_parens(self, s):
-        # Quick sanity check.
-        if not s or s[0] != '(':
-            return s
-
-        ct = i = 0
-        l = len(s)
-        while i < l:
-            if s[i] == '(' and s[l - 1] == ')':
-                ct += 1
-                i += 1
-                l -= 1
-            else:
-                break
-        if ct:
-            # If we ever end up with negatively-balanced parentheses, then we
-            # know that one of the outer parentheses was required.
-            unbalanced_ct = 0
-            required = 0
-            for i in range(ct, l - ct):
-                if s[i] == '(':
-                    unbalanced_ct += 1
-                elif s[i] == ')':
-                    unbalanced_ct -= 1
-                if unbalanced_ct < 0:
-                    required += 1
-                    unbalanced_ct = 0
-                if required == ct:
-                    break
-            ct -= required
-        if ct > 0:
-            return s[ct:-ct]
-        return s
 
     def _parse_default(self, node, alias_map, conv):
         return self.interpolation, [node]
@@ -1410,13 +1543,13 @@ class QueryCompiler(object):
     def _parse_func(self, node, alias_map, conv):
         conv = node._coerce and conv or None
         sql, params = self.parse_node_list(node.arguments, alias_map, conv)
-        return '%s(%s)' % (node.name, self._clean_extra_parens(sql)), params
+        return '%s(%s)' % (node.name, strip_parens(sql)), params
 
     def _parse_clause(self, node, alias_map, conv):
         sql, params = self.parse_node_list(
             node.nodes, alias_map, conv, node.glue)
         if node.parens:
-            sql = '(%s)' % self._clean_extra_parens(sql)
+            sql = '(%s)' % strip_parens(sql)
         return sql, params
 
     def _parse_entity(self, node, alias_map, conv):
@@ -1474,11 +1607,11 @@ class QueryCompiler(object):
                 select_field = clone.model_class._meta.primary_key
             clone._select = (select_field,)
         sub, params = self.generate_select(clone, alias_map)
-        return '(%s)' % self._clean_extra_parens(sub), params
+        return '(%s)' % strip_parens(sub), params
 
     def _parse_strip_parens(self, node, alias_map, conv):
         sql, params = self.parse_node(node.node, alias_map, conv)
-        return self._clean_extra_parens(sql), params
+        return strip_parens(sql), params
 
     def _parse(self, node, alias_map, conv):
         # By default treat the incoming node as a raw value that should be
@@ -1495,7 +1628,8 @@ class QueryCompiler(object):
             sql = '(%s)' % sql
         elif isinstance(node, Model):
             sql = self.interpolation
-            if conv and isinstance(conv, ForeignKeyField):
+            if conv and isinstance(conv, ForeignKeyField) and \
+                    not isinstance(conv.to_field, ForeignKeyField):
                 params = [
                     conv.to_field.db_value(getattr(node, conv.to_field.name))]
             else:
@@ -1570,10 +1704,18 @@ class QueryCompiler(object):
                     # Clear any alias on the join expression.
                     constraint = join.on.clone().alias()
                 else:
-                    metadata = join.join_metadata(curr)
-                    if metadata.foreign_key:
-                        lhs = metadata.foreign_key
-                        rhs = metadata.foreign_key.to_field
+                    metadata = join.metadata
+                    if metadata.is_backref:
+                        fk_model = join.dest
+                        pk_model = join.src
+                    else:
+                        fk_model = join.src
+                        pk_model = join.dest
+
+                    fk = metadata.foreign_key
+                    if fk:
+                        lhs = getattr(fk_model, fk.name)
+                        rhs = getattr(pk_model, fk.to_field.name)
                         if metadata.is_backref:
                             lhs, rhs = rhs, lhs
                         constraint = (lhs == rhs)
@@ -1647,10 +1789,10 @@ class QueryCompiler(object):
         if query._order_by:
             clauses.extend([SQL('ORDER BY'), CommaClause(*query._order_by)])
 
-        if query._limit or (query._offset and db.limit_max):
-            limit = query._limit or db.limit_max
+        if query._limit is not None or (query._offset and db.limit_max):
+            limit = query._limit if query._limit is not None else db.limit_max
             clauses.append(SQL('LIMIT %s' % limit))
-        if query._offset:
+        if query._offset is not None:
             clauses.append(SQL('OFFSET %s' % query._offset))
 
         for_update, no_wait = query._for_update
@@ -1684,6 +1826,11 @@ class QueryCompiler(object):
         if query._where:
             clauses.extend([SQL('WHERE'), query._where])
 
+        if query._returning is not None:
+            returning_clause = Clause(*query._returning)
+            returning_clause.glue = ', '
+            clauses.extend([SQL('RETURNING'), returning_clause])
+
         return self.build_query(clauses, alias_map)
 
     def _get_field_clause(self, fields, clause_type=EnclosedClause):
@@ -1696,7 +1843,7 @@ class QueryCompiler(object):
         alias_map = self.alias_map_class()
         alias_map.add(model, model._meta.db_table)
         if query._upsert:
-            statement = 'INSERT OR REPLACE INTO'
+            statement = meta.database.upsert_sql
         elif query._on_conflict:
             statement = 'INSERT OR %s INTO' % query._on_conflict
         else:
@@ -1733,6 +1880,10 @@ class QueryCompiler(object):
                     self._get_field_clause(fields),
                     SQL('VALUES'),
                     CommaClause(*value_clauses)])
+            elif query.model_class._meta.auto_increment:
+                # Bare insert, use default value for primary key.
+                clauses.append(query.database.default_insert_clause(
+                    query.model_class))
 
         if query.is_insert_returning:
             clauses.extend([
@@ -1740,6 +1891,11 @@ class QueryCompiler(object):
                 self._get_field_clause(
                     meta.get_primary_key_fields(),
                     clause_type=CommaClause)])
+        elif query._returning is not None:
+            returning_clause = Clause(*query._returning)
+            returning_clause.glue = ', '
+            clauses.extend([SQL('RETURNING'), returning_clause])
+
 
         return self.build_query(clauses, alias_map)
 
@@ -1748,6 +1904,10 @@ class QueryCompiler(object):
         clauses = [SQL('DELETE FROM'), model.as_entity()]
         if query._where:
             clauses.extend([SQL('WHERE'), query._where])
+        if query._returning is not None:
+            returning_clause = Clause(*query._returning)
+            returning_clause.glue = ', '
+            clauses.extend([SQL('RETURNING'), returning_clause])
         return self.build_query(clauses)
 
     def field_definition(self, field):
@@ -1800,10 +1960,16 @@ class QueryCompiler(object):
                        for f in meta.primary_key.field_names]
             constraints.append(Clause(
                 SQL('PRIMARY KEY'), EnclosedClause(*pk_cols)))
-        for field in meta.get_fields():
+        for field in meta.sorted_fields:
             columns.append(self.field_definition(field))
             if isinstance(field, ForeignKeyField) and not field.deferred:
                 constraints.append(self.foreign_key_constraint(field))
+
+        if model_class._meta.constraints:
+            for constraint in model_class._meta.constraints:
+                if not isinstance(constraint, Node):
+                    constraint = SQL(constraint)
+                constraints.append(constraint)
 
         return Clause(
             SQL(statement),
@@ -1818,6 +1984,16 @@ class QueryCompiler(object):
             ddl.append(SQL('CASCADE'))
         return Clause(*ddl)
     drop_table = return_parsed_node('_drop_table')
+
+    def _truncate_table(self, model_class, restart_identity=False,
+                        cascade=False):
+        ddl = [SQL('TRUNCATE TABLE'), model_class.as_entity()]
+        if restart_identity:
+            ddl.append(SQL('RESTART IDENTITY'))
+        if cascade:
+            ddl.append(SQL('CASCADE'))
+        return Clause(*ddl)
+    truncate_table = return_parsed_node('_truncate_table')
 
     def index_name(self, table, columns):
         index = '%s_%s' % (table, '_'.join(columns))
@@ -1848,6 +2024,31 @@ class QueryCompiler(object):
     drop_sequence = return_parsed_node('_drop_sequence')
 
 
+class SqliteQueryCompiler(QueryCompiler):
+    def truncate_table(self, model_class, restart_identity=False,
+                       cascade=False):
+        return model_class.delete().sql()
+
+
+class ResultIterator(object):
+    def __init__(self, qrw):
+        self.qrw = qrw
+        self._idx = 0
+
+    def next(self):
+        if self._idx < self.qrw._ct:
+            obj = self.qrw._result_cache[self._idx]
+        elif not self.qrw._populated:
+            obj = self.qrw.iterate()
+            self.qrw._result_cache.append(obj)
+            self.qrw._ct += 1
+        else:
+            raise StopIteration
+        self._idx += 1
+        return obj
+    __next__ = next
+
+
 class QueryResultWrapper(object):
     """
     Provides an iterator over the results of a raw Query, additionally doing
@@ -1859,8 +2060,8 @@ class QueryResultWrapper(object):
         self.model = model
         self.cursor = cursor
 
-        self.__ct = 0
-        self.__idx = 0
+        self._ct = 0
+        self._idx = 0
 
         self._result_cache = []
         self._populated = False
@@ -1872,12 +2073,18 @@ class QueryResultWrapper(object):
             self.column_meta = self.join_meta = None
 
     def __iter__(self):
-        self.__idx = 0
-
-        if not self._populated:
-            return self
-        else:
+        if self._populated:
             return iter(self._result_cache)
+        else:
+            return ResultIterator(self)
+
+    @property
+    def count(self):
+        self.fill_cache()
+        return self._ct
+
+    def __len__(self):
+        return self.count
 
     def process_row(self, row):
         return row
@@ -1899,17 +2106,17 @@ class QueryResultWrapper(object):
             yield self.iterate()
 
     def next(self):
-        if self.__idx < self.__ct:
-            inst = self._result_cache[self.__idx]
-            self.__idx += 1
+        if self._idx < self._ct:
+            inst = self._result_cache[self._idx]
+            self._idx += 1
             return inst
         elif self._populated:
             raise StopIteration
 
         obj = self.iterate()
         self._result_cache.append(obj)
-        self.__ct += 1
-        self.__idx += 1
+        self._ct += 1
+        self._idx += 1
         return obj
     __next__ = next
 
@@ -1917,10 +2124,10 @@ class QueryResultWrapper(object):
         n = n or float('Inf')
         if n < 0:
             raise ValueError('Negative values are not supported.')
-        self.__idx = self.__ct
-        while not self._populated and (n > self.__ct):
+        self._idx = self._ct
+        while not self._populated and (n > self._ct):
             try:
-                self.next()
+                next(self)
             except StopIteration:
                 break
 
@@ -1963,6 +2170,9 @@ class TuplesQueryResultWrapper(ExtQueryResultWrapper):
     def process_row(self, row):
         return tuple([self.conv[i][2](col) for i, col in enumerate(row)])
 
+if _TuplesQueryResultWrapper is None:
+    _TuplesQueryResultWrapper = TuplesQueryResultWrapper
+
 class NaiveQueryResultWrapper(ExtQueryResultWrapper):
     def process_row(self, row):
         instance = self.model()
@@ -1971,12 +2181,18 @@ class NaiveQueryResultWrapper(ExtQueryResultWrapper):
         instance._prepare_instance()
         return instance
 
+if _ModelQueryResultWrapper is None:
+    _ModelQueryResultWrapper = NaiveQueryResultWrapper
+
 class DictQueryResultWrapper(ExtQueryResultWrapper):
     def process_row(self, row):
         res = {}
         for i, column, func in self.conv:
             res[column] = func(row[i])
         return res
+
+if _DictQueryResultWrapper is None:
+    _DictQueryResultWrapper = DictQueryResultWrapper
 
 class ModelQueryResultWrapper(QueryResultWrapper):
     def initialize(self, description):
@@ -1992,17 +2208,20 @@ class ModelQueryResultWrapper(QueryResultWrapper):
                 if isinstance(node, FieldProxy):
                     key = node._model_alias
                     constructor = node.model
+                    conv = node.field_instance.python_value
                 else:
                     key = constructor = node.model_class
-                attr = node.name
-                conv = node.python_value
+                    conv = node.python_value
+                attr = node._alias or node.name
             else:
                 if node._bind_to is None:
                     key = constructor = self.model
                 else:
                     key = constructor = node._bind_to
-                if isinstance(node, Expression) and node._alias:
+                if isinstance(node, Node) and node._alias:
                     attr = node._alias
+                elif isinstance(node, Entity):
+                    attr = node.path[-1]
             column_map.append((key, constructor, attr, conv))
             models.add(key)
 
@@ -2018,8 +2237,9 @@ class ModelQueryResultWrapper(QueryResultWrapper):
                 continue
 
             for join in joins[current]:
-                if join.dest in models:
-                    join_list.append(join.join_metadata(current))
+                metadata = join.metadata
+                if metadata.dest in models or metadata.dest_model in models:
+                    join_list.append(metadata)
                     stack.append(join.dest)
 
         return join_list
@@ -2052,18 +2272,34 @@ class ModelQueryResultWrapper(QueryResultWrapper):
         prepared = [collected[self.model]]
         for metadata in self.join_list:
             inst = collected[metadata.src]
-            joined_inst = collected[metadata.dest]
+            try:
+                joined_inst = collected[metadata.dest]
+            except KeyError:
+                joined_inst = collected[metadata.dest_model]
 
             # Can we populate a value on the joined instance using the current?
-            can_populate = (
-                (metadata.primary_key is not None) and
+            mpk = metadata.primary_key is not None
+            can_populate_joined_pk = (
+                mpk and
                 (metadata.attr in inst._data) and
-                (getattr(joined_inst, metadata.primary_key) is None))
-            if can_populate:
+                (getattr(joined_inst, metadata.primary_key.name) is None))
+            if can_populate_joined_pk:
                 setattr(
                     joined_inst,
-                    metadata.primary_key,
+                    metadata.primary_key.name,
                     inst._data[metadata.attr])
+
+            if metadata.is_backref:
+                can_populate_joined_fk = (
+                    mpk and
+                    (metadata.foreign_key is not None) and
+                    (getattr(inst, metadata.primary_key.name) is not None) and
+                    (joined_inst._data.get(metadata.foreign_key.name) is None))
+                if can_populate_joined_fk:
+                    setattr(
+                        joined_inst,
+                        metadata.foreign_key.name,
+                        inst)
 
             setattr(inst, metadata.attr, joined_inst)
             prepared.append(joined_inst)
@@ -2071,7 +2307,7 @@ class ModelQueryResultWrapper(QueryResultWrapper):
         return prepared
 
 
-JoinCache = namedtuple('JoinCache', ('foreign_key', 'is_backref', 'att_name'))
+JoinCache = namedtuple('JoinCache', ('metadata', 'attr'))
 
 
 class AggregateQueryResultWrapper(ModelQueryResultWrapper):
@@ -2082,7 +2318,7 @@ class AggregateQueryResultWrapper(ModelQueryResultWrapper):
     def initialize(self, description):
         super(AggregateQueryResultWrapper, self).initialize(description)
 
-        # Collect the set of all models queried.
+        # Collect the set of all models (and ModelAlias objects) queried.
         self.all_models = set()
         for key, _, _, _ in self.column_map:
             self.all_models.add(key)
@@ -2092,32 +2328,46 @@ class AggregateQueryResultWrapper(ModelQueryResultWrapper):
         self.models_with_aggregate = set()
         self.back_references = {}
         self.source_to_dest = {}
+        self.dest_to_source = {}
 
-        #for (src, attr, dest, to_field, related_name) in self.join_list:
         for metadata in self.join_list:
             if metadata.is_backref:
                 att_name = metadata.foreign_key.related_name
             else:
                 att_name = metadata.attr
 
-            is_backref = metadata.is_backref or (
-                metadata.src_model is metadata.dest_model)
+            is_backref = metadata.is_backref or metadata.is_self_join
             if is_backref:
                 self.models_with_aggregate.add(metadata.src)
+            else:
+                self.dest_to_source.setdefault(metadata.dest, set())
+                self.dest_to_source[metadata.dest].add(metadata.src)
 
             self.source_to_dest.setdefault(metadata.src, {})
-            self.source_to_dest[metadata.src_model][metadata.dest] = JoinCache(
-                foreign_key=metadata.foreign_key,
-                is_backref=is_backref,
-                att_name=metadata.alias or att_name)
+            self.source_to_dest[metadata.src][metadata.dest] = JoinCache(
+                metadata=metadata,
+                attr=metadata.alias or att_name)
 
         # Determine which columns could contain "duplicate" data, e.g. if
         # getting Users and their Tweets, this would be the User columns.
         self.columns_to_compare = {}
+        key_to_columns = {}
         for idx, (key, model_class, col_name, _) in enumerate(self.column_map):
             if key in self.models_with_aggregate:
                 self.columns_to_compare.setdefault(key, [])
                 self.columns_to_compare[key].append((idx, col_name))
+
+            key_to_columns.setdefault(key, [])
+            key_to_columns[key].append((idx, col_name))
+
+        # Also compare columns for joins -> many-related model.
+        for model_or_alias in self.models_with_aggregate:
+            if model_or_alias not in self.columns_to_compare:
+                continue
+            sources = self.dest_to_source.get(model_or_alias, ())
+            for joined_model in sources:
+                self.columns_to_compare[model_or_alias].extend(
+                    key_to_columns[joined_model])
 
     def read_model_data(self, row):
         models = {}
@@ -2152,9 +2402,9 @@ class AggregateQueryResultWrapper(ModelQueryResultWrapper):
         identity_map = {}
         _constructed = self.construct_instances(row)
         primary_instance = _constructed[self.model]
-        for model_class, instance in _constructed.items():
-            identity_map[model_class] = OrderedDict()
-            identity_map[model_class][_get_pk(instance)] = instance
+        for model_or_alias, instance in _constructed.items():
+            identity_map[model_or_alias] = OrderedDict()
+            identity_map[model_or_alias][_get_pk(instance)] = instance
 
         model_data = self.read_model_data(row)
         while True:
@@ -2175,12 +2425,15 @@ class AggregateQueryResultWrapper(ModelQueryResultWrapper):
             different_models = self.all_models - duplicate_models
 
             new_instances = self.construct_instances(cur_row, different_models)
-            for model_class, instance in new_instances.items():
+            for model_or_alias, instance in new_instances.items():
                 # Do not include any instances which are comprised solely of
                 # NULL values.
-                pk_value = _get_pk(instance)
-                if [val for val in instance._data.values() if val is not None]:
-                    identity_map[model_class][pk_value] = instance
+                all_none = True
+                for value in instance._data.values():
+                    if value is not None:
+                        all_none = False
+                if not all_none:
+                    identity_map[model_or_alias][_get_pk(instance)] = instance
 
         stack = [self.model]
         instances = [primary_instance]
@@ -2191,25 +2444,13 @@ class AggregateQueryResultWrapper(ModelQueryResultWrapper):
 
             for join in self.join_meta[current]:
                 try:
-                    metadata = self.source_to_dest[current][join.dest]
+                    metadata, attr = self.source_to_dest[current][join.dest]
                 except KeyError:
                     continue
 
-                if not metadata.is_backref:
-                    if join.dest not in identity_map:
-                        continue
-
-                    for pk, instance in identity_map[current].items():
-                        joined_inst = identity_map[join.dest][
-                            instance._data[metadata.foreign_key.name]]
-                        setattr(
-                            instance,
-                            metadata.foreign_key.name,
-                            joined_inst)
-                        instances.append(joined_inst)
-                elif metadata.att_name:
+                if metadata.is_backref or metadata.is_self_join:
                     for instance in identity_map[current].values():
-                        setattr(instance, metadata.att_name, [])
+                        setattr(instance, attr, [])
 
                     if join.dest not in identity_map:
                         continue
@@ -2218,13 +2459,27 @@ class AggregateQueryResultWrapper(ModelQueryResultWrapper):
                         if pk is None:
                             continue
                         try:
+                            # XXX: if no FK exists, unable to join.
                             joined_inst = identity_map[current][
                                 inst._data[metadata.foreign_key.name]]
                         except KeyError:
                             continue
 
-                        getattr(joined_inst, metadata.att_name).append(inst)
+                        getattr(joined_inst, attr).append(inst)
                         instances.append(inst)
+                elif attr:
+                    if join.dest not in identity_map:
+                        continue
+
+                    for pk, instance in identity_map[current].items():
+                        # XXX: if no FK exists, unable to join.
+                        joined_inst = identity_map[join.dest][
+                            instance._data[metadata.foreign_key.name]]
+                        setattr(
+                            instance,
+                            metadata.foreign_key.name,
+                            joined_inst)
+                        instances.append(joined_inst)
 
                 stack.append(join.dest)
 
@@ -2276,6 +2531,19 @@ class Query(Node):
         conjunction = conjunction or operator.and_
         return conjunction(initial, reduced)
 
+    def _model_shorthand(self, args):
+        accum = []
+        for arg in args:
+            if isinstance(arg, Node):
+                accum.append(arg)
+            elif isinstance(arg, Query):
+                accum.append(arg)
+            elif isinstance(arg, ModelAlias):
+                accum.extend(arg.get_proxy_fields())
+            elif isclass(arg) and issubclass(arg, Model):
+                accum.extend(arg._meta.sorted_fields)
+        return accum
+
     @returns_clone
     def where(self, *expressions):
         self._where = self._add_query_clauses(self._where, expressions)
@@ -2287,16 +2555,17 @@ class Query(Node):
 
     @returns_clone
     def join(self, dest, join_type=None, on=None):
+        src = self._query_ctx
         if not on:
-            require_join_condition = [
-                isinstance(dest, SelectQuery),
-                (isclass(dest) and not self._query_ctx._meta.rel_exists(dest))]
-            if any(require_join_condition):
+            require_join_condition = (
+                isinstance(dest, SelectQuery) or
+                (isclass(dest) and not src._meta.rel_exists(dest)))
+            if require_join_condition:
                 raise ValueError('A join condition must be specified.')
         elif isinstance(on, basestring):
-            on = self._query_ctx._meta.fields[on]
-        self._joins.setdefault(self._query_ctx, [])
-        self._joins[self._query_ctx].append(Join(dest, join_type, on))
+            on = src._meta.fields[on]
+        self._joins.setdefault(src, [])
+        self._joins[src].append(Join(src, dest, join_type, on))
         if not isinstance(dest, SelectQuery):
             self._query_ctx = dest
 
@@ -2431,12 +2700,12 @@ class RawQuery(Query):
     def execute(self):
         if self._qr is None:
             if self._tuples:
-                ResultWrapper = TuplesQueryResultWrapper
+                QRW = self.database.get_result_wrapper(RESULTS_TUPLES)
             elif self._dicts:
-                ResultWrapper = DictQueryResultWrapper
+                QRW = self.database.get_result_wrapper(RESULTS_DICTS)
             else:
-                ResultWrapper = NaiveQueryResultWrapper
-            self._qr = ResultWrapper(self.model_class, self._execute(), None)
+                QRW = self.database.get_result_wrapper(RESULTS_NAIVE)
+            self._qr = QRW(self.model_class, self._execute(), None)
         return self._qr
 
     def __iter__(self):
@@ -2495,19 +2764,6 @@ class SelectQuery(Query):
         query._alias = self._alias
         return query
 
-    def _model_shorthand(self, args):
-        accum = []
-        for arg in args:
-            if isinstance(arg, Node):
-                accum.append(arg)
-            elif isinstance(arg, Query):
-                accum.append(arg)
-            elif isinstance(arg, ModelAlias):
-                accum.extend(arg.get_proxy_fields())
-            elif isclass(arg) and issubclass(arg, Model):
-                accum.extend(arg._meta.get_fields())
-        return accum
-
     def compound_op(operator):
         def inner(self, other):
             supported_ops = self.model_class._meta.database.compound_operations
@@ -2532,7 +2788,7 @@ class SelectQuery(Query):
 
     def __select(self, *selection):
         self._explicit_selection = len(selection) > 0
-        selection = selection or self.model_class._meta.get_fields()
+        selection = selection or self.model_class._meta.sorted_fields
         self._select = self._model_shorthand(selection)
     select = returns_clone(__select)
 
@@ -2649,7 +2905,7 @@ class SelectQuery(Query):
     def get(self):
         clone = self.paginate(1, 1)
         try:
-            return clone.execute().next()
+            return next(clone.execute())
         except StopIteration:
             raise self.model_class.DoesNotExist(
                 'Instance matching query does not exist:\nSQL: %s\nPARAMS: %s'
@@ -2671,25 +2927,31 @@ class SelectQuery(Query):
         for node in self._select:
             if isinstance(node, Field) and node.model_class != model_class:
                 return False
+            elif isinstance(node, Node) and node._bind_to is not None:
+                if node._bind_to != model_class:
+                    return False
         return True
 
     def get_query_meta(self):
         return (self._select, self._joins)
 
+    def _get_result_wrapper(self):
+        if self._tuples:
+            return self.database.get_result_wrapper(RESULTS_TUPLES)
+        elif self._dicts:
+            return self.database.get_result_wrapper(RESULTS_DICTS)
+        elif self._naive or not self._joins or self.verify_naive():
+            return self.database.get_result_wrapper(RESULTS_NAIVE)
+        elif self._aggregate_rows:
+            return self.database.get_result_wrapper(RESULTS_AGGREGATE_MODELS)
+        else:
+            return self.database.get_result_wrapper(RESULTS_MODELS)
+
     def execute(self):
-        if self._dirty or not self._qr:
+        if self._dirty or self._qr is None:
             model_class = self.model_class
             query_meta = self.get_query_meta()
-            if self._tuples:
-                ResultWrapper = TuplesQueryResultWrapper
-            elif self._dicts:
-                ResultWrapper = DictQueryResultWrapper
-            elif self._naive or not self._joins or self.verify_naive():
-                ResultWrapper = NaiveQueryResultWrapper
-            elif self._aggregate_rows:
-                ResultWrapper = AggregateQueryResultWrapper
-            else:
-                ResultWrapper = ModelQueryResultWrapper
+            ResultWrapper = self._get_result_wrapper()
             self._qr = ResultWrapper(model_class, self._execute(), query_meta)
             self._dirty = False
             return self._qr
@@ -2712,6 +2974,9 @@ class SelectQuery(Query):
             index += 1
         res.fill_cache(index)
         return res._result_cache[value]
+
+    def __len__(self):
+        return len(self.execute())
 
     if PY3:
         def __hash__(self):
@@ -2736,8 +3001,85 @@ class CompoundSelect(SelectQuery):
     def get_query_meta(self):
         return self.lhs.get_query_meta()
 
+    def verify_naive(self):
+        return self.lhs.verify_naive() and self.rhs.verify_naive()
 
-class UpdateQuery(Query):
+    def _get_result_wrapper(self):
+        if self._tuples:
+            return self.database.get_result_wrapper(RESULTS_TUPLES)
+        elif self._dicts:
+            return self.database.get_result_wrapper(RESULTS_DICTS)
+        elif self._aggregate_rows:
+            return self.database.get_result_wrapper(RESULTS_AGGREGATE_MODELS)
+
+        has_joins = self.lhs._joins or self.rhs._joins
+        is_naive = self.lhs._naive or self.rhs._naive or self._naive
+        if is_naive or not has_joins or self.verify_naive():
+            return self.database.get_result_wrapper(RESULTS_NAIVE)
+        else:
+            return self.database.get_result_wrapper(RESULTS_MODELS)
+
+class _WriteQuery(Query):
+    def __init__(self, model_class):
+        self._returning = None
+        self._tuples = False
+        self._dicts = False
+        self._qr = None
+        super(_WriteQuery, self).__init__(model_class)
+
+    def _clone_attributes(self, query):
+        query = super(_WriteQuery, self)._clone_attributes(query)
+        if self._returning:
+            query._returning = list(self._returning)
+            query._tuples = self._tuples
+            query._dicts = self._dicts
+        return query
+
+    def requires_returning(method):
+        def inner(self, *args, **kwargs):
+            db = self.model_class._meta.database
+            if not db.returning_clause:
+                raise ValueError('RETURNING is not supported by your '
+                                 'database: %s' % type(db))
+            return method(self, *args, **kwargs)
+        return inner
+
+    @requires_returning
+    @returns_clone
+    def returning(self, *selection):
+        if len(selection) == 1 and selection[0] is None:
+            self._returning = None
+        else:
+            if not selection:
+                selection = self.model_class._meta.sorted_fields
+            self._returning = self._model_shorthand(selection)
+
+    @requires_returning
+    @returns_clone
+    def tuples(self, tuples=True):
+        self._tuples = tuples
+
+    @requires_returning
+    @returns_clone
+    def dicts(self, dicts=True):
+        self._dicts = dicts
+
+    def get_result_wrapper(self):
+        if self._returning is not None:
+            if self._tuples:
+                return self.database.get_result_wrapper(RESULTS_TUPLES)
+            elif self._dicts:
+                return self.database.get_result_wrapper(RESULTS_DICTS)
+        return self.database.get_result_wrapper(RESULTS_NAIVE)
+
+    def _execute_with_result_wrapper(self):
+        ResultWrapper = self.get_result_wrapper()
+        meta = (self._returning, {self.model_class: []})
+        self._qr = ResultWrapper(self.model_class, self._execute(), meta)
+        return self._qr
+
+
+class UpdateQuery(_WriteQuery):
     def __init__(self, model_class, update=None):
         self._update = update
         self._on_conflict = None
@@ -2759,11 +3101,26 @@ class UpdateQuery(Query):
         return self.compiler().generate_update(self)
 
     def execute(self):
-        return self.database.rows_affected(self._execute())
+        if self._returning is not None and self._qr is None:
+            return self._execute_with_result_wrapper()
+        elif self._qr is not None:
+            return self._qr
+        else:
+            return self.database.rows_affected(self._execute())
 
-class InsertQuery(Query):
+    def __iter__(self):
+        if not self.model_class._meta.database.returning_clause:
+            raise ValueError('UPDATE queries cannot be iterated over unless '
+                             'they specify a RETURNING clause, which is not '
+                             'supported by your database.')
+        return iter(self.execute())
+
+    def iterator(self):
+        return iter(self.execute().iterator())
+
+class InsertQuery(_WriteQuery):
     def __init__(self, model_class, field_dict=None, rows=None,
-                 fields=None, query=None):
+                 fields=None, query=None, validate_fields=False):
         super(InsertQuery, self).__init__(model_class)
 
         self._upsert = False
@@ -2776,15 +3133,17 @@ class InsertQuery(Query):
 
         self._fields = fields
         self._query = query
+        self._validate_fields = validate_fields
         self._on_conflict = None
 
     def _iter_rows(self):
         model_meta = self.model_class._meta
-        valid_fields = (set(model_meta.fields.keys()) |
-                        set(model_meta.fields.values()))
-        def validate_field(field):
-            if field not in valid_fields:
-                raise KeyError('"%s" is not a recognized field.' % field)
+        if self._validate_fields:
+            valid_fields = (set(model_meta.fields.keys()) |
+                            set(model_meta.fields.values()))
+            def validate_field(field):
+                if field not in valid_fields:
+                    raise KeyError('"%s" is not a recognized field.' % field)
 
         defaults = model_meta._default_dict
         callables = model_meta._default_callables
@@ -2793,7 +3152,8 @@ class InsertQuery(Query):
             field_row = defaults.copy()
             seen = set()
             for key in row_dict:
-                validate_field(key)
+                if self._validate_fields:
+                    validate_field(key)
                 if key in model_meta.fields:
                     field = model_meta.fields[key]
                 else:
@@ -2814,6 +3174,7 @@ class InsertQuery(Query):
         query._fields = self._fields
         query._query = self._query
         query._return_id_list = self._return_id_list
+        query._validate_fields = self._validate_fields
         query._on_conflict = self._on_conflict
         return query
 
@@ -2859,40 +3220,50 @@ class InsertQuery(Query):
             return last_id
 
     def execute(self):
-        insert_with_loop = all((
-            self._is_multi_row_insert,
-            self._query is None,
-            not self.database.insert_many))
+        insert_with_loop = (
+            self._is_multi_row_insert and
+            self._query is None and
+            self._returning is None and
+            not self.database.insert_many)
         if insert_with_loop:
             return self._insert_with_loop()
 
-        cursor = self._execute()
-        if not self._is_multi_row_insert:
-            if self.database.insert_returning:
-                pk_row = cursor.fetchone()
-                meta = self.model_class._meta
-                clean_data = [
-                    field.python_value(column)
-                    for field, column
-                    in zip(meta.get_primary_key_fields(), pk_row)]
-                if self.model_class._meta.composite_key:
-                    return clean_data
-                return clean_data[0]
-            else:
-                return self.database.last_insert_id(cursor, self.model_class)
-        elif self._return_id_list:
-            return map(operator.itemgetter(0), cursor.fetchall())
+        if self._returning is not None and self._qr is None:
+            return self._execute_with_result_wrapper()
+        elif self._qr is not None:
+            return self._qr
         else:
-            return True
+            cursor = self._execute()
+            if not self._is_multi_row_insert:
+                if self.database.insert_returning:
+                    pk_row = cursor.fetchone()
+                    meta = self.model_class._meta
+                    clean_data = [
+                        field.python_value(column)
+                        for field, column
+                        in zip(meta.get_primary_key_fields(), pk_row)]
+                    if self.model_class._meta.composite_key:
+                        return clean_data
+                    return clean_data[0]
+                return self.database.last_insert_id(cursor, self.model_class)
+            elif self._return_id_list:
+                return map(operator.itemgetter(0), cursor.fetchall())
+            else:
+                return True
 
-class DeleteQuery(Query):
+class DeleteQuery(_WriteQuery):
     join = not_allowed('joining')
 
     def sql(self):
         return self.compiler().generate_delete(self)
 
     def execute(self):
-        return self.database.rows_affected(self._execute())
+        if self._returning is not None and self._qr is None:
+            return self._execute_with_result_wrapper()
+        elif self._qr is not None:
+            return self._qr
+        else:
+            return self.database.rows_affected(self._execute())
 
 
 IndexMetadata = namedtuple(
@@ -2930,7 +3301,11 @@ class ExceptionWrapper(object):
             return
         if exc_type.__name__ in self.exceptions:
             new_type = self.exceptions[exc_type.__name__]
-            reraise(new_type, new_type(*exc_value.args), traceback)
+            if PY26:
+                exc_args = exc_value
+            else:
+                exc_args = exc_value.args
+            reraise(new_type, new_type(*exc_args), traceback)
 
 class _BaseConnectionLocal(object):
     def __init__(self, **kwargs):
@@ -2962,9 +3337,11 @@ class Database(object):
     op_overrides = {}
     quote_char = '"'
     reserved_tables = []
+    returning_clause = False
     savepoints = True
     sequences = False
     subquery_delete_same_table = True
+    upsert_sql = None
     window_functions = False
 
     exceptions = {
@@ -2979,25 +3356,29 @@ class Database(object):
         'ProgrammingError': ProgrammingError}
 
     def __init__(self, database, threadlocals=True, autocommit=True,
-                 fields=None, ops=None, autorollback=False, **connect_kwargs):
-        self.init(database, **connect_kwargs)
-
+                 fields=None, ops=None, autorollback=False, use_speedups=True,
+                 **connect_kwargs):
+        self.connect_kwargs = {}
         if threadlocals:
             self.__local = _ConnectionLocal()
         else:
             self.__local = _BaseConnectionLocal()
+        self.init(database, **connect_kwargs)
 
         self._conn_lock = threading.Lock()
         self.autocommit = autocommit
         self.autorollback = autorollback
+        self.use_speedups = use_speedups
 
         self.field_overrides = merge_dict(self.field_overrides, fields or {})
         self.op_overrides = merge_dict(self.op_overrides, ops or {})
 
     def init(self, database, **connect_kwargs):
+        if not self.is_closed():
+            self.close()
         self.deferred = database is None
         self.database = database
-        self.connect_kwargs = connect_kwargs
+        self.connect_kwargs.update(connect_kwargs)
 
     def exception_wrapper(self):
         return ExceptionWrapper(self.exceptions)
@@ -3028,7 +3409,9 @@ class Database(object):
 
     def get_conn(self):
         if self.__local.context_stack:
-            return self.__local.context_stack[-1].connection
+            conn = self.__local.context_stack[-1].connection
+            if conn is not None:
+                return conn
         if self.__local.closed:
             self.connect()
         return self.__local.conn
@@ -3053,6 +3436,24 @@ class Database(object):
     def register_ops(cls, ops):
         cls.op_overrides = merge_dict(cls.op_overrides, ops)
 
+    def get_result_wrapper(self, wrapper_type):
+        if wrapper_type == RESULTS_NAIVE:
+            return (_ModelQueryResultWrapper if self.use_speedups
+                    else NaiveQueryResultWrapper)
+        elif wrapper_type == RESULTS_MODELS:
+            return ModelQueryResultWrapper
+        elif wrapper_type == RESULTS_TUPLES:
+            return (_TuplesQueryResultWrapper if self.use_speedups
+                    else TuplesQueryResultWrapper)
+        elif wrapper_type == RESULTS_DICTS:
+            return (_DictQueryResultWrapper if self.use_speedups
+                    else DictQueryResultWrapper)
+        elif wrapper_type == RESULTS_AGGREGATE_MODELS:
+            return AggregateQueryResultWrapper
+        else:
+            return (_ModelQueryResultWrapper if self.use_speedups
+                    else NaiveQueryResultWrapper)
+
     def last_insert_id(self, cursor, model):
         if model._meta.auto_increment:
             return cursor.lastrowid
@@ -3060,13 +3461,13 @@ class Database(object):
     def rows_affected(self, cursor):
         return cursor.rowcount
 
-    def sql_error_handler(self, exception, sql, params, require_commit):
-        return True
-
     def compiler(self):
         return self.compiler_class(
             self.quote_char, self.interpolation, self.field_overrides,
             self.op_overrides)
+
+    def execute(self, clause):
+        return self.execute_sql(*self.compiler().parse_node(clause))
 
     def execute_sql(self, sql, params=None, require_commit=True):
         logger.debug((sql, params))
@@ -3074,11 +3475,10 @@ class Database(object):
             cursor = self.get_cursor()
             try:
                 cursor.execute(sql, params or ())
-            except Exception as exc:
+            except Exception:
                 if self.get_autocommit() and self.autorollback:
                     self.rollback()
-                if self.sql_error_handler(exc, sql, params, require_commit):
-                    raise
+                raise
             else:
                 if require_commit and self.get_autocommit():
                     self.commit()
@@ -3193,6 +3593,16 @@ class Database(object):
     def drop_tables(self, models, safe=False, cascade=False):
         drop_model_tables(models, fail_silently=safe, cascade=cascade)
 
+    def truncate_table(self, model_class, restart_identity=False,
+                       cascade=False):
+        qc = self.compiler()
+        return self.execute_sql(*qc.truncate_table(
+            model_class, restart_identity, cascade))
+
+    def truncate_tables(self, models, restart_identity=False, cascade=False):
+        for model in reversed(sort_models_topologically(models)):
+            model.truncate_table(restart_identity, cascade)
+
     def drop_sequence(self, seq):
         if self.sequences:
             qc = self.compiler()
@@ -3204,7 +3614,19 @@ class Database(object):
     def truncate_date(self, date_part, date_field):
         return fn.DATE_TRUNC(SQL(date_part), date_field)
 
+    def default_insert_clause(self, model_class):
+        return SQL('DEFAULT VALUES')
+
+    def get_binary_type(self):
+        return binary_constructor
+
 class SqliteDatabase(Database):
+    compiler_class = SqliteQueryCompiler
+    field_overrides = {
+        'bool': 'INTEGER',
+        'smallint': 'INTEGER',
+        'uuid': 'TEXT',
+    }
     foreign_keys = False
     insert_many = sqlite3 and sqlite3.sqlite_version_info >= (3, 7, 11, 0)
     limit_max = -1
@@ -3212,29 +3634,45 @@ class SqliteDatabase(Database):
         OP.LIKE: 'GLOB',
         OP.ILIKE: 'LIKE',
     }
+    upsert_sql = 'INSERT OR REPLACE INTO'
 
-    def __init__(self, *args, **kwargs):
-        self._journal_mode = kwargs.pop('journal_mode', None)
-        super(SqliteDatabase, self).__init__(*args, **kwargs)
-        if not self.database:
-            self.database = ':memory:'
+    def __init__(self, database, pragmas=None, *args, **kwargs):
+        self._pragmas = pragmas or []
+        journal_mode = kwargs.pop('journal_mode', None)  # Backwards-compat.
+        if journal_mode:
+            self._pragmas.append(('journal_mode', journal_mode))
+
+        super(SqliteDatabase, self).__init__(database, *args, **kwargs)
 
     def _connect(self, database, **kwargs):
         conn = sqlite3.connect(database, **kwargs)
         conn.isolation_level = None
-        self._add_conn_hooks(conn)
+        try:
+            self._add_conn_hooks(conn)
+        except:
+            conn.close()
+            raise
         return conn
 
     def _add_conn_hooks(self, conn):
+        self._set_pragmas(conn)
         conn.create_function('date_part', 2, _sqlite_date_part)
         conn.create_function('date_trunc', 2, _sqlite_date_trunc)
         conn.create_function('regexp', 2, _sqlite_regexp)
-        if self._journal_mode:
+
+    def _set_pragmas(self, conn):
+        if self._pragmas:
             cursor = conn.cursor()
-            cursor.execute('PRAGMA journal_mode=%s;' % self._journal_mode)
+            for pragma, value in self._pragmas:
+                cursor.execute('PRAGMA %s = %s;' % (pragma, value))
+            cursor.close()
 
     def begin(self, lock_type='DEFERRED'):
         self.execute_sql('BEGIN %s' % lock_type, require_commit=False)
+
+    def create_foreign_key(self, model_class, field, constraint=None):
+        raise OperationalError('SQLite does not support ALTER TABLE '
+                               'statements to add constraints.')
 
     def get_tables(self, schema=None):
         cursor = self.execute_sql('SELECT name FROM sqlite_master WHERE '
@@ -3294,6 +3732,9 @@ class SqliteDatabase(Database):
     def truncate_date(self, date_part, date_field):
         return fn.strftime(SQLITE_DATE_TRUNC_MAPPING[date_part], date_field)
 
+    def get_binary_type(self):
+        return sqlite3.Binary
+
 class PostgresqlDatabase(Database):
     commit_select = True
     compound_select_parentheses = True
@@ -3316,6 +3757,7 @@ class PostgresqlDatabase(Database):
         OP.REGEXP: '~',
     }
     reserved_tables = ['user']
+    returning_clause = True
     sequences = True
     window_functions = True
 
@@ -3334,7 +3776,7 @@ class PostgresqlDatabase(Database):
 
     def _get_pk_sequence(self, model):
         meta = model._meta
-        if meta.primary_key.sequence:
+        if meta.primary_key is not False and meta.primary_key.sequence:
             return meta.primary_key.sequence
         elif meta.auto_increment:
             return '%s_%s_seq' % (meta.db_table, meta.primary_key.db_column)
@@ -3437,6 +3879,9 @@ class PostgresqlDatabase(Database):
         path_params = ','.join(['%s'] * len(search_path))
         self.execute_sql('SET search_path TO %s' % path_params, search_path)
 
+    def get_binary_type(self):
+        return psycopg2.Binary
+
 class MySQLDatabase(Database):
     commit_select = True
     compound_operations = ['UNION', 'UNION ALL']
@@ -3447,6 +3892,7 @@ class MySQLDatabase(Database):
         'float': 'FLOAT',
         'primary_key': 'INTEGER AUTO_INCREMENT',
         'text': 'LONGTEXT',
+        'uuid': 'VARCHAR(40)',
     }
     for_update = True
     interpolation = '%s'
@@ -3458,6 +3904,7 @@ class MySQLDatabase(Database):
     }
     quote_char = '`'
     subquery_delete_same_table = False
+    upsert_sql = 'REPLACE INTO'
 
     def _connect(self, database, **kwargs):
         if not mysql:
@@ -3519,6 +3966,14 @@ class MySQLDatabase(Database):
     def truncate_date(self, date_part, date_field):
         return fn.DATE_FORMAT(date_field, MYSQL_DATE_TRUNC_MAPPING[date_part])
 
+    def default_insert_clause(self, model_class):
+        return Clause(
+            EnclosedClause(model_class._meta.primary_key),
+            SQL('VALUES (DEFAULT)'))
+
+    def get_binary_type(self):
+        return mysql.Binary
+
 
 class _callable_context_manager(object):
     def __call__(self, fn):
@@ -3532,6 +3987,7 @@ class ExecutionContext(_callable_context_manager):
     def __init__(self, database, with_transaction=True):
         self.database = database
         self.with_transaction = with_transaction
+        self.connection = None
 
     def __enter__(self):
         with self.database._conn_lock:
@@ -3546,14 +4002,17 @@ class ExecutionContext(_callable_context_manager):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         with self.database._conn_lock:
-            try:
-                if self.with_transaction:
-                    if not exc_type:
-                        self.txn.commit(False)
-                    self.txn.__exit__(exc_type, exc_val, exc_tb)
-            finally:
+            if self.connection is None:
                 self.database.pop_execution_context()
-                self.database._close(self.connection)
+            else:
+                try:
+                    if self.with_transaction:
+                        if not exc_type:
+                            self.txn.commit(False)
+                        self.txn.__exit__(exc_type, exc_val, exc_tb)
+                finally:
+                    self.database.pop_execution_context()
+                    self.database._close(self.connection)
 
 class Using(ExecutionContext):
     def __init__(self, database, models, with_transaction=True):
@@ -3719,7 +4178,7 @@ class ModelAlias(object):
 
     def get_proxy_fields(self):
         return [
-            FieldProxy(self, f) for f in self.model_class._meta.get_fields()]
+            FieldProxy(self, f) for f in self.model_class._meta.sorted_fields]
 
     def select(self, *selection):
         if not selection:
@@ -3732,6 +4191,39 @@ class ModelAlias(object):
     def __call__(self, **kwargs):
         return self.model_class(**kwargs)
 
+if _SortedFieldList is None:
+    class _SortedFieldList(object):
+        __slots__ = ('_keys', '_items')
+
+        def __init__(self):
+            self._keys = []
+            self._items = []
+
+        def __getitem__(self, i):
+            return self._items[i]
+
+        def __iter__(self):
+            return iter(self._items)
+
+        def __contains__(self, item):
+            k = item._sort_key
+            i = bisect_left(self._keys, k)
+            j = bisect_right(self._keys, k)
+            return item in self._items[i:j]
+
+        def index(self, field):
+            return self._keys.index(field._sort_key)
+
+        def insert(self, item):
+            k = item._sort_key
+            i = bisect_left(self._keys, k)
+            self._keys.insert(i, k)
+            self._items.insert(i, item)
+
+        def remove(self, item):
+            idx = self.index(item)
+            del self._items[idx]
+            del self._keys[idx]
 
 class DoesNotExist(Exception): pass
 
@@ -3744,7 +4236,7 @@ class ModelOptions(object):
     def __init__(self, cls, database=None, db_table=None, db_table_func=None,
                  indexes=None, order_by=None, primary_key=None,
                  table_alias=None, constraints=None, schema=None,
-                 validate_backrefs=True, **kwargs):
+                 validate_backrefs=True, only_save_dirty=False, **kwargs):
         self.model_class = cls
         self.name = cls.__name__.lower()
         self.fields = {}
@@ -3753,6 +4245,10 @@ class ModelOptions(object):
         self._default_by_name = {}
         self._default_dict = {}
         self._default_callables = {}
+        self._default_callable_list = []
+        self._sorted_field_list = _SortedFieldList()
+        self.sorted_fields = []
+        self.sorted_field_names = []
 
         self.database = database or default_database
         self.db_table = db_table
@@ -3764,6 +4260,7 @@ class ModelOptions(object):
         self.constraints = constraints
         self.schema = schema
         self.validate_backrefs = validate_backrefs
+        self.only_save_dirty = only_save_dirty
 
         self.auto_increment = None
         self.composite_key = False
@@ -3778,15 +4275,6 @@ class ModelOptions(object):
             self.db_table = self.db_table_func(cls)
 
     def prepared(self):
-        for field in self.fields.values():
-            if field.default is not None:
-                self.defaults[field] = field.default
-                if callable(field.default):
-                    self._default_callables[field] = field.default
-                else:
-                    self._default_dict[field] = field.default
-                    self._default_by_name[field.name] = field.default
-
         if self.order_by:
             norm_order_by = []
             for item in self.order_by:
@@ -3800,28 +4288,55 @@ class ModelOptions(object):
                     norm_order_by.append(field.asc())
             self.order_by = norm_order_by
 
+    def add_field(self, field):
+        self.remove_field(field.name)
+        self.fields[field.name] = field
+        self.columns[field.db_column] = field
+
+        self._sorted_field_list.insert(field)
+        self.sorted_fields = list(self._sorted_field_list)
+        self.sorted_field_names = [f.name for f in self.sorted_fields]
+
+        if field.default is not None:
+            self.defaults[field] = field.default
+            if callable(field.default):
+                self._default_callables[field] = field.default
+                self._default_callable_list.append((field.name, field.default))
+            else:
+                self._default_dict[field] = field.default
+                self._default_by_name[field.name] = field.default
+
+    def remove_field(self, field_name):
+        if field_name not in self.fields:
+            return
+        original = self.fields.pop(field_name)
+        del self.columns[original.db_column]
+        self._sorted_field_list.remove(original)
+        self.sorted_fields = list(self._sorted_field_list)
+        self.sorted_field_names = [f.name for f in self.sorted_fields]
+
+        if original.default is not None:
+            del self.defaults[original]
+            if self._default_callables.pop(original, None):
+                for i, (name, _) in enumerate(self._default_callable_list):
+                    if name == field_name:
+                        self._default_callable_list.pop(i)
+                        break
+            else:
+                self._default_dict.pop(original, None)
+                self._default_by_name.pop(original.name, None)
+
     def get_default_dict(self):
         dd = self._default_by_name.copy()
-        if self._default_callables:
-            for field, default in self._default_callables.items():
-                dd[field.name] = default()
+        for field_name, default in self._default_callable_list:
+            dd[field_name] = default()
         return dd
 
-    def get_sorted_fields(self):
-        key = lambda i: i[1]._sort_key
-        return sorted(self.fields.items(), key=key)
-
-    def get_field_names(self):
-        return [f[0] for f in self.get_sorted_fields()]
-
-    def get_fields(self):
-        return [f[1] for f in self.get_sorted_fields()]
-
     def get_field_index(self, field):
-        for i, (field_name, field_obj) in enumerate(self.get_sorted_fields()):
-            if field_name == field.name:
-                return i
-        return -1
+        try:
+            return self._sorted_field_list.index(field)
+        except ValueError:
+            return -1
 
     def get_primary_key_fields(self):
         if self.composite_key:
@@ -3830,20 +4345,26 @@ class ModelOptions(object):
                 for field_name in self.primary_key.field_names]
         return [self.primary_key]
 
-    def rel_for_model(self, model, field_obj=None):
+    def rel_for_model(self, model, field_obj=None, multi=False):
         is_field = isinstance(field_obj, Field)
         is_node = not is_field and isinstance(field_obj, Node)
-        for field in self.get_fields():
+        if multi:
+            accum = []
+        for field in self.sorted_fields:
             if isinstance(field, ForeignKeyField) and field.rel_model == model:
                 is_match = (
                     (field_obj is None) or
                     (is_field and field_obj.name == field.name) or
                     (is_node and field_obj._alias == field.name))
                 if is_match:
-                    return field
+                    if not multi:
+                        return field
+                    accum.append(field)
+        if multi:
+            return accum
 
-    def reverse_rel_for_model(self, model, field_obj=None):
-        return model._meta.rel_for_model(self.model_class, field_obj)
+    def reverse_rel_for_model(self, model, field_obj=None, multi=False):
+        return model._meta.rel_for_model(self.model_class, field_obj, multi)
 
     def rel_exists(self, model):
         return self.rel_for_model(model) or self.reverse_rel_for_model(model)
@@ -3867,7 +4388,7 @@ class ModelOptions(object):
 class BaseModel(type):
     inheritable = set([
         'constraints', 'database', 'db_table_func', 'indexes', 'order_by',
-        'primary_key', 'schema', 'validate_backrefs'])
+        'primary_key', 'schema', 'validate_backrefs', 'only_save_dirty'])
 
     def __new__(cls, name, bases, attrs):
         if not bases:
@@ -3907,7 +4428,8 @@ class BaseModel(type):
 
         # initialize the new class and set the magic attributes
         cls = super(BaseModel, cls).__new__(cls, name, bases, attrs)
-        cls._meta = ModelOptions(cls, **meta_options)
+        ModelOptionsBase = meta_options.get('model_options_base', ModelOptions)
+        cls._meta = ModelOptionsBase(cls, **meta_options)
         cls._data = None
         cls._meta.indexes = list(cls._meta.indexes)
 
@@ -3952,9 +4474,13 @@ class BaseModel(type):
                 cls.__name__, self.__unicode__()))
 
         exc_name = '%sDoesNotExist' % cls.__name__
-        exception_class = type(exc_name, (DoesNotExist,), {})
+        exc_attrs = {'__module__': cls.__module__}
+        exception_class = type(exc_name, (DoesNotExist,), exc_attrs)
         cls.DoesNotExist = exception_class
         cls._meta.prepared()
+
+        if hasattr(cls, 'validate_model'):
+            cls.validate_model()
 
         return cls
 
@@ -3982,17 +4508,20 @@ class Model(with_metaclass(BaseModel)):
         return query
 
     @classmethod
-    def update(cls, **update):
-        fdict = dict((cls._meta.fields[f], v) for f, v in update.items())
+    def update(cls, __data=None, **update):
+        fdict = __data or {}
+        fdict.update([(cls._meta.fields[f], update[f]) for f in update])
         return UpdateQuery(cls, fdict)
 
     @classmethod
-    def insert(cls, **insert):
-        return InsertQuery(cls, insert)
+    def insert(cls, __data=None, **insert):
+        fdict = __data or {}
+        fdict.update([(cls._meta.fields[f], insert[f]) for f in insert])
+        return InsertQuery(cls, fdict)
 
     @classmethod
-    def insert_many(cls, rows):
-        return InsertQuery(cls, rows=rows)
+    def insert_many(cls, rows, validate_fields=True):
+        return InsertQuery(cls, rows=rows, validate_fields=True)
 
     @classmethod
     def insert_from(cls, fields, query):
@@ -4025,9 +4554,15 @@ class Model(with_metaclass(BaseModel)):
     @classmethod
     def get_or_create(cls, **kwargs):
         defaults = kwargs.pop('defaults', {})
-        sq = cls.select().filter(**kwargs)
+        query = cls.select()
+        for field, value in kwargs.items():
+            if '__' in field:
+                query = query.filter(**{field: value})
+            else:
+                query = query.where(getattr(cls, field) == value)
+
         try:
-            return sq.get(), False
+            return query.get(), False
         except cls.DoesNotExist:
             try:
                 params = dict((k, v) for k, v in kwargs.items()
@@ -4037,9 +4572,22 @@ class Model(with_metaclass(BaseModel)):
                     return cls.create(**params), True
             except IntegrityError as exc:
                 try:
-                    return sq.get(), False
+                    return query.get(), False
                 except cls.DoesNotExist:
                     raise exc
+
+    @classmethod
+    def create_or_get(cls, **kwargs):
+        try:
+            with cls._meta.database.atomic():
+                return cls.create(**kwargs), True
+        except IntegrityError:
+            query = []  # TODO: multi-column unique constraints.
+            for field_name, value in kwargs.items():
+                field = getattr(cls, field_name)
+                if field.unique or field.primary_key:
+                    query.append(field == value)
+            return cls.get(*query), False
 
     @classmethod
     def filter(cls, *dq, **query):
@@ -4059,7 +4607,7 @@ class Model(with_metaclass(BaseModel)):
 
         db = cls._meta.database
         pk = cls._meta.primary_key
-        if db.sequences and pk.sequence:
+        if db.sequences and pk is not False and pk.sequence:
             if not db.sequence_exists(pk.sequence):
                 db.create_sequence(pk.sequence)
 
@@ -4111,6 +4659,10 @@ class Model(with_metaclass(BaseModel)):
         cls._meta.database.drop_table(cls, fail_silently, cascade)
 
     @classmethod
+    def truncate_table(cls, restart_identity=False, cascade=False):
+        cls._meta.database.truncate_table(cls, restart_identity, cascade)
+
+    @classmethod
     def as_entity(cls):
         if cls._meta.schema:
             return Entity(cls._meta.schema, cls._meta.db_table)
@@ -4142,12 +4694,35 @@ class Model(with_metaclass(BaseModel)):
                 new_data[field.name] = field_dict[field.name]
         return new_data
 
+    def _populate_unsaved_relations(self, field_dict):
+        for key in self._meta.rel:
+            conditions = (
+                key in self._dirty and
+                key in field_dict and
+                field_dict[key] is None and
+                self._obj_cache.get(key) is not None)
+            if conditions:
+                setattr(self, key, getattr(self, key))
+                field_dict[key] = self._data[key]
+
     def save(self, force_insert=False, only=None):
         field_dict = dict(self._data)
-        pk_field = self._meta.primary_key
-        pk_value = self._get_pk_value()
+        if self._meta.primary_key is not False:
+            pk_field = self._meta.primary_key
+            pk_value = self._get_pk_value()
+        else:
+            pk_field = pk_value = None
         if only:
             field_dict = self._prune_fields(field_dict, only)
+        elif self._meta.only_save_dirty and not force_insert:
+            field_dict = self._prune_fields(
+                field_dict,
+                self.dirty_fields)
+            if not field_dict:
+                self._dirty.clear()
+                return False
+
+        self._populate_unsaved_relations(field_dict)
         if pk_value is not None and not force_insert:
             if self._meta.composite_key:
                 for pk_part_name in pk_field.field_names:
@@ -4155,6 +4730,9 @@ class Model(with_metaclass(BaseModel)):
             else:
                 field_dict.pop(pk_field.name, None)
             rows = self.update(**field_dict).where(self._pk_expr()).execute()
+        elif pk_field is None:
+            self.insert(**field_dict).execute()
+            rows = 1
         else:
             pk_from_cursor = self.insert(**field_dict).execute()
             if pk_from_cursor is not None:
@@ -4169,7 +4747,7 @@ class Model(with_metaclass(BaseModel)):
 
     @property
     def dirty_fields(self):
-        return [f for f in self._meta.get_fields() if f.name in self._dirty]
+        return [f for f in self._meta.sorted_fields if f.name in self._dirty]
 
     def dependencies(self, search_nullable=False):
         model_class = type(self)
@@ -4205,6 +4783,9 @@ class Model(with_metaclass(BaseModel)):
                     model.delete().where(query).execute()
         return self.delete().where(self._pk_expr()).execute()
 
+    def __hash__(self):
+        return hash((self.__class__, self._get_pk_value()))
+
     def __eq__(self, other):
         return (
             other.__class__ == self.__class__ and
@@ -4214,80 +4795,104 @@ class Model(with_metaclass(BaseModel)):
     def __ne__(self, other):
         return not self == other
 
+def clean_prefetch_subquery(query):
+    query._group_by = query._having = None
+    return query
 
 def prefetch_add_subquery(sq, subqueries):
     fixed_queries = [PrefetchResult(sq)]
     for i, subquery in enumerate(subqueries):
+        if isinstance(subquery, tuple):
+            subquery, target_model = subquery
+        else:
+            target_model = None
         if not isinstance(subquery, Query) and issubclass(subquery, Model):
             subquery = subquery.select()
         subquery_model = subquery.model_class
-        fkf = backref = None
+        fks = backrefs = None
         for j in reversed(range(i + 1)):
-            last_query = fixed_queries[j][0]
-            last_model = last_query.model_class
-            foreign_key = subquery_model._meta.rel_for_model(last_model)
-            if foreign_key:
-                fkf = getattr(subquery_model, foreign_key.name)
-                to_field = getattr(last_model, foreign_key.to_field.name)
+            prefetch_result = fixed_queries[j]
+            last_query = prefetch_result.query
+            last_model = prefetch_result.model
+            rels = subquery_model._meta.rel_for_model(last_model, multi=True)
+            if rels:
+                fks = [getattr(subquery_model, fk.name) for fk in rels]
+                pks = [getattr(last_model, fk.to_field.name) for fk in rels]
             else:
-                backref = last_model._meta.rel_for_model(subquery_model)
+                backrefs = last_model._meta.rel_for_model(
+                    subquery_model,
+                    multi=True)
 
-            if fkf or backref:
+            if (fks or backrefs) and ((target_model is last_model) or
+                                      (target_model is None)):
                 break
 
-        if not (fkf or backref):
+        if not (fks or backrefs):
+            tgt_err = ' using %s' % target_model if target_model else ''
             raise AttributeError('Error: unable to find foreign key for '
-                                 'query: %s' % subquery)
+                                 'query: %s%s' % (subquery, tgt_err))
 
-        if fkf:
-            inner_query = last_query.select(to_field)
-            fixed_queries.append(
-                PrefetchResult(subquery.where(fkf << inner_query), fkf, False))
-        elif backref:
-            q = subquery.where(backref.to_field << last_query.select(backref))
-            fixed_queries.append(PrefetchResult(q, backref, True))
+        if fks:
+            cleaned = clean_prefetch_subquery(last_query)
+            expr = reduce(operator.or_, [
+                (fk << cleaned.select(pk))
+                for (fk, pk) in zip(fks, pks)])
+            subquery = subquery.where(expr)
+            fixed_queries.append(PrefetchResult(subquery, fks, False))
+        elif backrefs:
+            cleaned = clean_prefetch_subquery(last_query)
+            expr = reduce(operator.or_, [
+                (backref.to_field << cleaned.select(backref))
+                for backref in backrefs])
+            subquery = subquery.where(expr)
+            fixed_queries.append(PrefetchResult(subquery, backrefs, True))
 
     return fixed_queries
 
 __prefetched = namedtuple('__prefetched', (
-    'query', 'field', 'backref', 'rel_model', 'foreign_key_attr', 'model'))
+    'query', 'fields', 'backref', 'rel_models', 'field_to_name', 'model'))
 
 class PrefetchResult(__prefetched):
-    def __new__(cls, query, field=None, backref=None, rel_model=None,
-                foreign_key_attr=None, model=None):
-        if field:
+    def __new__(cls, query, fields=None, backref=None, rel_models=None,
+                field_to_name=None, model=None):
+        if fields:
             if backref:
-                rel_model = field.model_class
-                foreign_key_attr = field.to_field.name
+                rel_models = [field.model_class for field in fields]
+                foreign_key_attrs = [field.to_field.name for field in fields]
             else:
-                rel_model = field.rel_model
-                foreign_key_attr = field.name
+                rel_models = [field.rel_model for field in fields]
+                foreign_key_attrs = [field.name for field in fields]
+            field_to_name = list(zip(fields, foreign_key_attrs))
         model = query.model_class
         return super(PrefetchResult, cls).__new__(
-            cls, query, field, backref, rel_model, foreign_key_attr, model)
+            cls, query, fields, backref, rel_models, field_to_name, model)
 
     def populate_instance(self, instance, id_map):
         if self.backref:
-            identifier = instance._data[self.field.name]
-            if identifier in id_map:
-                setattr(instance, self.field.name, id_map[identifier])
+            for field in self.fields:
+                identifier = instance._data[field.name]
+                key = (field, identifier)
+                if key in id_map:
+                    setattr(instance, field.name, id_map[key])
         else:
-            identifier = instance._data[self.field.to_field.name]
-            rel_instances = id_map.get(identifier, [])
-            attname = self.foreign_key_attr
-            dest = '%s_prefetch' % self.field.related_name
-            for inst in rel_instances:
-                setattr(inst, attname, instance)
-            setattr(instance, dest, rel_instances)
+            for field, attname in self.field_to_name:
+                identifier = instance._data[field.to_field.name]
+                key = (field, identifier)
+                rel_instances = id_map.get(key, [])
+                dest = '%s_prefetch' % field.related_name
+                for inst in rel_instances:
+                    setattr(inst, attname, instance)
+                setattr(instance, dest, rel_instances)
 
     def store_instance(self, instance, id_map):
-        identity = self.field.to_field.python_value(
-            instance._data[self.foreign_key_attr])
-        if self.backref:
-            id_map[identity] = instance
-        else:
-            id_map.setdefault(identity, [])
-            id_map[identity].append(instance)
+        for field, attname in self.field_to_name:
+            identity = field.to_field.python_value(instance._data[attname])
+            key = (field, identity)
+            if self.backref:
+                id_map[key] = instance
+            else:
+                id_map.setdefault(key, [])
+                id_map[key].append(instance)
 
 
 def prefetch(sq, *subqueries):
@@ -4299,16 +4904,17 @@ def prefetch(sq, *subqueries):
     rel_map = {}
     for prefetch_result in reversed(fixed_queries):
         query_model = prefetch_result.model
-        if prefetch_result.field:
-            rel_map.setdefault(prefetch_result.rel_model, [])
-            rel_map[prefetch_result.rel_model].append(prefetch_result)
+        if prefetch_result.fields:
+            for rel_model in prefetch_result.rel_models:
+                rel_map.setdefault(rel_model, [])
+                rel_map[rel_model].append(prefetch_result)
 
         deps[query_model] = {}
         id_map = deps[query_model]
         has_relations = bool(rel_map.get(query_model))
 
         for instance in prefetch_result.query:
-            if prefetch_result.field:
+            if prefetch_result.fields:
                 prefetch_result.store_instance(instance, id_map)
 
             if has_relations:
@@ -4326,20 +4932,3 @@ def drop_model_tables(models, **drop_table_kwargs):
     """Drop tables for all given models (in the right order)."""
     for m in reversed(sort_models_topologically(models)):
         m.drop_table(**drop_table_kwargs)
-
-def sort_models_topologically(models):
-    """Sort models topologically so that parents will precede children."""
-    models = set(models)
-    seen = set()
-    ordering = []
-    def dfs(model):
-        if model in models and model not in seen:
-            seen.add(model)
-            for foreign_key in model._meta.reverse_rel.values():
-                dfs(foreign_key.model_class)
-            ordering.append(model)  # parent will follow descendants
-    # order models by name and table initially to guarantee a total ordering
-    names = lambda m: (m._meta.name, m._meta.db_table)
-    for m in sorted(models, key=names, reverse=True):
-        dfs(m)
-    return list(reversed(ordering))  # want parents first in output ordering

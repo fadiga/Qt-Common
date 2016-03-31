@@ -28,8 +28,8 @@ class FMainWindow(QMainWindow):
         self.setWindowIcon(QIcon.fromTheme('logo',
                                            QIcon(u"{}logo.png".format(Config.img_media))))
 
-        self.wc = 1100
-        self.hc = 600
+        self.wc = self.width()
+        self.hc = self.height()
         self.resize(self.wc, self.hc)
         self.setWindowTitle(Config.NAME_ORGA)
         self.setWindowIcon(QIcon(Config.APP_LOGO))
@@ -39,10 +39,13 @@ class FMainWindow(QMainWindow):
         # trouve les dimensions du container
         self.wc = self.width()
         self.hc = self.height()
+        # print(self.wc)
+        # print(self.hc)
 
     def change_context(self, context_widget, *args, **kwargs):
 
         # instanciate context
+        # print("change_context Window")
         self.view_widget = context_widget(parent=self, *args, **kwargs)
         # attach context to window
         self.setCentralWidget(self.view_widget)
@@ -56,7 +59,7 @@ class FMainWindow(QMainWindow):
 
     def logout(self):
         from models import Owner, SettingsAdmin
-        print("logout")
+        # print("logout")
         if SettingsAdmin.get(id=1).login:
             for ur in Owner.select().where(Owner.islog == True):
                 ur.islog = False
@@ -86,6 +89,7 @@ class FWidget(QWidget):
         pass
 
     def change_main_context(self, context_widget, *args, **kwargs):
+        # print("change_main_context")
         return self.parentWidget().change_context(context_widget, *args, **kwargs)
 
     def open_dialog(self, dialog, modal=False, *args, **kwargs):
@@ -430,7 +434,7 @@ class BttSmall(Button):
     def __init__(self, *args, **kwargs):
         super(BttSmall, self).__init__(*args, **kwargs)
         chart_count = len(self.text())
-        print(chart_count)
+        # print(chart_count)
         self.setFixedWidth(chart_count + 45)
         # self.setFixedHeight(30)
 
@@ -657,7 +661,7 @@ class WigglyWidget(QWidget):
         QtGui.QWidget.__init__(self, parent)
 
         self.setBackgroundRole(QtGui.QPalette.Midlight)
-        print(test)
+        # print(test)
         newFont = self.font()
         newFont.setPointSize(newFont.pointSize() + 20)
         self.setFont(newFont)

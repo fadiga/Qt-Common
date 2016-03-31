@@ -194,7 +194,6 @@ class Organization(BaseModel):
     def get_or_create(cls, name_orga, typ):
         try:
             ctct = cls.get(name_orga=name_orga, type_=typ)
-            print(ctct)
         except cls.DoesNotExist:
             ctct = cls.create(name_orga=name_orga, type_=typ)
         return ctct
@@ -231,7 +230,7 @@ class SettingsAdmin(BaseModel):
     def can_use(self):
         self.tolerance -= 1
         self.save()
-        print("trial - {}".format(self.tolerance))
+        # print("trial - {}".format(self.tolerance))
         if self.is_valide_mac(self.license) or self.tolerance >= 0:
             return True
         return False
@@ -252,7 +251,7 @@ class Version(BaseModel):
         print("save")
         self.number += 1
         self.date = datetime.now()
-        print(self.number)
+        # print(self.number)
         self.save()
 
 

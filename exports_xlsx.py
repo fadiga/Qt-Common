@@ -8,7 +8,7 @@ from __future__ import (
 import xlsxwriter
 import os
 
-from datetime import date, datetime
+from datetime import date
 
 from Common.ui.util import openFile
 from configuration import Config
@@ -44,7 +44,9 @@ def export_dynamic_data(dict_data):
             'sheet': "Les produits",
             'extend_rows': [(row1, col1, val), (row2, col2, val), ]
             'widths': [col, ..]
-            'date': le 20 juin 2015
+            'date': object date
+            'format_money': [col,]
+
         }
         - Principe
         write((nbre ligne - 1), nbre colonne, "contenu", style(optionnel).
@@ -63,6 +65,8 @@ def export_dynamic_data(dict_data):
     others = dict_data.get("others")
     footers = dict_data.get("footers")
     exclude_row = dict_data.get("exclude_row")
+    format_money = dict_data.get("format_money")
+    # print(data)
 
     dict_alph = {
         1: "A",
@@ -76,20 +80,15 @@ def export_dynamic_data(dict_data):
     }
 
     if date_ == "None":
-        date_ = date.today().strftime("%A le %d/%m/%Y")
+        date_ = date.today()
 
-    workbook = xlsxwriter.Workbook(file_name)
+    workbook = xlsxwriter.Workbook(
+        file_name, {'default_date_format': 'dd/mm/yy'})
     worksheet = workbook.add_worksheet(sheet_name)
     worksheet.fit_num_pages = 1
 
     format1 = workbook.add_format(
-        {'num_format': '#,##0{}'.format(Config.DEVISE)})
-    # date = datetime.strptime('2011-01-01', "%Y-%m-%d")
-
-    # worksheet.conditional_format('A112:F10', {'type':     'date',
-    #                                           'criteria': 'greater than',
-    #                                           'value':    date,
-    #                                           'format':   format1})
+        {'num_format': '{}'.format(Config.NUMBER_FORMAT)})
     style_def = workbook.add_format({})
     rowx = 1
     end_colx = len(headers) - 1
@@ -115,25 +114,26 @@ def export_dynamic_data(dict_data):
     for col in widths:
         w = (120 / len(headers))
         worksheet.set_column(col, col, w)
-
     columns = [({'header': item}) for item in headers]
-    end_row_table = len(data) + rowx + 2
-
+    end_row_table = len(data) + rowx + 3
+    if format_money:
+        for col_str in format_money:
+            worksheet.set_column(col_str, 18, format1)
     rowx += 1
     worksheet.merge_range(
-        "B{}:{}{}".format(rowx, dict_alph.get(end_colx), rowx), date_, workbook.add_format({'align': 'right'}))
-    rowx += 1
+        "D{}:{}{}".format(rowx, dict_alph.get(end_colx), rowx), date_, workbook.add_format({'align': 'right'}))
+    rowx += 2
     worksheet.add_table(
         'A{}:{}{}'.format(rowx, dict_alph.get(end_colx), end_row_table),
         {'autofilter': 0, 'data': data, 'columns': columns})
-
     rowx = end_row_table
+    # rowx += 1
     if extend_rows:
         # worksheet.write(rowx, extend_rows[0][0] - 1, "Totals",
         #                 workbook.add_format(style_label))
         for elt in extend_rows:
             col, val = elt
-            worksheet.write(rowx, col, val, workbook.add_format(style_label))
+            worksheet.write(rowx, col, val, style_def)
         rowx += 1
     if footers:
         rowx += 2
@@ -141,22 +141,10 @@ def export_dynamic_data(dict_data):
             worksheet.merge_range('{}{}:{}{}'.format(s_col, rowx, e_col, rowx),
                                   val, workbook.add_format(style_label))
         rowx += 1
-
     if others:
-        for rowx, row, colx, col, val in others:
-            nb_ch = 60
-            print(rowx, row, colx, col)
-            # if len(val) > nb_ch:
-            #     worksheet.merge_range(
-            #         'A{}:{}{}'.format(row, dict_alph.get(colx), col),
-            #         val[:nb_ch], workbook.add_format(style_label))
-            #     worksheet.merge_range(
-            #     rowx + 1, row + 1, colx, col, val[nb_ch:],
-            #     workbook.add_format(style_label))
-            # else:
-            #     worksheet.merge_range(
-            # rowx, row, colx, col, val, workbook.add_format(style_label))
-
+        for pos, pos2, val in others:
+            worksheet.merge_range(
+                '{}:{}'.format(pos, pos2), val, workbook.add_format(style_label))
     try:
         workbook.close()
         # workbook.save(file_name)
