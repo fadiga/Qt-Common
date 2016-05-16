@@ -21,6 +21,22 @@ except NameError:
     unicode = str
 
 
+def device_amount(value, devise="FCFA"):
+
+    from configuration import Config
+    try:
+        devise = Config.DEVISE_M
+    except Exception as e:
+        print(e)
+
+    if devise == "USD":
+        return "${}".format(formatted_number(value))
+    if devise == "XOF":
+        return "{} F".format(formatted_number(value))
+    else:
+        return "{} {}".format(formatted_number(value), devise)
+
+
 def check_is_empty(field):
     stylerreur = ""
     flag = False

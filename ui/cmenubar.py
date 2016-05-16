@@ -147,8 +147,10 @@ class FMenuBar(QMenuBar, FWidget):
 
     def open_logo_file(self):
         from Common.ui import util
-        util.uopen_file("main.log")
-        # open("main.log", "a")
+        try:
+            util.uopen_file("main.log")
+        except:
+            pass
 
     # About
     def goto_about(self):

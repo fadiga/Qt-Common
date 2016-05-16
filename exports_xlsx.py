@@ -8,7 +8,7 @@ from __future__ import (
 import xlsxwriter
 import os
 
-from datetime import date
+from datetime import datetime
 
 from Common.ui.util import openFile
 from configuration import Config
@@ -17,8 +17,8 @@ style_org = {'align': 'center', 'valign': 'vcenter', 'font_size': 26,
              'border': 1,  'font_color': 'blue', 'bold': True}
 
 style_title = {"border": 1, }
-style_value = {"border": 1}
-style_label = {"border": 1}
+style_value = {"border": 0}
+style_label = {"border": 0}
 style_headers = {"border": 1}
 
 
@@ -45,7 +45,7 @@ def export_dynamic_data(dict_data):
             'extend_rows': [(row1, col1, val), (row2, col2, val), ]
             'widths': [col, ..]
             'date': object date
-            'format_money': [col,]
+            'format_money': ['D:D',]
 
         }
         - Principe
@@ -80,15 +80,15 @@ def export_dynamic_data(dict_data):
     }
 
     if date_ == "None":
-        date_ = date.today()
+        date_ = datetime.now()
 
     workbook = xlsxwriter.Workbook(
         file_name, {'default_date_format': 'dd/mm/yy'})
     worksheet = workbook.add_worksheet(sheet_name)
     worksheet.fit_num_pages = 1
 
-    format1 = workbook.add_format(
-        {'num_format': '{}'.format(Config.NUMBER_FORMAT)})
+    date_format = workbook.add_format({'num_format': 'd-mmm-yy'})
+    money = workbook.add_format({'num_format': '#,##0 '})
     style_def = workbook.add_format({})
     rowx = 1
     end_colx = len(headers) - 1
@@ -118,10 +118,10 @@ def export_dynamic_data(dict_data):
     end_row_table = len(data) + rowx + 3
     if format_money:
         for col_str in format_money:
-            worksheet.set_column(col_str, 18, format1)
+            worksheet.set_column(col_str, 18, money)
     rowx += 1
     worksheet.merge_range(
-        "D{}:{}{}".format(rowx, dict_alph.get(end_colx), rowx), date_, workbook.add_format({'align': 'right'}))
+        "D{}:{}{}".format(rowx, dict_alph.get(end_colx), rowx), date_, date_format)
     rowx += 2
     worksheet.add_table(
         'A{}:{}{}'.format(rowx, dict_alph.get(end_colx), end_row_table),
@@ -129,11 +129,9 @@ def export_dynamic_data(dict_data):
     rowx = end_row_table
     # rowx += 1
     if extend_rows:
-        # worksheet.write(rowx, extend_rows[0][0] - 1, "Totals",
-        #                 workbook.add_format(style_label))
         for elt in extend_rows:
             col, val = elt
-            worksheet.write(rowx, col, val, style_def)
+            worksheet.write(rowx, col, val, money)
         rowx += 1
     if footers:
         rowx += 2

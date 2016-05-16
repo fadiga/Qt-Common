@@ -50,11 +50,11 @@ class FMainWindow(QMainWindow):
         # attach context to window
         self.setCentralWidget(self.view_widget)
 
-    def open_dialog(self, dialog, modal=False, *args, **kwargs):
+    def open_dialog(self, dialog, modal=False, opacity=0.90, *args, **kwargs):
         d = dialog(parent=self, *args, **kwargs)
         d.setModal(modal)
         # d.setWindowFlags(Qt.FramelessWindowHint)
-        d.setWindowOpacity(0.90)
+        d.setWindowOpacity(opacity)
         d.exec_()
 
     def logout(self):
@@ -520,6 +520,7 @@ class FloatLineEdit(LineEdit):
 
     def __init__(self, parent=None):
         LineEdit.__init__(self, parent)
+        self.setAlignment(Qt.AlignRight)
         self.setValidator(QDoubleValidator(0.1, 0.1, 100, self))
 
 
