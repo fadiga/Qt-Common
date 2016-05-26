@@ -7,10 +7,9 @@ from __future__ import (
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import (QComboBox, QVBoxLayout, QCheckBox,
                          QFormLayout, QDialog)
-
+from peewee import IntegrityError
 from Common.cstatic import CConstants
 from Common.ui.util import check_is_empty, field_error, check_field
-from Common import peewee
 from Common.models import Owner
 
 from Common.ui.common import (
@@ -142,7 +141,7 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
                 self.pp.refresh_()
                 self.parent.Notify("L'identifiant %s a été enregistré" %
                                    ow.username, "success")
-        except peewee.IntegrityError as e:
+        except IntegrityError as e:
             field_error(
                 self.name_field, u"L'utilisateurs %s existe déjà dans la base de donnée" % ow.username)
         # else:

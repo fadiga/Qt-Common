@@ -8,21 +8,22 @@ from __future__ import (
 import os
 import time
 import hashlib
+import peewee
+
 
 from datetime import datetime
 
-# from playhouse.migrate import *
+from playhouse.migrate import *
 from Common.check_mac import get_mac
 from Common.ui.util import get_path, copy_file
 
 DB_FILE = "database.db"
 
-from Common import peewee
 print("Peewee version : " + peewee.__version__)
 
 
 dbh = peewee.SqliteDatabase(DB_FILE)
-# migrator = peewee.SqliteMigrator(dbh)
+migrator = SqliteMigrator(dbh)
 
 dbh.connect()
 
@@ -217,7 +218,7 @@ class SettingsAdmin(BaseModel):
 
     @property
     def clean_mac(self):
-        return get_mac().replace(":", "").replace("-", "")
+        return get_mac()
 
     def is_valide_mac(self, license):
         """ check de license """

@@ -7,6 +7,11 @@ from __future__ import (
     unicode_literals, absolute_import, division, print_function)
 
 from PyQt4.QtGui import QDialog
+
+import locale
+import gettext
+import gettext_windows
+
 from Common.cstatic import CConstants
 from Common.models import SettingsAdmin, Owner
 
@@ -16,6 +21,11 @@ from Common.ui.user_add_or_edit import NewOrEditUserViewWidget
 
 
 def cmain():
+
+    gettext_windows.setup_env()
+    locale.setlocale(locale.LC_ALL, '')
+    gettext.install('main.py', localedir='locale')
+
     settg = SettingsAdmin().get(id=1)
     if CConstants.DEBUG:
         print("Debug is True")

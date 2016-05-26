@@ -126,17 +126,19 @@ class FMenuBar(QMenuBar, FWidget):
     #     from models import SettingsAdmin
 
     def restart(self):
-        print("restart")
         import subprocess
         import sys
+        import os
         self.parent.close()
+        path_main_name = os.path.join(
+            os.path.dirname(os.path.abspath('__file__')), Config.NAME_MAIN)
         try:
             subprocess.Popen(
-                [sys.executable, Config.NAME_MAIN.replace("py", "exe")])
+                [sys.executable, path_main_name])
         except Exception as e:
-            # print(e)
+            print('EEEE ', e)
             subprocess.call(
-                "python.exe " + Config.NAME_MAIN, shell=True)
+                "python.exe " + path_main_name, shell=True)
 
     def goto(self, goto):
         self.change_main_context(goto)
@@ -148,9 +150,9 @@ class FMenuBar(QMenuBar, FWidget):
     def open_logo_file(self):
         from Common.ui import util
         try:
-            util.uopen_file("main.log")
-        except:
-            pass
+            util.uopen_file(Config.NAME_MAIN.replace(".py", ".log"))
+        except Exception as e:
+            print("show log file ", e)
 
     # About
     def goto_about(self):

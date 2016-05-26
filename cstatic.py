@@ -25,7 +25,7 @@ class CConstants(object):
     if os.path.exists(file_img):
         img_cmedia = file_img
     else:
-        img_cmedia = os.path.join(ROOT_DIR, "Common/cimages/")
+        img_cmedia = os.path.join(ROOT_DIR, "Common", "cimages/")
     # ------------------------- Autor --------------------------#
     AUTOR = u"Fadiga Ibrahima"
     EMAIL_AUT = u"ibfadiga@gmail.com"

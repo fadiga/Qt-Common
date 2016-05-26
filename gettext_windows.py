@@ -99,11 +99,12 @@ def _get_lang_env_var():
     return None
 
 
+print("locale ..........")
 if OS_WINDOWS:
+    print("OS WINDOWS")
     setup_env = setup_env_windows
     get_language = get_language_windows
 else:
+    print("OS OTHER")
     setup_env = setup_env_other
     get_language = get_language_other
-
-print("locale ..........")
