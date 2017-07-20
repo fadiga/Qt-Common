@@ -48,51 +48,51 @@ class LoginWidget(QDialog, FMainWindow):
                                  font: 12pt 'URW Bookman L';""".format(Config.APP_LOGO))
         vbox = QHBoxLayout()
 
-        self.sttg = SettingsAdmin.select().where(SettingsAdmin.id == 1).get()
-        if not self.sttg.can_use:
-            self.activationGroupBox()
-            vbox.addWidget(self.topLeftGroupBoxBtt)
-            self.setLayout(vbox)
-        else:
-            self.loginUserGroupBox()
-            vbox.addWidget(self.topLeftGroupBox)
-            # set focus to username field
-            self.setFocusProxy(self.username_field)
-            self.setLayout(vbox)
+        # self.sttg = SettingsAdmin.select().where(SettingsAdmin.id == 1).get()
+        # if not self.sttg.can_use:
+        #     self.activationGroupBox()
+        #     vbox.addWidget(self.topLeftGroupBoxBtt)
+        #     self.setLayout(vbox)
+        # else:
+        self.loginUserGroupBox()
+        vbox.addWidget(self.topLeftGroupBox)
+        # set focus to username field
+        self.setFocusProxy(self.username_field)
+        self.setLayout(vbox)
 
-    def activationGroupBox(self):
-        self.topLeftGroupBoxBtt = QGroupBox(self.tr("Nouvelle license"))
-        self.setWindowTitle(u"License")
-        self.setWindowTitle(u"Activation de la license")
+    # def activationGroupBox(self):
+    #     self.topLeftGroupBoxBtt = QGroupBox(self.tr("Nouvelle license"))
+    #     self.setWindowTitle(u"License")
+    #     self.setWindowTitle(u"Activation de la license")
 
-        self.code_field = PyTextViewer(u"""Vous avez besoin du code ci desous
-                                           pour l'activation:<hr> <b>{code}</b><hr>
-                                           <h4>Contacts:</h4>{contact}"""
-                                       .format(code=SettingsAdmin().select().get().clean_mac,
-                                               contact=CConstants.TEL_AUT))
-        self.name_field = LineEdit()
-        self.license_field = QTextEdit()
-        self.pixmap = QPixmap("")
-        self.image = QLabel(self)
-        self.image.setPixmap(self.pixmap)
+    #     self.code_field = PyTextViewer(u"""Vous avez besoin du code ci desous
+    #                                        pour l'activation:<hr> <b>{code}</b><hr>
+    #                                        <h4>Contacts:</h4>{contact}"""
+    #                                    .format(code=SettingsAdmin().select().get().clean_mac,
+    #                                            contact=CConstants.TEL_AUT))
+    #     self.name_field = LineEdit()
+    #     self.license_field = QTextEdit()
+    #     self.pixmap = QPixmap("")
+    #     self.image = QLabel(self)
+    #     self.image.setPixmap(self.pixmap)
 
-        butt = Button_save(u"Enregistrer")
-        butt.clicked.connect(self.add_lience)
+    #     butt = Button_save(u"Enregistrer")
+    #     butt.clicked.connect(self.add_lience)
 
-        cancel_but = Button(u"Annuler")
-        cancel_but.clicked.connect(self.cancel)
+    #     cancel_but = Button(u"Annuler")
+    #     cancel_but.clicked.connect(self.cancel)
 
-        editbox = QGridLayout()
-        editbox.addWidget(QLabel(u"Nom: "), 0, 0)
-        editbox.addWidget(self.name_field, 0, 1)
-        editbox.addWidget(QLabel(u"License: "), 1, 0)
-        editbox.addWidget(self.license_field, 1, 1)
-        editbox.addWidget(self.code_field, 1, 2)
-        editbox.addWidget(self.image, 5, 1)
-        editbox.addWidget(butt, 6, 1)
-        editbox.addWidget(cancel_but, 6, 0)
+    #     editbox = QGridLayout()
+    #     editbox.addWidget(QLabel(u"Nom: "), 0, 0)
+    #     editbox.addWidget(self.name_field, 0, 1)
+    #     editbox.addWidget(QLabel(u"License: "), 1, 0)
+    #     editbox.addWidget(self.license_field, 1, 1)
+    #     editbox.addWidget(self.code_field, 1, 2)
+    #     editbox.addWidget(self.image, 5, 1)
+    #     editbox.addWidget(butt, 6, 1)
+    #     editbox.addWidget(cancel_but, 6, 0)
 
-        self.topLeftGroupBoxBtt.setLayout(editbox)
+    #     self.topLeftGroupBoxBtt.setLayout(editbox)
 
     def loginUserGroupBox(self):
         self.topLeftGroupBox = QGroupBox(self.tr("Identification"))
@@ -166,33 +166,30 @@ class LoginWidget(QDialog, FMainWindow):
             return False
         self.accept()
 
-    def add_lience(self):
-        """ add User """
-        name = str(self.name_field.text()).strip()
-        license = str(self.license_field.toPlainText())
-        self.check_license(license)
+    # def add_lience(self):
+    #     """ add User """
+    #     name = str(self.name_field.text()).strip()
+    #     license = str(self.license_field.toPlainText())
+    #     self.check_license(license)
 
-        if self.flog:
-            sttg = self.sttg
-            sttg.user = name
-            sttg.license = license
-            sttg.save()
-            self.cancel()
-            self.parent.Notify(u"""La license (<b>{}</b>) à éte bien enregistré pour cette
-                        machine.\n Elle doit être bien gardé""".format(license), "success")
-            # file_lience = open("licence.txt", "r")
+    #     if self.flog:
+    #         License.create(code=license, owner=name)
+    #         self.cancel()
+    #         self.parent.Notify(u"""La license (<b>{}</b>) à éte bien enregistré pour cette
+    #                     machine.\n Elle doit être bien gardé""".format(license), "success")
+    #         # file_lience = open("licence.txt", "r")
 
-    def check_license(self, license):
+    # def check_license(self, license):
 
-        self.flog = False
+    #     self.flog = False
 
-        if (SettingsAdmin().is_valide_mac(license)):
-            self.pixmap = QPixmap(
-                u"{}accept.png".format(CConstants.img_cmedia))
-            self.image.setToolTip("License correct")
-            self.flog = True
-        else:
-            self.pixmap = QPixmap(
-                u"{}decline.png".format(CConstants.img_cmedia))
-            self.image.setToolTip("License incorrect")
-        self.image.setPixmap(self.pixmap)
+    #     if (SettingsAdmin().is_valide_mac(license)):
+    #         self.pixmap = QPixmap(
+    #             u"{}accept.png".format(CConstants.img_cmedia))
+    #         self.image.setToolTip("License correct")
+    #         self.flog = True
+    #     else:
+    #         self.pixmap = QPixmap(
+    #             u"{}decline.png".format(CConstants.img_cmedia))
+    #         self.image.setToolTip("License incorrect")
+    #     self.image.setPixmap(self.pixmap)

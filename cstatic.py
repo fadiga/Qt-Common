@@ -41,3 +41,5 @@ class CConstants(object):
     DEBUG = False
     APP_LOGO = os.path.join(img_cmedia, "logo.png")
     APP_LOGO_ICO = os.path.join(img_cmedia, "logo.ico")
+    ExportFolders = []
+    ExportFiles = []

@@ -15,25 +15,24 @@ from Common.models import DB_FILE, Version
 
 from configuration import Config
 
-from Common.ui.util import raise_success, raise_error, uopen_file
+from Common.ui.util import raise_success, raise_error, uopen_file, get_lcse_file
 
 DATETIME = "{}".format(datetime.now().strftime('%d-%m-%Y-%Hh%M'))
-LICENCE = "licence.txt"
 
 
 def export_database_as_file():
-    destination = QFileDialog.getSaveFileName(QWidget(),
-                                              u"Sauvegarder la base de Donnée.",
-                                              u"Sauvegarde du {} {}.db"
-                                              .format(DATETIME, Config.NAME_ORGA), "*.db")
+    destination = QFileDialog.getSaveFileName(
+        QWidget(), u"Sauvegarder la base de Donnée.",
+        u"Sauvegarde du {} {}.db".format(DATETIME, Config.NAME_ORGA), "*.db")
     if not destination:
         return None
     try:
         shutil.copyfile(DB_FILE, destination)
         Version().get(id=1).update_v()
-        raise_success(u"Les données ont été exportées correctement.",
-                      u"Conservez ce fichier précieusement car il contient \
-                       toutes vos données.\n Exportez vos données régulièrement.")
+        raise_success(
+            u"Les données ont été exportées correctement.",
+            u"Conservez ce fichier précieusement car il contient \
+            toutes vos données.\n Exportez vos données régulièrement.")
     except IOError:
         raise_error(u"La base de données n'a pas pu être exportée.",
                     u"Vérifiez le chemin de destination puis re-essayez.\n\n \
@@ -98,11 +97,8 @@ def copyanything(src, dest):
 
 def export_license_as_file():
 
-    from models import SettingsAdmin
-    sttg = SettingsAdmin().select().where(SettingsAdmin.id == 1).get()
-
-    flcce = open(LICENCE, 'w')
-    flcce.write(sttg.license)
-    flcce.close()
-    fil = os.path.join(os.path.dirname(os.path.abspath('__file__')), LICENCE)
+    # from Common.models import SettingsAdmin
+    # fil = os.path.join(os.path.dirname(os.path.abspath('__file__')), LICENCE)
+    # settg = SettingsAdmin().get(id=1)
+    fil = get_lcse_file()
     uopen_file(fil)

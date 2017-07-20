@@ -10,7 +10,11 @@ import sys
 import locale
 import tempfile
 import subprocess
-from datetime import datetime
+import hashlib
+
+from uuid import getnode
+
+from datetime import datetime, timedelta
 
 from PyQt4 import QtGui, QtCore
 from Common.ui.window import FWindow
@@ -21,9 +25,12 @@ except NameError:
     unicode = str
 
 
-def device_amount(value, devise="FCFA"):
+def device_amount(value, dvs=None):
 
     from configuration import Config
+    if dvs:
+        return "{} {}".format(formatted_number(value), dvs)
+
     try:
         devise = Config.DEVISE_M
     except Exception as e:
@@ -33,8 +40,6 @@ def device_amount(value, devise="FCFA"):
         return "${}".format(formatted_number(value))
     if devise == "XOF":
         return "{} F".format(formatted_number(value))
-    else:
-        return "{} {}".format(formatted_number(value), devise)
 
 
 def check_is_empty(field):
@@ -251,8 +256,9 @@ def get_path(path, filename):
 
 
 def slug_mane_file(file_name):
-    return u"{timestamp}_{fname}".format(fname=file_name.replace(" ", "_"),
-                                         timestamp=to_jstimestamp(datetime.now()))
+    return u"{timestamp}_{fname}".format(
+        fname=file_name.replace(" ", "_"),
+        timestamp=to_jstimestamp(datetime.now()))
 
 
 def normalize(s):
@@ -284,7 +290,8 @@ def show_date(dat, time=True):
         dat = date_to_datetime(dat)
     if not dat:
         return "pas de date"
-    return dat.strftime(u"%d %b %Y à %Hh:%Mmn") if time else dat.strftime("%d %b %Y")
+    return dat.strftime(
+        u"%d %b %Y à %Hh:%Mmn") if time else dat.strftime("%d %b %Y")
 
 
 def date_to_datetime(dat):
@@ -298,3 +305,37 @@ def date_to_datetime(dat):
 
 def getlog(text):
     return "Log-{}".format(text)
+
+
+def is_valide_mac():
+    """ check de license """
+    from Common.models import License
+    if len(License.all()) == 0:
+        License.create(
+            can_expired=True, code="Evaluton", owner="Demo",
+            expiration_date=datetime.now() + timedelta(
+                days=30, milliseconds=4))
+    try:
+        return License.get(License.code == str(make_lcse())).can_use()
+    except Exception as e:
+        return License.get(License.code == "Evaluton").can_use()
+    else:
+        return False
+
+
+def make_lcse(lcse=getnode()):
+    lcse = hashlib.md5(str(lcse).encode('utf-8')).hexdigest()
+    return lcse
+
+
+def clean_mac():
+    return getnode()
+
+
+def get_lcse_of_file():
+    return open("{}".format(get_lcse_file()), 'r').read()
+
+
+def get_lcse_file():
+    return os.path.join(os.path.dirname(
+        os.path.abspath('__file__')), 'LICENCE')
