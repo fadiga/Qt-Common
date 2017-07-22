@@ -12,7 +12,7 @@ from configuration import Config
 from Common.exports import export_database_as_file, export_backup, import_backup
 from Common.ui.common import FWidget
 from Common.ui.license_view import LicenseViewWidget
-from models import SettingsAdmin
+from Common.models import SettingsAdmin
 from Common.ui.qss import dict_style
 
 

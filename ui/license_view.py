@@ -61,8 +61,9 @@ class LicenseViewWidget(QDialog, FWidget):
             """.format(
                 name=self.lcce.owner,
                 a_date=self.lcce.activation_date.strftime('%c'),
-                ex_date=self.lcce.expiration_date.strftime('%c'),
-                v_type="activée" if self.lcce.can_expired else "d'evalution"
+                ex_date="néant" if not self.lcce.can_expired else self.lcce.expiration_date.strftime(
+                    '%c'),
+                v_type="d'evalution" if self.lcce.can_expired else "activée"
             ))
         self.topLeftGroupBox = QGroupBox(self.tr("Licence"))
         gridbox = QGridLayout()
@@ -127,7 +128,6 @@ class LicenseViewWidget(QDialog, FWidget):
 
     def remove_trial(self):
         lcce = self.lcce
-        # print(sttg)
         lcce.expiration_date = datetime.now() - timedelta(days=1)
         lcce.save()
         self.parent.Notify(u"La licence a été bien supprimée", "warring")

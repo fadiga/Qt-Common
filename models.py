@@ -59,7 +59,6 @@ class FileJoin(BaseModel):
 
     def save(self):
         self.file_slug = copy_file(self.DEST_FILES, self.file_slug)
-        print("SAVE", self.file_slug)
         super(FileJoin, self).save()
 
     def display_name(self):
@@ -67,7 +66,6 @@ class FileJoin(BaseModel):
 
     @property
     def get_file(self):
-        print("get_file")
         return os.path.join(
             os.path.join(os.path.dirname(os.path.abspath('__file__')),
                          self.DEST_FILES), self.file_slug)

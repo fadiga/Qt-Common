@@ -14,7 +14,7 @@ from __future__ import (
 import platform
 import os
 
-from models import SettingsAdmin
+from Common.models import SettingsAdmin
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 

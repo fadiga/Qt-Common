@@ -58,7 +58,7 @@ class FMainWindow(QMainWindow):
         d.exec_()
 
     def logout(self):
-        from models import Owner, SettingsAdmin
+        from Common.models import Owner, SettingsAdmin
         # print("logout")
         if SettingsAdmin.get(id=1).login:
             for ur in Owner.select().where(Owner.islog == True):

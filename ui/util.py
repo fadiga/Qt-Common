@@ -140,13 +140,10 @@ def formatted_number(number, sep="."):
     """ """
     # locale_name, encoding = locale.getlocale()
     locale.setlocale(locale.LC_ALL, 'fra')
-    # print(number)
     fmt = "%s"
     if (isinstance(number, int)):
-        # print('int :', number)
         fmt = u"%d"
     elif(isinstance(number, float)):
-        # print('float ', number)
         fmt = u"%.2f"
 
     try:
