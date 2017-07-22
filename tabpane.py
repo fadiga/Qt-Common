@@ -3,7 +3,7 @@
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
 
-from PyQt4.QtGui import QTabWidget
+from PyQt5.QtWidgets import QTabWidget
 from Common.ui.common import TabPane
 
 

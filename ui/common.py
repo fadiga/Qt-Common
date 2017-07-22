@@ -6,17 +6,24 @@ from __future__ import (
 
 from datetime import date
 
-from PyQt4.QtCore import Qt, QSize
-from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QPalette,
-                         QDateTimeEdit, QFont, QWidget, QTabBar, QToolButton,
-                         QTextEdit, QColor, QIntValidator, QDoubleValidator,
-                         QCommandLinkButton, QRadialGradient, QPainter, QBrush,
-                         QPainterPath, QPen, QPushButton, QStringListModel,
-                         QCompleter, QComboBox, QSortFilterProxyModel)
-# from PyQt4.QtWebKit import QWebView
+from PyQt5.QtCore import (
+    Qt, QSize, QSortFilterProxyModel, QStringListModel)
+from PyQt5.QtWidgets import (QMainWindow, QTextEdit, QLabel, QLineEdit, QCompleter,
+                             QDateTimeEdit,  QWidget, QTabBar, QToolButton,
+                             QCommandLinkButton, QPushButton, QComboBox)
+from PyQt5.QtGui import (QRadialGradient, QPainter, QBrush,
+                         QPainterPath, QPen,
+                         QIcon, QPalette, QFont, QColor, QIntValidator, QDoubleValidator,)
+# from PyQt5.QtWebKit import QWebView
 
 from configuration import Config
 from Common.periods import Period
+
+
+try:
+    unicode
+except:
+    unicode = str
 
 
 class FMainWindow(QMainWindow):
@@ -604,13 +611,6 @@ class EnterDoesTab(QWidget):
 class EnterTabbedLineEdit(LineEdit, EnterDoesTab):
     pass
 
-from PyQt4.QtGui import QCompleter, QComboBox, QSortFilterProxyModel
-
-try:
-    unicode
-except:
-    unicode = str
-
 
 class ExtendedComboBox(QComboBox):
 
@@ -630,7 +630,7 @@ class ExtendedComboBox(QComboBox):
         # always show all (filtered) completions
         self.completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
         self.setCompleter(self.completer)
-        # connect signals
+        # connect pyqtSignals
         self.lineEdit().textEdited[unicode].connect(
             self.pFilterModel.setFilterFixedString)
         self.completer.activated.connect(self.on_completer_activated)

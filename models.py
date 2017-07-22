@@ -13,7 +13,7 @@ import peewee
 
 from datetime import datetime
 
-from playhouse.migrate import *
+# from playhouse.migrate import SqliteMigrator
 from Common.check_mac import get_mac
 from Common.ui.util import get_path, copy_file
 
@@ -23,7 +23,7 @@ print("Peewee version : " + peewee.__version__)
 
 
 dbh = peewee.SqliteDatabase(DB_FILE)
-migrator = SqliteMigrator(dbh)
+# migrator = SqliteMigrator(dbh)
 
 dbh.connect()
 

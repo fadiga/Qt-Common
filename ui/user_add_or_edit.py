@@ -4,9 +4,9 @@
 from __future__ import (
     unicode_literals, absolute_import, division, print_function)
 
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import (QComboBox, QVBoxLayout, QCheckBox,
-                         QFormLayout, QDialog)
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (QComboBox, QVBoxLayout, QCheckBox,
+                             QFormLayout, QDialog)
 from peewee import IntegrityError
 from Common.cstatic import CConstants
 from Common.ui.util import check_is_empty, field_error, check_field

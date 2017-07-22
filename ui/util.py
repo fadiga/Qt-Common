@@ -12,7 +12,9 @@ import tempfile
 import subprocess
 from datetime import datetime
 
-from PyQt4 import QtGui, QtCore
+from PyQt5.QtWidgets import QTextEdit, QMessageBox
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QTimer
 from Common.ui.window import FWindow
 
 try:
@@ -43,7 +45,7 @@ def check_is_empty(field):
     containt = ""
     # if isinstance(field, )
     field.setToolTip("")
-    if isinstance(field, QtGui.QTextEdit):
+    if isinstance(field, QTextEdit):
         containt = field.toPlainText()
     else:
         containt = field.text()
@@ -115,26 +117,28 @@ def get_temp_filename(extension=None):
 
 
 def raise_error(title, message):
-    box = QtGui.QMessageBox(QtGui.QMessageBox.Critical, title,
-                            message, QtGui.QMessageBox.Ok,
-                            parent=FWindow.window)
+    box = QMessageBox(QMessageBox.Critical, title,
+                      message, QMessageBox.Ok,
+                      parent=FWindow.window)
     box.setWindowOpacity(0.9)
 
     box.exec_()
 
 
 def raise_success(title, message):
-    box = QtGui.QMessageBox(QtGui.QMessageBox.Information, title,
-                            message, QtGui.QMessageBox.Ok,
-                            parent=FWindow.window)
+    box = QMessageBox(QMessageBox.Information, title,
+                      message, QMessageBox.Ok,
+                      parent=FWindow.window)
     box.setWindowOpacity(0.9)
     box.exec_()
 
 
 def formatted_number(number, sep="."):
     """ """
-    # locale_name, encoding = locale.getlocale()
-    locale.setlocale(locale.LC_ALL, 'fra')
+    locale_name, encoding = locale.getlocale()
+    print(locale_name)
+    locale.setlocale(locale.LC_ALL, 'fr_FR')
+    # locale.setlocale(locale.LC_ALL, locale_name)
     # print(number)
     fmt = "%s"
     if (isinstance(number, int)):
@@ -153,30 +157,30 @@ def formatted_number(number, sep="."):
         return "%s" % number
 
 
-class SystemTrayIcon(QtGui.QSystemTrayIcon):
+# class SystemTrayIcon(QSystemTrayIcon):
 
-    def __init__(self, mss, parent=None):
+#     def __init__(self, mss, parent=None):
 
-        QtGui.QSystemTrayIcon.__init__(self, parent)
+#         QSystemTrayIcon.__init__(self, parent)
 
-        self.setIcon(QtGui.QIcon.fromTheme("document-save"))
+#         self.setIcon(QIcon.fromTheme("document-save"))
 
-        self.activated.connect(self.click_trap)
-        # self.mss = ("Confirmation", "Mali rapou!!!!")
-        self.show(mss)
+#         self.activated.connect(self.click_trap)
+#         # self.mss = ("Confirmation", "Mali rapou!!!!")
+#         self.show(mss)
 
-    def click_trap(self, value):
-        # left click!
-        if value == self.Trigger:
-            self.left_menu.exec_(QtGui.QCursor.pos())
+#     def click_trap(self, value):
+#         # left click!
+#         if value == self.Trigger:
+#             self.left_menu.exec_(QCursor.pos())
 
-    def welcome(self):
-        self.showMessage(self.mss[0], self.mss[1])
+#     def welcome(self):
+#         self.showMessage(self.mss[0], self.mss[1])
 
-    def show(self, mss):
-        self.mss = mss
-        QtGui.QSystemTrayIcon.show(self)
-        QtCore.QTimer.singleShot(1000, self.welcome)
+#     def show(self, mss):
+#         self.mss = mss
+#         QSystemTrayIcon.show(self)
+#         QtCore.QTimer.singleShot(1000, self.welcome)
 
 
 def is_float(val):

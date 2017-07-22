@@ -8,7 +8,8 @@
 ###############################
 
 import sys
-from PyQt4 import QtCore, QtGui
+from PyQt5.QtWidgets import QWidget, QDesktopWidget, QLabel, QVBoxLayout
+from PyQt5.QtCore import pyqtSignal, Qt, QThread
 import time
 
 global OS
@@ -20,14 +21,13 @@ except Exception as e:
     OS = 1
 
 
-class Notification(QtGui.QWidget):
-    closed = QtCore.pyqtSignal()
+class Notification(QWidget):
 
     def __init__(self, mssg,  parent=None, type_mssg="", *args, **kwargs):
         super(Notification, self).__init__(parent=parent, *args, **kwargs)
 
         self.mssg = str(mssg)
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.FramelessWindowHint)
         if type_mssg == "success":
             background = "green"
         elif type_mssg == "error":
@@ -50,7 +50,7 @@ class Notification(QtGui.QWidget):
             # Get X coordinate of screen
             self.x = user32.GetSystemMetrics(0)
         else:
-            cp = QtGui.QDesktopWidget().availableGeometry()
+            cp = QDesktopWidget().availableGeometry()
             self.x = cp.width()
         self.y = 2
 
@@ -59,17 +59,22 @@ class Notification(QtGui.QWidget):
 
         # Start Worker
         self.workThread = WorkThread(self)
-        self.connect(
-            self.workThread, QtCore.SIGNAL("update(QString)"), self.animate)
-        self.connect(
-            self.workThread, QtCore.SIGNAL("vanish(QString)"), self.disappear)
-        self.connect(self.workThread, QtCore.SIGNAL("finished()"), self.done)
+
+        self.workThread.mySignal.connect(self.animate)
+        self.workThread.mySignal.connect(self.disappear)
+        self.workThread.mySignal.connect(self.done)
+        # self.connect(
+        #     self.workThread, pyqtSignal("update(QString)"), self.animate)
+        # self.connect(
+        #     self.workThread, pyqtSignal("vanish(QString)"), self.disappear)
+        # self.connect(
+        #     self.workThread, pyqtSignal("finished()"), self.done)
 
         self.workThread.start()
 
-        vbox = QtGui.QVBoxLayout()
+        vbox = QVBoxLayout()
         # Set the message
-        vbox.addWidget(QtGui.QLabel(self.mssg))
+        vbox.addWidget(QLabel(self.mssg))
         self.setLayout(vbox)
 
         return
@@ -95,19 +100,22 @@ class Notification(QtGui.QWidget):
 # The Worker
 
 
-class WorkThread(QtCore.QThread):
+class WorkThread(QThread):
+    mySignal = pyqtSignal(str)
 
     def __init__(self, mv):
-        super(QtCore.QThread, self).__init__()
+        super(QThread, self).__init__()
 
     def run(self):
         while True:
             # Bring em in :D
             for i in range(336):
                 time.sleep(0.0001)
-                self.emit(QtCore.SIGNAL('update(QString)'), "ping")
+                self.mySignal.emit('update(QString)')
+                # self.emit(pyqtSignal('update(QString)'), "ping")
             # Hide u bitch :P
             for j in range(50):
                 time.sleep(0.1)
-                self.emit(QtCore.SIGNAL('vanish(QString)'), "ping")
+                self.mySignal.emit('vanish(QString)')
+                # self.emit(pyqtSignal('vanish(QString)'), "ping")
             return

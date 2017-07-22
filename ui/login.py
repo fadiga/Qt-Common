@@ -4,11 +4,11 @@
 # maintainer: Fad
 from __future__ import (
     unicode_literals, absolute_import, division, print_function)
+from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import (QPushButton,
+                             QHBoxLayout, QGridLayout, QGroupBox, QDialog, QLabel, QComboBox, QTextEdit, QFormLayout)
 
-from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QIcon, QPixmap,
-                         QPushButton, QDialog, QLabel, QComboBox, QTextEdit, QFormLayout)
-
-from PyQt4.QtCore import Qt
+from PyQt5.QtCore import Qt
 
 from Common.cstatic import CConstants
 from Common.ui.common import (FMainWindow, FPageTitle, FormLabel, PyTextViewer,

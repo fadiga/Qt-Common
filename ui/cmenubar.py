@@ -5,8 +5,9 @@
 from __future__ import (
     unicode_literals, absolute_import, division, print_function)
 
-from PyQt4.QtGui import (QMessageBox, QMenuBar, QIcon, QAction, QPixmap)
-from PyQt4.QtCore import SIGNAL, SLOT
+from PyQt5.QtWidgets import QMessageBox, QMenuBar, QAction, qApp
+from PyQt5.QtGui import (QIcon, QPixmap)
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 
 from configuration import Config
 from Common.exports import export_database_as_file, export_backup, import_backup
@@ -38,13 +39,17 @@ class FMenuBar(QMenuBar, FWidget):
         admin_ = QAction(QIcon.fromTheme('emblem-system', QIcon('')),
                          u"Gestion Admistration", self)
         admin_.setShortcut("Ctrl+G")
-        self.connect(admin_, SIGNAL("triggered()"), self.goto_admin)
+        admin_.triggered.connect(self.goto_admin)
+        # self.connect(admin_, pyqtSignal("triggered()"), self.goto_admin)
+
         admin.addAction(admin_)
 
         license = QAction(QIcon.fromTheme('emblem-system', QIcon('')),
                           u"Licience", self)
         license.setShortcut("Alt+L")
-        self.connect(license, SIGNAL("triggered()"), self.goto_license)
+
+        license.triggered.connect(self.goto_license)
+        # self.connect(license, pyqtSignal("triggered()"), self.goto_license)
         admin.addAction(license)
 
         preference = self.addMenu(u"Préference")
@@ -59,9 +64,12 @@ class FMenuBar(QMenuBar, FWidget):
             el_menu = QAction(QIcon("{}{}.png".format(
                 Config.img_cmedia, icon)), m.get('name'), self)
             el_menu.setShortcut(m.get("shortcut"))
-            self.connect(
-                el_menu, SIGNAL("triggered()"), lambda m=m: self.change_theme(
-                    int(m.get('style_number'))))
+
+            # el_menu.triggered.connect(
+            #     lambda m=m: self.change_theme(int(m.get('style_number'))))
+            # self.connect(
+            #     el_menu, pyqtSignal("triggered()"), lambda m=m: self.change_theme(
+            #         int(m.get('style_number'))))
             _theme.addSeparator()
             _theme.addAction(el_menu)
 
@@ -70,14 +78,16 @@ class FMenuBar(QMenuBar, FWidget):
             QIcon("{}login.png".format(Config.img_cmedia)), "Verrouiller", self)
         lock.setShortcut("Ctrl+V")
         lock.setToolTip(u"Verrouile l'application")
-        self.connect(lock, SIGNAL("triggered()"), self.logout)
+        lock.triggered.connect(self.logout)
+        # self.connect(lock, pyqtSignal("triggered()"), self.logout)
         self.file_.addAction(lock)
         # R
         log_file = QAction(
             QIcon(), "Log ", self)
         log_file.setShortcut("Ctrl+l")
         log_file.setToolTip(u"Verrouile l'application")
-        self.connect(log_file, SIGNAL("triggered()"), self.open_logo_file)
+        # self.connect(log_file, pyqtSignal("triggered()"), self.open_logo_file)
+        lock.triggered.connect(self.open_logo_file)
         admin.addAction(log_file)
 
         # Exit
@@ -85,8 +95,10 @@ class FMenuBar(QMenuBar, FWidget):
             QIcon.fromTheme('application-exit', QIcon('')), "Exit", self)
         exit_.setShortcut("Ctrl+Q")
         exit_.setToolTip(u"Quiter l'application")
-        self.connect(exit_, SIGNAL("triggered()"), self.parentWidget(),
-                     SLOT("close()"))
+        exit_.triggered.connect(qApp.quit)
+
+        # self.connect(exit_, pyqtSignal("triggered()"), self.parentWidget(),
+        #              pyqtSlot("close()"))
         self.file_.addAction(exit_)
 
     def logout(self):
@@ -136,7 +148,6 @@ class FMenuBar(QMenuBar, FWidget):
             subprocess.Popen(
                 [sys.executable, path_main_name])
         except Exception as e:
-            print('EEEE ', e)
             subprocess.call(
                 "python.exe " + path_main_name, shell=True)
 

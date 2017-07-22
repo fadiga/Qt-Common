@@ -5,10 +5,11 @@
 from __future__ import (
     unicode_literals, absolute_import, division, print_function)
 
-from PyQt4.QtCore import Qt, SIGNAL
-from PyQt4.QtGui import (QVBoxLayout, QHBoxLayout, QFont, QGridLayout, QSplitter,
-                         QFrame, QCheckBox, QMessageBox, QTextEdit, QFormLayout,
-                         QListWidgetItem, QIcon, QPixmap, QListWidget)
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QGridLayout, QSplitter,
+                             QFrame, QCheckBox, QMessageBox, QTextEdit, QFormLayout,
+                             QListWidgetItem, QListWidget)
+from PyQt5.QtGui import (QIcon, QPixmap, QFont)
 
 from Common.ui.user_add_or_edit import NewOrEditUserViewWidget
 from Common.ui.common import (FWidget, FLabel, FBoxTitle, Button,
@@ -143,7 +144,7 @@ class TrashTableWidget(FTableWidget):
             if data == 2:
                 editor.setCheckState(2)
             self.connect(
-                editor, SIGNAL('stateChanged(int)'), self.parent.enablebtt)
+                editor, pyqtSignal('stateChanged(int)'), self.parent.enablebtt)
             return editor
         return super(TrashTableWidget, self)._item_for_data(row, column,
                                                             data, context)

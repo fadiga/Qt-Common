@@ -10,7 +10,7 @@ import os
 
 from datetime import datetime
 
-from PyQt4.QtGui import QFileDialog, QWidget
+from PyQt5.QtWidgets import QFileDialog, QWidget
 from Common.models import DB_FILE, Version
 
 from configuration import Config

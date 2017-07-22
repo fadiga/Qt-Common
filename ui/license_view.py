@@ -5,9 +5,10 @@ from __future__ import (
     unicode_literals, absolute_import, division, print_function)
 
 # from sqlite3 import IntegrityError
-from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QPixmap,
-                         QDialog, QLabel, QTextEdit)
+from PyQt5.QtGui import QPixmap
 
+from PyQt5.QtWidgets import (QHBoxLayout, QGridLayout, QGroupBox,
+                             QDialog, QLabel, QTextEdit)
 from Common.cstatic import CConstants
 from Common.models import SettingsAdmin
 from Common.exports import export_license_as_file
@@ -160,6 +161,7 @@ class LicenseViewWidget(QDialog, FWidget):
             print(key)
             self.cpt += 1
             if self.cpt > 2 and name == str(key):
-                lcse = SettingsAdmin().generator_lcse(SettingsAdmin().select().get().clean_mac)
+                lcse = SettingsAdmin().generator_lcse(
+                    SettingsAdmin().select().get().clean_mac)
                 self.name_field.setText("")
                 self.license_field.setText(lcse)

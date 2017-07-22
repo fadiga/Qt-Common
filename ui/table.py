@@ -7,10 +7,12 @@ from __future__ import (
 
 import datetime
 
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import (QTableWidget, QAbstractItemView, QLabel,
-                         QHeaderView, QTableWidgetItem, QWidget,
-                         QPushButton, QFont)
+from PyQt5.QtCore import Qt
+
+from PyQt5.QtWidgets import (QTableWidget, QAbstractItemView, QLabel,
+                             QHeaderView, QTableWidgetItem, QWidget,
+                             QPushButton)
+from PyQt5.QtGui import QFont
 
 from Common.ui.util import formatted_number
 

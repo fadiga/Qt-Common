@@ -21,7 +21,7 @@ ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 def load_stylesheet(file_qss):
     """
     """
-    from PyQt4.QtCore import QFile, QTextStream
+    from PyQt5.QtCore import QFile, QTextStream
     f = QFile("{}.css".format(os.path.join(ROOT_DIR, file_qss)))
     if not f.exists():
         print("Unable to load stylesheet, file not found in "
