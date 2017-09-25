@@ -12,6 +12,7 @@ from datetime import datetime
 
 from Common.ui.util import openFile
 from configuration import Config
+from Common.models import Organization
 
 style_org = {'align': 'center', 'valign': 'vcenter', 'font_size': 26,
              'border': 1,  'font_color': 'blue', 'bold': True}
@@ -38,7 +39,7 @@ def export_dynamic_data(dict_data):
     '''
         - Export params
         dict = {
-            'file_name': "prod.xls",
+            'file_name': "prod",
             'data' : [1, 3, ...],
             'headers': ["ff", "kkk", "ooo"],
             'sheet': "Les produits",
@@ -53,8 +54,9 @@ def export_dynamic_data(dict_data):
         merge_range((nbre ligne - 1), (nbre ligne - 1) + nbre de ligne à merger, (nbre de colonne - 1), (nbre de colonne - 1) + nbre
         de colonne à merger, u"contenu", style(optionnel)).
     '''
+    organization = Organization.get(id=1)
 
-    file_name = str(dict_data.get("file_name"))
+    file_name = "{}.xlsx".format(dict_data.get("file_name"))
     headers = dict_data.get("headers")
     sheet_name = str(dict_data.get("sheet"))
     title = str(dict_data.get("title"))
@@ -93,23 +95,29 @@ def export_dynamic_data(dict_data):
     rowx = 1
     end_colx = len(headers) - 1
     if Config.ORG_LOGO:
-        worksheet.insert_image('A1:B2', os.path.join(
-            Config.img_media, Config.ORG_LOGO), {'x_offset': 1.5, 'y_offset': 0.5})
+        worksheet.insert_image(
+            'A1:B2', os.path.join(Config.img_media, Config.ORG_LOGO),
+            {'x_offset': 1.5, 'y_offset': 0.5})
         rowx += 6
     else:
         worksheet.merge_range('A{}:E{}'.format(
-            rowx, rowx), Config.NAME_ORGA, workbook.add_format(style_org))
+            rowx, rowx), organization.name_orga, workbook.add_format(
+            style_org))
         rowx += 1
-        worksheet.merge_range('A{}:E{}'.format(
-            rowx, rowx), "Adresse : {}".format(Config.ADRESS_ORGA), style_def)
+        worksheet.merge_range(
+            'A{}:E{}'.format(rowx, rowx), "Adresse : {}".format(
+                organization.adress_org), style_def)
         rowx += 1
         worksheet.merge_range('A{}:B{}'.format(
-            rowx, rowx), "BP : {}".format(Config.BP), style_def)
-        worksheet.merge_range('{}{}:{}{}'.format(dict_alph.get(end_colx - 1), rowx, dict_alph.get(
-            end_colx), rowx), "E-mail : {}".format(Config.EMAIL_ORGA), style_def)
+            rowx, rowx), "BP : {}".format(organization.bp), style_def)
+        worksheet.merge_range(
+            '{}{}:{}{}'.format(dict_alph.get(end_colx - 1),
+                               rowx, dict_alph.get(end_colx), rowx),
+            "E-mail : {}".format(organization.email_org), style_def)
         rowx += 1
-        worksheet.merge_range('A{}:{}{}'.format(
-            rowx, dict_alph.get(end_colx - 1), rowx), "Tel : {}".format(Config.TEL_ORGA), style_def)
+        worksheet.merge_range(
+            'A{}:{}{}'.format(rowx, dict_alph.get(end_colx - 1), rowx),
+            "Tel : {}".format(organization.phone), style_def)
         rowx += 2
     for col in widths:
         w = (120 / len(headers))
@@ -120,8 +128,8 @@ def export_dynamic_data(dict_data):
         for col_str in format_money:
             worksheet.set_column(col_str, 18, money)
     rowx += 1
-    worksheet.merge_range(
-        "D{}:{}{}".format(rowx, dict_alph.get(end_colx), rowx), date_, date_format)
+    worksheet.merge_range("D{}:{}{}".format(
+        rowx, dict_alph.get(end_colx), rowx), date_, date_format)
     rowx += 2
     worksheet.add_table(
         'A{}:{}{}'.format(rowx, dict_alph.get(end_colx), end_row_table),
@@ -143,7 +151,8 @@ def export_dynamic_data(dict_data):
     if others:
         for pos, pos2, val in others:
             worksheet.merge_range(
-                '{}:{}'.format(pos, pos2), val, workbook.add_format(style_label))
+                '{}:{}'.format(pos, pos2), val, workbook.add_format(
+                    style_label))
     try:
         workbook.close()
         # workbook.save(file_name)

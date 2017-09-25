@@ -16,9 +16,9 @@ class AdminFixture(object):
         Version(number=1),
         Organization(slug=Organization.DEFAULT, adress_org="",
                      name_orga="demo s.a.r.l", bp="demo", login=True,
-                     email_org="demo@demo.ml", phone=76433890,)]
+                     email_org="demo@demo.ml", phone=00000000,)]
 
-    def creat_all_or_pass(self):
+    def create_all_or_pass(self):
 
         print(u"---- Init fixture -----")
 

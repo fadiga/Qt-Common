@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QPixmap,
                          QDialog, QLabel, QTextEdit)
 
-from Common.ui.util import is_valide_mac, clean_mac, make_lcse, get_lcse_file
+from Common.ui.util import clean_mac, make_lcse, get_lcse_file
 from Common.cstatic import CConstants
 from Common.models import License
 from Common.exports import export_license_as_file
@@ -34,19 +34,20 @@ class LicenseViewWidget(QDialog, FWidget):
 
         vbox = QHBoxLayout()
         vbox.addWidget(self.title)
-
         try:
-            self.lcce = License.get(License.code == str(make_lcse()))
+            self.lcse = License.get(License.code == str(make_lcse()))
         except:
-            self.lcce = License.get(License.code == "Evaluton")
-
-        if is_valide_mac():
-            self.showLicenseGroupBox()
-            vbox.addWidget(self.topLeftGroupBox)
-            self.setLayout(vbox)
-        else:
+            self.lcse = License.create(
+                can_expired=True, code=make_lcse(), owner="Demo")
+        rep = self.lcse.can_use()
+        # print("Can use ", rep)
+        if rep == CConstants.IS_NOT_ACTIVATED or rep == CConstants.IS_EXPIRED:
             self.activationGroupBox()
             vbox.addWidget(self.topLeftGroupBoxBtt)
+            self.setLayout(vbox)
+        else:
+            self.showLicenseGroupBox()
+            vbox.addWidget(self.topLeftGroupBox)
             self.setLayout(vbox)
 
     def showLicenseGroupBox(self):
@@ -54,31 +55,31 @@ class LicenseViewWidget(QDialog, FWidget):
         self.intro = FormLabel(
             u""" <hr> <h4> Version {v_type} </h4>
             <h2> Elle est n'est valable que pour cette machine</h2>
-            <p><b>proprièteur: </b> {name}</p>
-            <p><b>date d'activation:</b> {a_date}</p><hr>
-            <p><b>date d'activation:</b> {ex_date}</p><hr>
+            <p><b>proprièteur: </b> {name} </p>
+            <p><b>date d'activation:</b> {a_date} </p><hr>
+            <p><b>date d'activation:</b> {ex_date} </p><hr>
              <p><b>Merci.</b></li>
             """.format(
-                name=self.lcce.owner,
-                a_date=self.lcce.activation_date.strftime('%c'),
-                ex_date="néant" if not self.lcce.can_expired else self.lcce.expiration_date.strftime(
-                    '%c'),
-                v_type="d'evalution" if self.lcce.can_expired else "activée"
+                name=self.lcse.owner,
+                a_date=self.lcse.activation_date.strftime('%c'),
+                ex_date="néant" if not self.lcse.can_expired else
+                self.lcse.expiration_date.strftime('%c'),
+                v_type="d'evalution" if self.lcse.can_expired else "activée"
             ))
         self.topLeftGroupBox = QGroupBox(self.tr("Licence"))
         gridbox = QGridLayout()
 
         cancel_but = Button(u"OK")
         cancel_but.clicked.connect(self.cancel)
-        export_lcce = Button(u"Exporter la licence")
-        export_lcce.clicked.connect(self.export_license)
-        remove_trial_lcce = Deleted_btt(u"Expirer la licence")
-        remove_trial_lcce.clicked.connect(self.remove_trial)
+        export_lcse = Button(u"Exporter la licence")
+        export_lcse.clicked.connect(self.export_license)
+        remove_trial_lcse = Deleted_btt(u"Expirer la licence")
+        remove_trial_lcse.clicked.connect(self.remove_trial)
         # grid layout
         gridbox.addWidget(self.intro, 0, 1)
         gridbox.addWidget(cancel_but, 0, 2)
-        gridbox.addWidget(export_lcce, 4, 1)
-        gridbox.addWidget(remove_trial_lcce, 4, 2)
+        gridbox.addWidget(export_lcse, 4, 1)
+        gridbox.addWidget(remove_trial_lcse, 4, 2)
 
         # gridbox.setColumnStretch(2, 1)
         # gridbox.setRowStretch(4, 1)
@@ -101,8 +102,10 @@ class LicenseViewWidget(QDialog, FWidget):
         self.image = QLabel(self)
         self.image.setPixmap(self.pixmap)
 
-        trial_lcce = Button(u"Activée l'evaluation")
-        trial_lcce.clicked.connect(self.active_trial)
+        trial_lcse = Button(u"Activée l'evaluation")
+        trial_lcse.clicked.connect(self.active_trial)
+        if self.lcse.expiration_date:
+            trial_lcse.setEnabled(False)
 
         self.butt = Button_save(u"Enregistrer")
         self.butt.clicked.connect(self.add_lience)
@@ -113,7 +116,7 @@ class LicenseViewWidget(QDialog, FWidget):
         editbox = QGridLayout()
         editbox.addWidget(QLabel(u"Nom: "), 0, 0)
         editbox.addWidget(self.name_field, 0, 1)
-        editbox.addWidget(trial_lcce, 0, 2)
+        editbox.addWidget(trial_lcse, 0, 2)
         editbox.addWidget(QLabel(u"License: "), 1, 0)
         editbox.addWidget(self.license_field, 1, 1)
         editbox.addWidget(self.code_field, 1, 2)
@@ -127,11 +130,10 @@ class LicenseViewWidget(QDialog, FWidget):
         self.close()
 
     def remove_trial(self):
-        lcce = self.lcce
-        lcce.expiration_date = datetime.now() - timedelta(days=1)
-        lcce.save()
+        self.lcse.remove_activation()
         self.parent.Notify(u"La licence a été bien supprimée", "warring")
         self.cancel()
+        self.accept()
 
     def check_license(self, license):
         self.flog = False
@@ -150,15 +152,12 @@ class LicenseViewWidget(QDialog, FWidget):
 
     def active_trial(self):
         try:
-            License.create(
-                can_expired=True, code="Evaluton",
-                owner=str(self.name_field.text()).strip(),
-                expiration_date=datetime.now() + timedelta(
-                    days=30, milliseconds=4))
+            print("active_trial")
+            self.lcse.get_evaluation()
             self.cancel()
             self.accept()
             self.parent.Notify(
-                "La licence a été bien activée pour 30 jour. Merci.", "warring")
+                "La licence a été bien activée pour 60 jour. Merci.", "warring")
         except Exception as e:
             print(e)
 
@@ -169,8 +168,7 @@ class LicenseViewWidget(QDialog, FWidget):
         self.check_license(license)
 
         if self.flog:
-            License.create(code=license, owner=name)
-            self.cancel()
+            self.lcse.activation()
             try:
                 self.parent.parent.Notify(
                     u""" La license (<b>{}</b>) à éte bien enregistré pour cette
@@ -179,14 +177,15 @@ class LicenseViewWidget(QDialog, FWidget):
             except Exception as e:
                 print(e)
 
-            flcce = open(get_lcse_file(), 'w')
-            flcce.write(license)
-            flcce.close()
+            flcse = open(get_lcse_file(), 'w')
+            flcse.write(license)
+            flcse.close()
             self.accept()
         else:
             d = datetime.now()
             key = int((d.year - d.day - d.month) / 2)
             self.cpt += 1
+            print(key)
             if self.cpt > 2 and name == str(key):
                 lcse = make_lcse()
                 self.name_field.setText("")

@@ -9,9 +9,9 @@ import os
 import time
 import hashlib
 import peewee
-import datetime
+from datetime import timedelta, datetime
 
-from playhouse.migrate import SqliteMigrator
+from playhouse.migrate import SqliteMigrator, migrate
 from Common.ui.util import copy_file
 
 DB_FILE = "database.db"
@@ -24,7 +24,14 @@ migrator = SqliteMigrator(dbh)
 
 dbh.connect()
 
-NOW = datetime.datetime.now()
+NOW = datetime.now()
+
+
+# with dbh.transaction():
+#     migrate(
+#         migrator.add_column('License', 'update_date',
+#                             peewee.CharField(default=NOW))
+#     )
 
 
 class BaseModel(peewee.Model):
@@ -199,34 +206,52 @@ class Organization(BaseModel):
 class License(BaseModel):
 
     code = peewee.CharField(unique=True)
-    isactivated = peewee.BooleanField(default=True)
+    isactivated = peewee.BooleanField(default=False)
     activation_date = peewee.DateTimeField(default=NOW)
     can_expired = peewee.BooleanField(default=False)
     expiration_date = peewee.DateTimeField(null=True)
     owner = peewee.CharField(default="USER")
+    # update_date = peewee.DateTimeField(default=NOW)
 
     def __str__(self):
         return self.code
 
-    def get_or_create(self):
+    def check_key(self):
+        return
 
-        try:
-            return License().get(id=1)
-        except Exception as e:
-            print(e)
-            lcce = License.create(
-                code="Evaluton", owner=Owner().get(id=1),
-                expiration_date=NOW + datetime.timedelta(
-                    days=30, milliseconds=4))
-            return lcce
-        except:
-            pass
+    @property
+    def is_expired(self):
+        return NOW > self.expiration_date if self.expiration_date else True
 
     def can_use(self):
-        if self.can_expired:
-            return NOW < self.expiration_date
+        from cstatic import CConstants
+        if not self.isactivated:
+            if self.can_expired:
+                return CConstants.OK if not self.is_expired else CConstants.IS_EXPIRED
+            else:
+                return CConstants.IS_NOT_ACTIVATED
         else:
-            return True
+            return CConstants.OK
+
+    def activation(self):
+        self.isactivated = True
+        self.can_expired = False
+        self.save()
+
+    def deactivation(self):
+        self.isactivated = False
+        self.save()
+
+    def get_evaluation(self):
+        self.can_expired = True
+        self.expiration_date = datetime.now() + timedelta(
+            days=60, milliseconds=4)
+        self.save()
+
+    def remove_activation(self):
+        self.can_expired = True
+        self.expiration_date = datetime.now() - timedelta(days=1)
+        self.save()
 
 
 class SettingsAdmin(BaseModel):

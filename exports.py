@@ -21,6 +21,7 @@ DATETIME = "{}".format(datetime.now().strftime('%d-%m-%Y-%Hh%M'))
 
 
 def export_database_as_file():
+
     destination = QFileDialog.getSaveFileName(
         QWidget(), u"Sauvegarder la base de Donnée.",
         u"Sauvegarde du {} {}.db".format(DATETIME, Config.NAME_ORGA), "*.db")

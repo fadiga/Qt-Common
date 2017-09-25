@@ -25,27 +25,27 @@ class LoginWidget(QDialog, FMainWindow):
 
     def __init__(self, hibernate=False):
         QDialog.__init__(self)
-        self.setWindowTitle(Config.NAME_ORGA + "    " + self.title_page)
+        self.setWindowTitle(self.set_window_title(self.title_page))
         self.hibernate = hibernate
 
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.intro = FormLabel(u"<h3>Vous devez vous identifier pour pouvoir<h3>"
-                               u"<i>utiliser {}.</i>".format(Config.NAME_ORGA))
-        self.title = FPageTitle(u"""<h4>{app_org}</h4>
-                                 <b><li>{app_name}</li> </b>
-                                 <ol><li>{org}</li><li><b>Version:
-                                 </b> {version}</li></ol>
-                                 """.format(app_org=Config.NAME_ORGA,
-                                            org=Config.ORG_AUT,
-                                            version=Config.APP_VERSION,
-                                            app_name=Config.APP_NAME))
-        self.title.setStyleSheet(""" background:
-                                 url({}) no-repeat scroll 200px 50px #fff;
-                                 border-radius: 14px 14px 8px 8px;
-                                 border: 10px double #fff;
-                                 width: 100%; height: auto;
-                                 padding: 3.3em 1em 1em 100px;
-                                 font: 12pt 'URW Bookman L';""".format(Config.APP_LOGO))
+                               u"<i>utiliser {}.</i>".format(Config.APP_NAME))
+        # self.title = FPageTitle(u"""<h4>{app_org}</h4>
+        #                          <b><li>{app_name}</li> </b>
+        #                          <ol><li>{org}</li><li><b>Version:
+        #                          </b> {version}</li></ol>
+        #                          """.format(app_org=Config.NAME_ORGA,
+        #                                     org=Config.ORG_AUT,
+        #                                     version=Config.APP_VERSION,
+        #                                     app_name=Config.APP_NAME))
+        # self.title.setStyleSheet(""" background:
+        #                          url({}) no-repeat scroll 200px 50px #fff;
+        #                          border-radius: 14px 14px 8px 8px;
+        #                          border: 10px double #fff;
+        #                          width: 100%; height: auto;
+        #                          padding: 3.3em 1em 1em 100px;
+        # font: 12pt 'URW Bookman L';""".format(Config.APP_LOGO))
         vbox = QHBoxLayout()
 
         # self.sttg = SettingsAdmin.select().where(SettingsAdmin.id == 1).get()
@@ -177,7 +177,7 @@ class LoginWidget(QDialog, FMainWindow):
     #         self.cancel()
     #         self.parent.Notify(u"""La license (<b>{}</b>) à éte bien enregistré pour cette
     #                     machine.\n Elle doit être bien gardé""".format(license), "success")
-    #         # file_lience = open("licence.txt", "r")
+        # file_lience = open("licence.txt", "r")
 
     # def check_license(self, license):
 

@@ -14,10 +14,11 @@ import hashlib
 
 from uuid import getnode
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from PyQt4 import QtGui, QtCore
 from Common.ui.window import FWindow
+from Common.cstatic import CConstants
 
 try:
     unicode
@@ -138,7 +139,7 @@ def raise_success(title, message):
 
 def formatted_number(number, sep="."):
     """ """
-    # locale_name, encoding = locale.getlocale()
+    locale_name, encoding = locale.getlocale()
     locale.setlocale(locale.LC_ALL, 'fra')
     fmt = "%s"
     if (isinstance(number, int)):
@@ -213,8 +214,13 @@ def format_date(dat):
     return '-'.join([year, month, day])
 
 
+def date_to_ts(date):
+    return time.mktime(time.strptime(date.strftime(
+        "%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S"))
+
+
 def to_jstimestamp(adate):
-    if not adate is None:
+    if not adate:
         return int(to_timestamp(adate)) * 1000
 
 
@@ -222,7 +228,7 @@ def to_timestamp(dt):
     """
     Return a timestamp for the given datetime object.
     """
-    if not dt is None:
+    if not dt:
         return (dt - datetime(1970, 1, 1)).total_seconds()
 
 
@@ -304,29 +310,37 @@ def getlog(text):
     return "Log-{}".format(text)
 
 
+def internet_on(url):
+    from urllib.request import urlopen, URLError
+    try:
+        urlopen(url, timeout=1)
+        return True
+    except URLError as err:
+        return False
+    except Exception as e:
+        print(e)
+
+
 def is_valide_mac():
     """ check de license """
     from Common.models import License
+    # print([("C {}".format(i.code)) for i in License.select()])
     if len(License.all()) == 0:
-        License.create(
-            can_expired=True, code="Evaluton", owner="Demo",
-            expiration_date=datetime.now() + timedelta(
-                days=30, milliseconds=4))
+        License.create(can_expired=True, code=make_lcse(), owner="Demo")
     try:
-        return License.get(License.code == str(make_lcse())).can_use()
+        return License.get(License.code == str(make_lcse())
+                           ).can_use() == CConstants.OK
     except Exception as e:
-        return License.get(License.code == "Evaluton").can_use()
-    else:
         return False
-
-
-def make_lcse(lcse=getnode()):
-    lcse = hashlib.md5(str(lcse).encode('utf-8')).hexdigest()
-    return lcse
 
 
 def clean_mac():
     return getnode()
+
+
+def make_lcse(lcse=clean_mac()):
+    lcse = hashlib.md5(str(lcse).encode('utf-8')).hexdigest()
+    return lcse
 
 
 def get_lcse_of_file():

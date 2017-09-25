@@ -156,6 +156,8 @@ class FMenuBar(QMenuBar, FWidget):
 
     # About
     def goto_about(self):
+        from Common.models import Organization
+        org = Organization.get(id=1)
         QMessageBox.about(self, u"À propos",
                           u""" <h2>{app_name}  version: {version_app} </h2>
                             <hr>
@@ -166,21 +168,12 @@ class FMenuBar(QMenuBar, FWidget):
                                 <li><b>E-mail: </b> {email} <br/></li>
                                 <li>{org_out}</li>
                             </ul>
-                            <hr>
-                            <h3>Base de données</h3>
-                            <ul>
-                                <li>Date de mise à jour: {m_date_db}</li>
-                                <li>Version: {version_db}</li>
-                            </ul>
-                            """.format(email=Config.EMAIL_AUT,
-                                       app_name=Config.APP_NAME,
-                                       adress=Config.ADRESS_AUT,
-                                       autor=Config.AUTOR,
-                                       version_app=Config.APP_VERSION,
-                                       phone=Config.TEL_AUT,
-                                       org_out=Config.ORG_AUT,
-                                       version_db=Config.DB_VERS.display_name(),
-                                       m_date_db=Config.DB_VERS.date.strftime(
-                                           "%c")
-                                       )
-                          )
+                            """.format(
+                                email=org.email_org,
+                              app_name=Config.APP_NAME,
+                              adress=org.adress_org,
+                              autor=Config.AUTOR,
+                              version_app=Config.APP_VERSION,
+                              phone=org.phone,
+                              org_out=org.name_orga,
+                          ))

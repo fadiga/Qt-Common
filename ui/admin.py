@@ -6,12 +6,13 @@ from __future__ import (
     unicode_literals, absolute_import, division, print_function)
 
 from PyQt4.QtCore import Qt, SIGNAL
-from PyQt4.QtGui import (QVBoxLayout, QHBoxLayout, QFont, QGridLayout, QSplitter,
-                         QFrame, QCheckBox, QMessageBox, QTextEdit, QFormLayout,
-                         QListWidgetItem, QIcon, QPixmap, QListWidget)
+from PyQt4.QtGui import (
+    QVBoxLayout, QHBoxLayout, QFont, QGridLayout, QSplitter, QCheckBox,
+    QMessageBox, QTextEdit, QFormLayout, QListWidgetItem, QIcon, QPixmap,
+    QListWidget)
 
 from Common.ui.user_add_or_edit import NewOrEditUserViewWidget
-from Common.ui.common import (FWidget, FLabel, FBoxTitle, Button,
+from Common.ui.common import (FWidget, FLabel, Button,
                               LineEdit, Button_save, FormLabel, IntLineEdit)
 
 from configuration import Config
@@ -19,7 +20,7 @@ from Common.models import Owner
 
 from Common.models import Organization, SettingsAdmin
 from Common.tabpane import tabbox
-from Common.ui.util import (formatted_number, raise_error)
+from Common.ui.util import raise_error
 from Common.ui.table import FTableWidget
 
 
@@ -229,7 +230,7 @@ class LoginManageWidget(FWidget):
 
     def __init__(self, parent, *args, **kwargs):
         super(FWidget, self).__init__(parent=parent, *args, **kwargs)
-        self.parentWidget().setWindowTitle(Config.NAME_ORGA + u"  Gestion ")
+        self.parentWidget().setWindowTitle("Utilisateur")
         self.parent = parent
 
         self.table_owner = OwnerTableWidget(parent=self)
