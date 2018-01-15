@@ -2,17 +2,17 @@
 # -*- coding: utf-8 -*-
 # Autor: Fadiga
 
+
 from __future__ import (
     unicode_literals, absolute_import, division, print_function)
 
 from Common.models import (
-    Owner, SettingsAdmin, Organization, License, Version, FileJoin)
+    Owner, Organization, License, Version, FileJoin, History)
 
 
 class AdminDatabase(object):
 
-    LIST_CREAT = [
-        Owner, SettingsAdmin, Organization, License, Version, FileJoin]
+    LIST_CREAT = [History, Owner, Organization, License, Version, FileJoin]
 
     def create_all_or_pass(self, drop_tables=False):
         did_create = False

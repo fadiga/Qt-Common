@@ -87,7 +87,8 @@ def export_dynamic_data(dict_data):
     workbook = xlsxwriter.Workbook(
         file_name, {'default_date_format': 'dd/mm/yy'})
     worksheet = workbook.add_worksheet(sheet_name)
-    worksheet.fit_num_pages = 1
+    # worksheet.fit_num_pages = 1
+    # worksheet.set_h_pagebreaks([4])
 
     date_format = workbook.add_format({'num_format': 'd-mmm-yy'})
     money = workbook.add_format({'num_format': '#,##0 '})

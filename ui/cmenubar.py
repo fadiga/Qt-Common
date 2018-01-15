@@ -12,7 +12,7 @@ from configuration import Config
 from Common.exports import export_database_as_file, export_backup, import_backup
 from Common.ui.common import FWidget
 from Common.ui.license_view import LicenseViewWidget
-from Common.models import SettingsAdmin
+from Common.models import Organization
 from Common.ui.qss import dict_style
 
 
@@ -49,19 +49,20 @@ class FMenuBar(QMenuBar, FWidget):
 
         preference = self.addMenu(u"Préference")
         _theme = preference.addMenu("Theme")
-        list_theme = [({"name": dict_style[k][0], "icon": '', "admin": False,
-                        "shortcut": "", "style_number": k}) for k in dict_style]
+        styles = dict_style()
+        list_theme = [({"name": k, "icon": '', "admin": False,
+                        "shortcut": "", "theme": k}) for k in styles.keys()]
 
         for m in list_theme:
             icon = ""
-            if int(m.get('style_number')) == SettingsAdmin.get(id=1).style_number:
+            if m.get('theme') == Organization.get(id=1).theme:
                 icon = "accept"
             el_menu = QAction(QIcon("{}{}.png".format(
                 Config.img_cmedia, icon)), m.get('name'), self)
             el_menu.setShortcut(m.get("shortcut"))
             self.connect(
                 el_menu, SIGNAL("triggered()"), lambda m=m: self.change_theme(
-                    int(m.get('style_number'))))
+                    m.get('theme')))
             _theme.addSeparator()
             _theme.addAction(el_menu)
 
@@ -116,14 +117,11 @@ class FMenuBar(QMenuBar, FWidget):
     def goto_license(self):
         self.open_dialog(LicenseViewWidget, modal=True)
 
-    def change_theme(self, style_number):
-        sttg = SettingsAdmin.get(id=1)
-        sttg.style_number = style_number
+    def change_theme(self, theme):
+        sttg = Organization.get(id=1)
+        sttg.theme = theme
         sttg.save()
         self.restart()
-
-    # def choise_theme(self):
-    #     from models import SettingsAdmin
 
     def restart(self):
         import subprocess

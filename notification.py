@@ -53,7 +53,6 @@ class Notification(QtGui.QWidget):
             cp = QtGui.QDesktopWidget().availableGeometry()
             self.x = cp.width()
         self.y = 2
-
         # Set the opacity
         self.f = 1.0
 

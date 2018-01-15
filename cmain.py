@@ -13,13 +13,13 @@ import gettext
 import gettext_windows
 
 from Common.cstatic import CConstants
-from Common.models import SettingsAdmin, Owner
+from Common.models import Organization, Owner
 
 from Common.ui.util import is_valide_mac
 from Common.ui.login import LoginWidget
 from Common.ui.license_view import LicenseViewWidget
 from Common.ui.user_add_or_edit import NewOrEditUserViewWidget
-from server import send_info_pc
+from Common.ui.organization_add_or_edit import NewOrEditOrganizationViewWidget
 
 
 def cmain():
@@ -27,20 +27,20 @@ def cmain():
     gettext_windows.setup_env()
     locale.setlocale(locale.LC_ALL, '')
     gettext.install('main.py', localedir='locale')
-    send_info_pc()
 
     if CConstants.DEBUG:
         print("Debug is True")
         return True
-    elif Owner().select().where(Owner.isactive == True).count() == 0:
-        if NewOrEditUserViewWidget().exec_() == QDialog.Accepted:
-            if LoginWidget().exec_() == QDialog.Accepted:
-                return True
-    elif not is_valide_mac():
-        if LicenseViewWidget(parent=None).exec_() == QDialog.Accepted:
-            return True
-    elif not SettingsAdmin().get(id=1).login:
-        return True
-    elif LoginWidget().exec_() == QDialog.Accepted:
+
+    if Owner().select().where(Owner.isactive == True).count() == 0:
+        if not NewOrEditUserViewWidget().exec_() == QDialog.Accepted:
+            return
+    if Organization().select().count() == 0:
+        if not NewOrEditOrganizationViewWidget().exec_() == QDialog.Accepted:
+            return
+    if not is_valide_mac() == CConstants.OK:
+        if not LicenseViewWidget(parent=None).exec_() == QDialog.Accepted:
+            return
+    if not Organization().get(id=1).is_login or LoginWidget().exec_() == QDialog.Accepted:
         return True
     return False

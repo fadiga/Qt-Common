@@ -8,8 +8,7 @@ from PyQt4.QtCore import Qt
 from PyQt4.QtGui import (QComboBox, QVBoxLayout, QCheckBox,
                          QFormLayout, QDialog)
 from peewee import IntegrityError
-from Common.cstatic import CConstants
-from Common.ui.util import check_is_empty, field_error, check_field
+from Common.ui.util import check_is_empty, field_error, is_valide_codition_field
 from Common.models import Owner
 
 from Common.ui.common import (
@@ -35,7 +34,6 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
         formbox = QFormLayout()
         self.checked = QCheckBox("Active")
         self.error_mssg = ""
-        msg = u"Cocher si vous voulez que cet utilisateur puisse se connecter"
         if self.owner:
             self.new = False
             self.title = u"Modification de l'utilisateur {}".format(
@@ -101,13 +99,13 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
         return True
 
     def check_password_is_valide(self):
-
         self.password = str(self.password_field.text())
         self.password_v = str(
             self.password_field_v.text()) if self.new else self.owner.password
 
-        if check_field(self.password_field_v,
-                       "Les mots de passe sont differents" if self.new else "Mot de passe incorrect", self.password != self.password_v):
+        if is_valide_codition_field(
+                self.password_field_v, "Les mots de passe sont differents" if self.new else "Mot de passe incorrect",
+                self.password != self.password_v):
             return
         return True
 

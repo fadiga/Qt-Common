@@ -11,6 +11,7 @@ import locale
 import tempfile
 import subprocess
 import hashlib
+from time import mktime, strptime
 
 from uuid import getnode
 
@@ -28,19 +29,20 @@ except NameError:
 
 def device_amount(value, dvs=None):
 
-    from configuration import Config
+    from Common.models import Organization
     if dvs:
         return "{} {}".format(formatted_number(value), dvs)
 
     try:
-        devise = Config.DEVISE_M
+        organ = Organization().get(id=1)
     except Exception as e:
         print(e)
-
-    if devise == "USD":
-        return "${}".format(formatted_number(value))
-    if devise == "XOF":
-        return "{} F".format(formatted_number(value))
+    d = organ.DEVISE[organ.devise]
+    v = formatted_number(value)
+    if organ.devise == organ.USA:
+        return "{d}{v}".format(v=v, d=d)
+    else:
+        return "{v} {d}".format(v=v, d=d)
 
 
 def check_is_empty(field):
@@ -68,7 +70,7 @@ def field_error(field, msg):
     return False
 
 
-def check_field(field, msg, condition):
+def is_valide_codition_field(field, msg, condition):
     stylerreur = ""
     flag = False
     field.setToolTip("")
@@ -215,7 +217,7 @@ def format_date(dat):
 
 
 def date_to_ts(date):
-    return time.mktime(time.strptime(date.strftime(
+    return mktime(strptime(date.strftime(
         "%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S"))
 
 
@@ -316,6 +318,7 @@ def internet_on(url):
         urlopen(url, timeout=1)
         return True
     except URLError as err:
+        print(err)
         return False
     except Exception as e:
         print(e)
@@ -324,14 +327,14 @@ def internet_on(url):
 def is_valide_mac():
     """ check de license """
     from Common.models import License
-    # print([("C {}".format(i.code)) for i in License.select()])
-    if len(License.all()) == 0:
-        License.create(can_expired=True, code=make_lcse(), owner="Demo")
+    lcse = CConstants.IS_EXPIRED
     try:
-        return License.get(License.code == str(make_lcse())
-                           ).can_use() == CConstants.OK
+        lcse = License.get(License.code == str(make_lcse())).can_use()
     except Exception as e:
-        return False
+        print("/!\ invalide license.")
+        print(e)
+
+    return lcse
 
 
 def clean_mac():
@@ -339,6 +342,7 @@ def clean_mac():
 
 
 def make_lcse(lcse=clean_mac()):
+    # print("lcse:", lcse)
     lcse = hashlib.md5(str(lcse).encode('utf-8')).hexdigest()
     return lcse
 

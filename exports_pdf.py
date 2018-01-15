@@ -46,7 +46,6 @@ def export_dynamic_data(dict_data):
 
     for r in data:
         ldata.append(r)
-    print(ldata)
 
     btable = Table(ldata)
     # btable = Table(ldata, colWidths=[(inch) for i in range(1, len(ldata) + 1)])

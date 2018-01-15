@@ -4,17 +4,19 @@
 from __future__ import (
     unicode_literals, absolute_import, division, print_function)
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
-from PyQt4.QtGui import (QHBoxLayout, QGridLayout, QGroupBox, QPixmap,
-                         QDialog, QLabel, QTextEdit)
+from PyQt4.QtCore import Qt
+from PyQt4.QtGui import (QVBoxLayout, QGridLayout, QGroupBox, QCheckBox,
+                         QDialog, QTextEdit, QComboBox, QFormLayout)
 
-from Common.ui.util import clean_mac, make_lcse, get_lcse_file
 from Common.cstatic import CConstants
-from Common.models import License
+from Common.models import License, Organization
 from Common.exports import export_license_as_file
-from Common.ui.common import (FWidget, Button_save, FPageTitle, LineEdit,
-                              Button, Deleted_btt, FormLabel, PyTextViewer)
+from Common.ui.util import (clean_mac, make_lcse, get_lcse_file,
+                            check_is_empty, is_valide_codition_field)
+from Common.ui.common import (FWidget, Button_save, LineEdit, PyTextViewer,
+                              Deleted_btt, Button, FormLabel, IntLineEdit)
 
 
 class LicenseViewWidget(QDialog, FWidget):
@@ -25,32 +27,28 @@ class LicenseViewWidget(QDialog, FWidget):
 
         self.intro = FormLabel("<h3>Vous devez activé la license pour pouvoir"
                                "<i>utiliser.</i></h3>")
-        self.title = FPageTitle("")
-        self.title.setStyleSheet(
-            """ background: url({}) no-repeat scroll 200px 50px #fff;
-            border-radius: 14px 14px 8px 8px;border: 10px double #fff;
-            width: 100%; height: auto;  padding: 3.3em 1em 1em 100px;
-            font: 12pt 'URW Bookman L';""".format(CConstants.APP_LOGO))
-
-        vbox = QHBoxLayout()
-        vbox.addWidget(self.title)
+        vbox = QVBoxLayout()
         try:
             self.lcse = License.get(License.code == str(make_lcse()))
-        except:
-            self.lcse = License.create(
-                can_expired=True, code=make_lcse(), owner="Demo")
+            rep = self.lcse.can_use()
+        except Exception as e:
+            print(e)
+            self.lcse = License()
+            rep = CConstants.IS_EXPIRED
+            # self.lcse = License.create(
+            #     can_expired=True, code=make_lcse(), owner="Demo")
         rep = self.lcse.can_use()
-        # print("Can use ", rep)
+
         if rep == CConstants.IS_NOT_ACTIVATED or rep == CConstants.IS_EXPIRED:
-            self.activationGroupBox()
+            self.activation_group_box()
             vbox.addWidget(self.topLeftGroupBoxBtt)
             self.setLayout(vbox)
         else:
-            self.showLicenseGroupBox()
+            self.show_license_group_box()
             vbox.addWidget(self.topLeftGroupBox)
             self.setLayout(vbox)
 
-    def showLicenseGroupBox(self):
+    def show_license_group_box(self):
 
         self.intro = FormLabel(
             u""" <hr> <h4> Version {v_type} </h4>
@@ -87,20 +85,17 @@ class LicenseViewWidget(QDialog, FWidget):
 
         self.topLeftGroupBox.setLayout(gridbox)
 
-    def activationGroupBox(self):
+    def activation_group_box(self):
         self.topLeftGroupBoxBtt = QGroupBox(self.tr("Nouvelle license"))
         # self.setWindowTitle(u"License")
         self.setWindowTitle(u"Activation de la license")
         self.cpt = 0
-        self.code_field = PyTextViewer(
+        self.info_field = PyTextViewer(
             u"""Vous avez besoin du code ci desous pour l'activation:
             <hr> <b>{code}</b><hr> <h4>Contacts:</h4>{contact}"""
             .format(code=clean_mac(), contact=CConstants.TEL_AUT))
         self.name_field = LineEdit()
         self.license_field = QTextEdit()
-        self.pixmap = QPixmap("")
-        self.image = QLabel(self)
-        self.image.setPixmap(self.pixmap)
 
         trial_lcse = Button(u"Activée l'evaluation")
         trial_lcse.clicked.connect(self.active_trial)
@@ -113,39 +108,22 @@ class LicenseViewWidget(QDialog, FWidget):
         cancel_but = Button(u"Annuler")
         cancel_but.clicked.connect(self.cancel)
 
-        editbox = QGridLayout()
-        editbox.addWidget(QLabel(u"Nom: "), 0, 0)
-        editbox.addWidget(self.name_field, 0, 1)
-        editbox.addWidget(trial_lcse, 0, 2)
-        editbox.addWidget(QLabel(u"License: "), 1, 0)
-        editbox.addWidget(self.license_field, 1, 1)
-        editbox.addWidget(self.code_field, 1, 2)
-        editbox.addWidget(self.image, 5, 1)
-        editbox.addWidget(self.butt, 6, 1)
-        editbox.addWidget(cancel_but, 6, 2)
-
-        self.topLeftGroupBoxBtt.setLayout(editbox)
+        formbox = QFormLayout()
+        formbox.addRow(FormLabel(""), self.info_field)
+        formbox.addRow(FormLabel("Nom :"), self.name_field)
+        formbox.addRow(FormLabel("Code license :"), self.license_field)
+        formbox.addRow(FormLabel(""), trial_lcse)
+        formbox.addRow(cancel_but, self.butt)
+        self.topLeftGroupBoxBtt.setLayout(formbox)
 
     def cancel(self):
         self.close()
 
     def remove_trial(self):
         self.lcse.remove_activation()
-        self.parent.Notify(u"La licence a été bien supprimée", "warring")
+        # self.parent.Notify(u"La licence a été bien supprimée", "warring")
         self.cancel()
         self.accept()
-
-    def check_license(self, license):
-        self.flog = False
-        if (license == make_lcse()):
-            icon = u"{}accept.png"
-            msg = "Licence correct"
-            self.flog = True
-        else:
-            icon = u"{}decline.png"
-            msg = "Licence incorrect"
-        self.image.setPixmap(QPixmap(icon.format(CConstants.img_cmedia)))
-        self.image.setToolTip(msg)
 
     def export_license(self):
         export_license_as_file()
@@ -153,6 +131,8 @@ class LicenseViewWidget(QDialog, FWidget):
     def active_trial(self):
         try:
             print("active_trial")
+            self.lcse = License(
+                can_expired=True, code=make_lcse(), owner="Demo")
             self.lcse.get_evaluation()
             self.cancel()
             self.accept()
@@ -162,31 +142,31 @@ class LicenseViewWidget(QDialog, FWidget):
             print(e)
 
     def add_lience(self):
-        """ add User """
         name = str(self.name_field.text()).strip()
         license = str(self.license_field.toPlainText())
-        self.check_license(license)
-
-        if self.flog:
-            self.lcse.activation()
-            try:
-                self.parent.parent.Notify(
-                    u""" La license (<b>{}</b>) à éte bien enregistré pour cette
-                    machine.\n Elle doit être bien gardé""".format(license),
-                    "success")
-            except Exception as e:
-                print(e)
-
-            flcse = open(get_lcse_file(), 'w')
-            flcse.write(license)
-            flcse.close()
-            self.accept()
-        else:
+        if check_is_empty(self.license_field):
+            return
+        m_lcse = make_lcse()
+        if is_valide_codition_field(
+                self.license_field, "Licence invalide", license != m_lcse):
             d = datetime.now()
             key = int((d.year - d.day - d.month) / 2)
             self.cpt += 1
             print(key)
-            if self.cpt > 2 and name == str(key):
-                lcse = make_lcse()
-                self.name_field.setText("")
-                self.license_field.setText(lcse)
+            if self.cpt > 2 and license == str(key):
+                self.license_field.setText(m_lcse)
+
+            return
+
+        if check_is_empty(self.name_field):
+            return
+        self.lcse.can_expired = False
+        self.lcse.owner = name
+        if not self.lcse:
+            self.lcse.code = license
+        self.lcse.activation()
+
+        flcse = open(get_lcse_file(), 'w')
+        flcse.write(license)
+        flcse.close()
+        self.accept()

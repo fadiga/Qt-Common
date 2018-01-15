@@ -16,6 +16,7 @@ from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QPalette,
                          QPixmap)
 # from PyQt4.QtWebKit import QWebView
 
+from Common.ui.statusbar import GStatusBar
 from configuration import Config
 from Common.periods import Period
 
@@ -28,6 +29,9 @@ class FMainWindow(QMainWindow):
         # self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setWindowIcon(QIcon.fromTheme(
             'logo', QIcon(u"{}logo.png".format(Config.img_media))))
+
+        self.statusbar = GStatusBar(self)
+        self.setStatusBar(self.statusbar)
 
         self.wc = self.width()
         self.hc = self.height()
@@ -62,9 +66,9 @@ class FMainWindow(QMainWindow):
         d.exec_()
 
     def logout(self):
-        from Common.models import Owner, SettingsAdmin
+        from Common.models import Owner, Organization
         # print("logout")
-        if SettingsAdmin.get(id=1).login:
+        if Organization.get(id=1).is_login:
             for ur in Owner.select().where(Owner.islog == True):
                 ur.islog = False
                 ur.save()

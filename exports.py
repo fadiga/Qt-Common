@@ -98,8 +98,5 @@ def copyanything(src, dest):
 
 def export_license_as_file():
 
-    # from Common.models import SettingsAdmin
-    # fil = os.path.join(os.path.dirname(os.path.abspath('__file__')), LICENCE)
-    # settg = SettingsAdmin().get(id=1)
     fil = get_lcse_file()
     uopen_file(fil)

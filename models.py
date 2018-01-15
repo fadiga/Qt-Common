@@ -9,9 +9,12 @@ import os
 import time
 import hashlib
 import peewee
-from datetime import timedelta, datetime
 
-from playhouse.migrate import SqliteMigrator, migrate
+# from peewee_migrate import Router
+from datetime import timedelta, datetime
+from playhouse.migrate import (
+    SqliteMigrator, migrate, CharField, BooleanField, DateTimeField)
+
 from Common.ui.util import copy_file
 
 DB_FILE = "database.db"
@@ -19,19 +22,41 @@ DB_FILE = "database.db"
 print("Peewee version : " + peewee.__version__)
 
 
-dbh = peewee.SqliteDatabase(DB_FILE)
-migrator = SqliteMigrator(dbh)
-
-dbh.connect()
-
 NOW = datetime.now()
 
 
-# with dbh.transaction():
+dbh = peewee.SqliteDatabase(DB_FILE)
+migrator = SqliteMigrator(dbh)
+
+for x, y, z in [
+        ('License', 'code', CharField(default="")),
+        ('Organization',
+         'devise', CharField(default="xof")),
+        ('Organization', 'theme', CharField(default="Theme systeme")),
+        ('Organization', 'is_login', BooleanField(default=True)),
+        ('License', 'update_date', DateTimeField(default=NOW))]:
+    try:
+        migrate(migrator.add_column(x, y, z))
+        print(x, " : ", y)
+    except Exception as e:
+        print(e)
+        # raise e
+# try:
 #     migrate(
+#         migrator.add_column('License', 'code'),
+#         migrator.add_column('Organization', 'devise',
+#                             CharField(default=NOW)),
+#         migrator.add_column('Organization', 'theme',
+#                             CharField(default="Theme systeme")),
+#         migrator.add_column('Organization', 'is_login',
+#                             BooleanField(default=True)),
 #         migrator.add_column('License', 'update_date',
-#                             peewee.CharField(default=NOW))
+#                             DateTimeField(default=NOW)),
 #     )
+# except peewee.OperationalError as e:
+#     print(e)
+# except:
+#     pass
 
 
 class BaseModel(peewee.Model):
@@ -56,6 +81,7 @@ class FileJoin(BaseModel):
 
     class Meta:
         ordering = (('file_name', 'desc'))
+        # db_table = 'file_join'
 
     file_name = peewee.CharField(max_length=200, null=True)
     file_slug = peewee.CharField(max_length=200, null=True, unique=True)
@@ -131,6 +157,10 @@ class Owner(BaseModel):
     """ The web user who is also owner of the Organization
     """
 
+    class Meta:
+        ordering = (('username', 'desc'))
+        # db_table = 'owner'
+
     USER = u"Utilisateur"
     ADMIN = u"Administrateur"
     ROOT = u"superuser"
@@ -168,6 +198,7 @@ class Owner(BaseModel):
 class Organization(BaseModel):
 
     """docstring for Organization"""
+
     PREV = 0
     CURRENT = 1
     DEFAULT = 2
@@ -175,12 +206,24 @@ class Organization(BaseModel):
                (DEFAULT, u"Par defaut"),
                (CURRENT, u"Actuel"),)
 
+    USA = "dollar"
+    XOF = "xof"
+    EURO = "euro"
+    DEVISE = {
+        USA: "$",
+        XOF: "F",
+        EURO: "€"
+    }
+
     slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
+    is_login = peewee.BooleanField(default=True)
+    theme = peewee.CharField(default=1)
     name_orga = peewee.CharField(verbose_name=(""))
     phone = peewee.IntegerField(null=True, verbose_name=(""))
     bp = peewee.CharField(null=True, verbose_name=(""))
     email_org = peewee.CharField(null=True, verbose_name=(""))
     adress_org = peewee.TextField(null=True, verbose_name=(""))
+    devise = peewee.CharField(choices=DEVISE, default=XOF)
     # file_join = peewee.ForeignKeyField(
     #     FileJoin, null=True, verbose_name=("image de la societe"))
 
@@ -211,7 +254,7 @@ class License(BaseModel):
     can_expired = peewee.BooleanField(default=False)
     expiration_date = peewee.DateTimeField(null=True)
     owner = peewee.CharField(default="USER")
-    # update_date = peewee.DateTimeField(default=NOW)
+    update_date = peewee.DateTimeField(default=NOW)
 
     def __str__(self):
         return self.code
@@ -254,35 +297,8 @@ class License(BaseModel):
         self.save()
 
 
-class SettingsAdmin(BaseModel):
-
-    """docstring for SettingsAdmin"""
-
-    user = peewee.CharField(default="User")
-    date = peewee.DateTimeField(default=NOW)
-    license = peewee.CharField(default=None, null=True)
-    login = peewee.BooleanField(default=True)
-    tolerance = peewee.IntegerField(default=360)
-    style_number = peewee.IntegerField(default=1)
-
-    def __str__(self):
-        return self.display_name()
-
-    def display_name(self):
-        return u"{}/{}/{}".format(self.user, self.date, self.license)
-
-    def get_or_create(self):
-
-        try:
-            return SettingsAdmin().get(id=1)
-        except Exception as e:
-            print(e)
-            return SettingsAdmin.create(user=Owner().get(id=1))
-        except:
-            pass
-
-
 class Version(BaseModel):
+
     date = peewee.DateTimeField(
         default=NOW, verbose_name="Date de Version")
     number = peewee.IntegerField(default=1, verbose_name="Numéro de Version")
@@ -300,7 +316,7 @@ class Version(BaseModel):
         self.save()
 
 
-class History(object):
+class History(BaseModel):
 
     date = peewee.DateTimeField(default=NOW)
     data = peewee.CharField()

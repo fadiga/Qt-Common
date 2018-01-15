@@ -49,5 +49,7 @@ class CConstants(object):
     APP_LOGO_ICO = os.path.join(img_cmedia, "logo.ico")
     ExportFolders = []
     ExportFiles = []
-    # BASE_URL = "http://192.168.5.51:8000/"
+    # BASE_URL = "http://192.168.1.31:9001/"
+    # BASE_URL = "http://192.168.5.51:9001/"
+    # BASE_URL = "http://172.20.10.3:9001/"
     BASE_URL = "http://fadcorp.ml/"
