@@ -6,17 +6,17 @@ from __future__ import (
 
 from datetime import datetime
 
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import (QVBoxLayout, QGridLayout, QGroupBox, QCheckBox,
-                         QDialog, QTextEdit, QComboBox, QFormLayout)
+# from PyQt4.QtCore import Qt
+from PyQt4.QtGui import (QVBoxLayout, QGridLayout, QGroupBox,
+                         QDialog, QTextEdit, QFormLayout)
 
 from Common.cstatic import CConstants
-from Common.models import License, Organization
+from Common.models import License
 from Common.exports import export_license_as_file
 from Common.ui.util import (clean_mac, make_lcse, get_lcse_file,
                             check_is_empty, is_valide_codition_field)
 from Common.ui.common import (FWidget, Button_save, LineEdit, PyTextViewer,
-                              Deleted_btt, Button, FormLabel, IntLineEdit)
+                              Deleted_btt, Button, FormLabel)
 
 
 class LicenseViewWidget(QDialog, FWidget):
@@ -137,7 +137,8 @@ class LicenseViewWidget(QDialog, FWidget):
             self.cancel()
             self.accept()
             self.parent.Notify(
-                "La licence a été bien activée pour 60 jour. Merci.", "warring")
+                "La licence a été bien activée pour 60 jour. Merci.",
+                "warring")
         except Exception as e:
             print(e)
 
@@ -162,7 +163,7 @@ class LicenseViewWidget(QDialog, FWidget):
             return
         self.lcse.can_expired = False
         self.lcse.owner = name
-        if not self.lcse:
+        if not self.lcse.code:
             self.lcse.code = license
         self.lcse.activation()
 

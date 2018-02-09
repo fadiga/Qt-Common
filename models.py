@@ -28,35 +28,26 @@ NOW = datetime.now()
 dbh = peewee.SqliteDatabase(DB_FILE)
 migrator = SqliteMigrator(dbh)
 
-for x, y, z in [
-        ('License', 'code', CharField(default="")),
-        ('Organization',
-         'devise', CharField(default="xof")),
-        ('Organization', 'theme', CharField(default="Theme systeme")),
-        ('Organization', 'is_login', BooleanField(default=True)),
-        ('License', 'update_date', DateTimeField(default=NOW))]:
+list_migrate = [
+    ('License', 'code', CharField(default="")),
+    ('Organization', 'devise', CharField(default="xof")),
+    ('Organization', 'theme', CharField(default="Theme systeme")),
+    ('Organization', 'is_login', BooleanField(default=True)),
+    ('License', 'update_date', DateTimeField(default=NOW))]
+
+try:
+    from migrations import make_migrate
+    list_migrate += make_migrate()
+except Exception as e:
+    print(e)
+
+for x, y, z in list_migrate:
     try:
         migrate(migrator.add_column(x, y, z))
         print(x, " : ", y)
     except Exception as e:
         print(e)
         # raise e
-# try:
-#     migrate(
-#         migrator.add_column('License', 'code'),
-#         migrator.add_column('Organization', 'devise',
-#                             CharField(default=NOW)),
-#         migrator.add_column('Organization', 'theme',
-#                             CharField(default="Theme systeme")),
-#         migrator.add_column('Organization', 'is_login',
-#                             BooleanField(default=True)),
-#         migrator.add_column('License', 'update_date',
-#                             DateTimeField(default=NOW)),
-#     )
-# except peewee.OperationalError as e:
-#     print(e)
-# except:
-#     pass
 
 
 class BaseModel(peewee.Model):

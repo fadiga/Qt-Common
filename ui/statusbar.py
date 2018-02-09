@@ -20,6 +20,10 @@ class GStatusBar(QStatusBar):
 
         QStatusBar.__init__(self, parent)
 
+        if not Config.SERV:
+            print("Not Serveur ")
+            return
+
         self.rsp = {}
         self.check = TaskThreadServer(self)
         QObject.connect(self.check, SIGNAL("download_"), self.download_)

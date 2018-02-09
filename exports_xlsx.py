@@ -15,7 +15,7 @@ from configuration import Config
 from Common.models import Organization
 
 style_org = {'align': 'center', 'valign': 'vcenter', 'font_size': 26,
-             'border': 1,  'font_color': 'blue', 'bold': True}
+             'border': 1, 'font_color': 'blue', 'bold': True}
 
 style_title = {"border": 1, }
 style_value = {"border": 0}
@@ -91,7 +91,9 @@ def export_dynamic_data(dict_data):
     # worksheet.set_h_pagebreaks([4])
 
     date_format = workbook.add_format({'num_format': 'd-mmm-yy'})
-    money = workbook.add_format({'num_format': '#,##0 '})
+    format1 = workbook.add_format()
+    format1.set_num_format('0.000')
+    money = workbook.add_format({'num_format': '#,## '})
     style_def = workbook.add_format({})
     rowx = 1
     end_colx = len(headers) - 1
@@ -157,6 +159,62 @@ def export_dynamic_data(dict_data):
     try:
         workbook.close()
         # workbook.save(file_name)
+        openFile(file_name)
+    except Exception as e:
+        print(e)
+
+
+def xexport_dynamic_data(dict_data):
+    from openpyxl import Workbook
+    from openpyxl.worksheet.table import Table, TableStyleInfo
+
+    wb = Workbook()
+    ws = wb.active
+
+    organization = Organization.get(id=1)
+
+    file_name = "{}.xlsx".format(dict_data.get("file_name"))
+    headers = dict_data.get("headers")
+    sheet_name = str(dict_data.get("sheet"))
+    title = str(dict_data.get("title"))
+    data = dict_data.get("data")
+    widths = dict_data.get("widths")
+    date_ = str(dict_data.get("date"))
+    extend_rows = dict_data.get("extend_rows")
+    others = dict_data.get("others")
+    footers = dict_data.get("footers")
+    exclude_row = dict_data.get("exclude_row")
+    format_money = dict_data.get("format_money")
+
+    # add column headings. NB. these must be strings
+    ws.append(headers)
+    for row in data:
+        print(row)
+        ws.append(row)
+
+    dict_alph = {
+        1: "A",
+        2: "C",
+        3: "D",
+        4: "E",
+        5: "F",
+        6: "G",
+        7: "H",
+        8: "I",
+    }
+    REF = "A1:{}{}".format(dict_alph.get(len(headers)), len(data) + 1)
+    print(REF)
+    tab = Table(displayName="Table1", ref=REF)
+
+    # Add a default style with striped rows and banded columns
+    style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
+                           showLastColumn=False, showRowStripes=True, showColumnStripes=True)
+    tab.tableStyleInfo = style
+    ws.add_table(tab)
+    wb.save(file_name)
+
+    try:
+        wb.close()
         openFile(file_name)
     except Exception as e:
         print(e)

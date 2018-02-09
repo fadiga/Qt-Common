@@ -11,9 +11,9 @@ import os
 from datetime import datetime
 
 from PyQt4.QtGui import QFileDialog, QWidget
-from Common.models import DB_FILE, Version
+from Common.models import DB_FILE, Version, Organization
 
-from configuration import Config
+# from configuration import Config
 
 from Common.ui.util import raise_success, raise_error, uopen_file, get_lcse_file
 
@@ -24,7 +24,7 @@ def export_database_as_file():
 
     destination = QFileDialog.getSaveFileName(
         QWidget(), u"Sauvegarder la base de Donnée.",
-        u"Sauvegarde du {} {}.db".format(DATETIME, Config.NAME_ORGA), "*.db")
+        u"Sauvegarde du {} {}.db".format(DATETIME, Organization.get(id=1).name_orga), "*.db")
     if not destination:
         return None
     try:
@@ -45,7 +45,7 @@ def export_backup(folder=None, dst_folder=None):
     directory = str(QFileDialog.getExistingDirectory(
         QWidget(), "Select Directory"))
     path_backup = u"{path}-{date}-{name}".format(path=os.path.join(
-        directory, 'BACKUP'), date=DATETIME, name=Config.NAME_ORGA)
+        directory, 'BACKUP'), date=DATETIME, name=Organization.get(id=1).name_orga)
 
     if not directory:
         return None

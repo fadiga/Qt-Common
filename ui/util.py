@@ -107,6 +107,7 @@ def openFile(file):
 
 
 def uopen_file(filename):
+    print(filename)
     if not os.path.exists(filename):
         raise IOError(u"Fichier %s non valable." % filename)
     subprocess.call('%(cmd)s %(file)s' %
@@ -139,22 +140,24 @@ def raise_success(title, message):
     box.exec_()
 
 
-def formatted_number(number, sep="."):
+def formatted_number(number, sep=".", aftergam=3):
     """ """
     locale_name, encoding = locale.getlocale()
     locale.setlocale(locale.LC_ALL, 'fra')
     fmt = "%s"
     if (isinstance(number, int)):
+        # print("int ", number)
         fmt = u"%d"
     elif(isinstance(number, float)):
-        fmt = u"%.2f"
+        # print("float, ", number)
+        fmt = u"%.{}f".format(aftergam)
 
     try:
         return locale.format(fmt, number, grouping=True).decode(encoding)
     except AttributeError:
         return locale.format(fmt, number, grouping=True)
     except Exception as e:
-        print(e)
+        print("formatted_number : ", e)
         return "%s" % number
 
 
@@ -189,7 +192,7 @@ def is_float(val):
         val = val.replace(',', '.').replace(' ', '').replace('\xa0', '')
         return float(val)
     except Exception as e:
-        print("is_float", e)
+        # print("is_float", e)
         return 0
 
 
@@ -332,7 +335,7 @@ def is_valide_mac():
         lcse = License.get(License.code == str(make_lcse())).can_use()
     except Exception as e:
         print("/!\ invalide license.")
-        print(e)
+        # print(e)
 
     return lcse
 

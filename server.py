@@ -21,6 +21,10 @@ class Network(QObject):
 
         QObject.__init__(self, parent)
 
+        if not Config.SERV:
+            print("Not Serveur ")
+            return
+
     #     self.t = TaskThreadServer(self)
     #     # QObject.connect(self.t, SIGNAL("rsp_server()"), self.rsp_server)
     #     self.t.start()
