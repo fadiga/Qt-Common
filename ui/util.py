@@ -331,6 +331,9 @@ def is_valide_mac():
     """ check de license """
     from Common.models import License
     lcse = CConstants.IS_EXPIRED
+    # print(lcse)
+    if License.select(License.can_expired == 0).count() > 0:
+        return CConstants.OK
     try:
         lcse = License.get(License.code == str(make_lcse())).can_use()
     except Exception as e:

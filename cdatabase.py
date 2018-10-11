@@ -13,6 +13,7 @@ from Common.models import (
 class AdminDatabase(object):
 
     LIST_CREAT = [History, Owner, Organization, License, Version, FileJoin]
+    CREATE_DB = True
 
     def create_all_or_pass(self, drop_tables=False):
         did_create = False

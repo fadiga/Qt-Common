@@ -12,6 +12,7 @@ from configuration import Config
 from Common.exports import export_database_as_file, export_backup, import_backup
 from Common.ui.common import FWidget
 from Common.ui.license_view import LicenseViewWidget
+from Common.ui.clean_db import DBCleanerWidget
 from Common.models import Organization
 from Common.ui.qss import dict_style
 
@@ -31,6 +32,8 @@ class FMenuBar(QMenuBar, FWidget):
 
         backup.addAction(u"Sauvegarder", self.goto_export_db)
         backup.addAction(u"Importer", self.goto_import_backup)
+        backup.addAction(
+            u"Suppression de tout les enregistrements", self.goto_clean_db)
 
         # Comptes utilisateur
         admin = self.file_.addMenu(u"Outils")
@@ -107,6 +110,9 @@ class FMenuBar(QMenuBar, FWidget):
         # u"<h3>Cette fonction n'est pas fini... </h3>")
         import_backup(folder=Config.des_image_record,
                       dst_folder=Config.ARMOIRE)
+
+    def goto_clean_db(self):
+        self.open_dialog(DBCleanerWidget, modal=True)
     # Admin
 
     def goto_admin(self):

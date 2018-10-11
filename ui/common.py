@@ -371,7 +371,7 @@ class Deleted_btt(Button):
                 padding:6px 24px;
                 text-decoration:none;
                 """
-        # self.setStyleSheet(css)
+        self.setStyleSheet(css)
 
 
 class Warning_btt(Button):
@@ -392,7 +392,7 @@ class Warning_btt(Button):
                     padding:6px 24px;
 
                 """
-        # self.setStyleSheet(css)
+        self.setStyleSheet(css)
 
 
 class Button_save(Button):

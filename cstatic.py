@@ -45,6 +45,10 @@ class CConstants(object):
     APP_DATE = u"02/2013"
     APP_VERSION = "1.7"
     DEBUG = False
+    # DEBUG = True
+
+    SERV = None
+    list_models = []
     APP_LOGO = os.path.join(img_cmedia, "logo.png")
     APP_LOGO_ICO = os.path.join(img_cmedia, "logo.ico")
     ExportFolders = []

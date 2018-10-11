@@ -2,12 +2,11 @@
 #                             #
 #  Coded By: Saurabh Joshi    #
 #  Original: 12/10/12         #
-#  Date Modified: 24/07/15    #
+#  Date Modified: 20/05/18    #
 #  modif by: Fadiga Ibrahima  #
 #  File: Notification System  #
 ###############################
 
-import sys
 from PyQt4 import QtCore, QtGui
 import time
 
@@ -23,7 +22,7 @@ except Exception as e:
 class Notification(QtGui.QWidget):
     closed = QtCore.pyqtSignal()
 
-    def __init__(self, mssg,  parent=None, type_mssg="", *args, **kwargs):
+    def __init__(self, mssg, parent=None, type_mssg="", *args, **kwargs):
         super(Notification, self).__init__(parent=parent, *args, **kwargs)
 
         self.mssg = str(mssg)
@@ -39,20 +38,21 @@ class Notification(QtGui.QWidget):
 
         css = """ color: white; background: {}; """.format(background)
         self.setStyleSheet(css)
-        self.createNotification()
+        self.create_notification()
         self.show()
 
-    def createNotification(self):
-        # print("createNotification")
-        global OS
+    def create_notification(self):
+        # print("create_notification")
         if (OS != 1):
             user32 = windll.user32
             # Get X coordinate of screen
             self.x = user32.GetSystemMetrics(0)
+            self.x = user32.GetSystemMetrics(0) / 2
+
         else:
             cp = QtGui.QDesktopWidget().availableGeometry()
             self.x = cp.width()
-        self.y = 2
+        self.y = 1
         # Set the opacity
         self.f = 1.0
 
@@ -60,6 +60,8 @@ class Notification(QtGui.QWidget):
         self.workThread = WorkThread(self)
         self.connect(
             self.workThread, QtCore.SIGNAL("update(QString)"), self.animate)
+        self.connect(
+            self.workThread, QtCore.SIGNAL("update2(QString)"), self.animate2)
         self.connect(
             self.workThread, QtCore.SIGNAL("vanish(QString)"), self.disappear)
         self.connect(self.workThread, QtCore.SIGNAL("finished()"), self.done)
@@ -84,11 +86,16 @@ class Notification(QtGui.QWidget):
         self.setWindowOpacity(self.f)
         return
 
-    #Move in animation
+    # Move in animation
+
     def animate(self):
-        # print(x)
         self.move(self.x, self.y)
-        self.x -= 1
+        self.y += 1
+        return
+
+    def animate2(self):
+        self.move(self.x, self.y)
+        self.y -= 1
         return
 
 # The Worker
@@ -103,10 +110,13 @@ class WorkThread(QtCore.QThread):
         while True:
             # Bring em in :D
             for i in range(336):
-                time.sleep(0.0001)
+                time.sleep(0.001)
                 self.emit(QtCore.SIGNAL('update(QString)'), "ping")
+            for j in range(336):
+                time.sleep(0.001)
+                self.emit(QtCore.SIGNAL('update2(QString)'), "ping")
             # Hide u bitch :P
             for j in range(50):
-                time.sleep(0.1)
+                time.sleep(0.2)
                 self.emit(QtCore.SIGNAL('vanish(QString)'), "ping")
             return
