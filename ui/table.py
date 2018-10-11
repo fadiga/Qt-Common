@@ -405,7 +405,7 @@ class FlexibleWidget(QTableWidgetItem):
     def __init__(self, *args, **kwargs):
         super(FlexibleWidget, self).__init__(*args, **kwargs)
 
-        #self.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        self.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
 
         self.setFlags(Qt.ItemIsEnabled |
                       Qt.ItemIsSelectable |
@@ -428,8 +428,7 @@ class TotalsWidget(QTableWidgetItem):
         self.setFont(font)
 
         self.setFlags(Qt.ItemIsEnabled |
-                      Qt.ItemIsSelectable |
-                      Qt.ItemIsEditable)
+                      Qt.ItemIsSelectable | Qt.ItemIsEditable)
 
     def live_refresh(self):
         pass

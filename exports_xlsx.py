@@ -134,10 +134,11 @@ def export_dynamic_data(dict_data):
             worksheet.write(rowx, col, val, money)
         rowx += 1
     if footers:
-        rowx += 2
+        rowx += 1
         for s_col, e_col, val in footers:
             worksheet.merge_range('{}{}:{}{}'.format(s_col, rowx, e_col, rowx),
                                   val, workbook.add_format(style_label))
+            rowx += 1
         rowx += 1
     if others:
         for pos, pos2, val in others:
