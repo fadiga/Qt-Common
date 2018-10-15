@@ -9,26 +9,45 @@ import os
 import time
 import hashlib
 import peewee
-import datetime
+# from peewee_migrate import Router
+from datetime import timedelta, datetime
+from playhouse.migrate import (
+    SqliteMigrator, migrate, CharField, BooleanField, DateTimeField)
 
-
-from datetime import datetime
-
-from playhouse.migrate import *
-from Common.check_mac import get_mac
-from Common.ui.util import get_path, copy_file
+from playhouse.migrate import SqliteMigrator
+from Common.ui.util import copy_file
 
 DB_FILE = "database.db"
 
 print("Peewee version : " + peewee.__version__)
 
 
+NOW = datetime.now()
+
+
 dbh = peewee.SqliteDatabase(DB_FILE)
-# migrator = SqliteMigrator(dbh)
+migrator = SqliteMigrator(dbh)
 
-dbh.connect()
+list_migrate = [
+    ('License', 'code', CharField(default="")),
+    ('Organization', 'devise', CharField(default="xof")),
+    ('Organization', 'theme', CharField(default="Theme systeme")),
+    ('Organization', 'is_login', BooleanField(default=True)),
+    ('License', 'update_date', DateTimeField(default=NOW))]
 
-NOW = datetime.datetime.now()
+try:
+    from migrations import make_migrate
+    list_migrate += make_migrate()
+except Exception as e:
+    print(e)
+
+for x, y, z in list_migrate:
+    try:
+        migrate(migrator.add_column(x, y, z))
+        print(x, " : ", y)
+    except Exception as e:
+        print(e)
+        # raise e
 
 
 class BaseModel(peewee.Model):
@@ -53,6 +72,7 @@ class FileJoin(BaseModel):
 
     class Meta:
         ordering = (('file_name', 'desc'))
+        # db_table = 'file_join'
 
     file_name = peewee.CharField(max_length=200, null=True)
     file_slug = peewee.CharField(max_length=200, null=True, unique=True)
@@ -128,6 +148,10 @@ class Owner(BaseModel):
     """ The web user who is also owner of the Organization
     """
 
+    class Meta:
+        ordering = (('username', 'desc'))
+        # db_table = 'owner'
+
     USER = u"Utilisateur"
     ADMIN = u"Administrateur"
     ROOT = u"superuser"
@@ -165,6 +189,7 @@ class Owner(BaseModel):
 class Organization(BaseModel):
 
     """docstring for Organization"""
+
     PREV = 0
     CURRENT = 1
     DEFAULT = 2
@@ -172,12 +197,24 @@ class Organization(BaseModel):
                (DEFAULT, u"Par defaut"),
                (CURRENT, u"Actuel"),)
 
+    USA = "dollar"
+    XOF = "xof"
+    EURO = "euro"
+    DEVISE = {
+        USA: "$",
+        XOF: "F",
+        EURO: "€"
+    }
+
     slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
+    is_login = peewee.BooleanField(default=True)
+    theme = peewee.CharField(default=1)
     name_orga = peewee.CharField(verbose_name=(""))
     phone = peewee.IntegerField(null=True, verbose_name=(""))
     bp = peewee.CharField(null=True, verbose_name=(""))
     email_org = peewee.CharField(null=True, verbose_name=(""))
     adress_org = peewee.TextField(null=True, verbose_name=(""))
+    devise = peewee.CharField(choices=DEVISE, default=XOF)
     # file_join = peewee.ForeignKeyField(
     #     FileJoin, null=True, verbose_name=("image de la societe"))
 
@@ -203,65 +240,56 @@ class Organization(BaseModel):
 class License(BaseModel):
 
     code = peewee.CharField(unique=True)
-    isactivated = peewee.BooleanField(default=True)
+    isactivated = peewee.BooleanField(default=False)
     activation_date = peewee.DateTimeField(default=NOW)
     can_expired = peewee.BooleanField(default=False)
     expiration_date = peewee.DateTimeField(null=True)
     owner = peewee.CharField(default="USER")
+    update_date = peewee.DateTimeField(default=NOW)
 
     def __str__(self):
         return self.code
 
-    def get_or_create(self):
+    def check_key(self):
+        return
 
-        try:
-            return License().get(id=1)
-        except Exception as e:
-            print(e)
-            lcce = License.create(
-                code="Evaluton", owner=Owner().get(id=1),
-                expiration_date=NOW + datetime.timedelta(
-                    days=30, milliseconds=4))
-            return lcce
-        except:
-            pass
+    @property
+    def is_expired(self):
+        return NOW > self.expiration_date if self.expiration_date else True
 
     def can_use(self):
-        if self.can_expired:
-            return NOW < self.expiration_date
+        from cstatic import CConstants
+        if not self.isactivated:
+            if self.can_expired:
+                return CConstants.OK if not self.is_expired else CConstants.IS_EXPIRED
+            else:
+                return CConstants.IS_NOT_ACTIVATED
         else:
-            return True
+            return CConstants.OK
 
+    def activation(self):
+        self.isactivated = True
+        self.can_expired = False
+        self.save()
 
-class SettingsAdmin(BaseModel):
+    def deactivation(self):
+        self.isactivated = False
+        self.save()
 
-    """docstring for SettingsAdmin"""
+    def get_evaluation(self):
+        self.can_expired = True
+        self.expiration_date = datetime.now() + timedelta(
+            days=60, milliseconds=4)
+        self.save()
 
-    user = peewee.CharField(default="User")
-    date = peewee.DateTimeField(default=NOW)
-    license = peewee.CharField(default=None, null=True)
-    login = peewee.BooleanField(default=True)
-    tolerance = peewee.IntegerField(default=360)
-    style_number = peewee.IntegerField(default=1)
-
-    def __str__(self):
-        return self.display_name()
-
-    def display_name(self):
-        return u"{}/{}/{}".format(self.user, self.date, self.license)
-
-    def get_or_create(self):
-
-        try:
-            return SettingsAdmin().get(id=1)
-        except Exception as e:
-            print(e)
-            return SettingsAdmin.create(user=Owner().get(id=1))
-        except:
-            pass
+    def remove_activation(self):
+        self.can_expired = True
+        self.expiration_date = datetime.now() - timedelta(days=1)
+        self.save()
 
 
 class Version(BaseModel):
+
     date = peewee.DateTimeField(
         default=NOW, verbose_name="Date de Version")
     number = peewee.IntegerField(default=1, verbose_name="Numéro de Version")
@@ -279,7 +307,7 @@ class Version(BaseModel):
         self.save()
 
 
-class History(object):
+class History(BaseModel):
 
     date = peewee.DateTimeField(default=NOW)
     data = peewee.CharField()

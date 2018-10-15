@@ -14,7 +14,7 @@ from __future__ import (
 import platform
 import os
 
-from Common.models import SettingsAdmin
+from Common.models import Organization
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -44,13 +44,17 @@ def load_stylesheet(file_qss):
         return stylesheet
 
 
-dict_style = {1: ["Theme systeme", ""],
-              2: ["Dark", load_stylesheet("dark")],
-              3: ["DSView", load_stylesheet("DSView")],
-              4: ["Tangerine", load_stylesheet("tangerine")],
-              5: ["Coffee", load_stylesheet("coffee")],
-              6: ["F", load_stylesheet("fad")],
-              7: ["Fat", load_stylesheet("fat")],
-              }
+def dict_style():
+    return {"Theme systeme": "",
+            "Dark": load_stylesheet("dark"),
+            "DSVie": load_stylesheet("DSView"),
+            "Tangerine": load_stylesheet("tangerine"),
+            "Coffee": load_stylesheet("coffee"),
+            "F": load_stylesheet("fad"),
+            "Fat": load_stylesheet("fat"),
+            }
 
-appStyle = dict_style.get(SettingsAdmin.get(id=1).style_number)[1]
+try:
+    theme = dict_style()[(Organization.get(id=1).theme)]
+except Exception as e:
+    theme = dict_style()["Theme systeme"]

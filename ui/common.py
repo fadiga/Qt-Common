@@ -16,6 +16,7 @@ from PyQt5.QtGui import (QRadialGradient, QPainter, QBrush,
                          QIcon, QPalette, QFont, QColor, QIntValidator, QDoubleValidator,)
 # from PyQt5.QtWebKit import QWebView
 
+from Common.ui.statusbar import GStatusBar
 from configuration import Config
 from Common.periods import Period
 
@@ -30,16 +31,22 @@ class FMainWindow(QMainWindow):
 
     def __init__(self, parent=0, *args, **kwargs):
         QMainWindow.__init__(self)
-
+        print("FMainWindow")
         # self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
-        self.setWindowIcon(QIcon.fromTheme('logo',
-                                           QIcon(u"{}logo.png".format(Config.img_media))))
+        self.setWindowIcon(QIcon.fromTheme(
+            'logo', QIcon(u"{}logo.png".format(Config.img_media))))
+
+        self.statusbar = GStatusBar(self)
+        self.setStatusBar(self.statusbar)
 
         self.wc = self.width()
         self.hc = self.height()
         self.resize(self.wc, self.hc)
-        self.setWindowTitle(Config.NAME_ORGA)
+        self.setWindowTitle(Config.APP_NAME)
         self.setWindowIcon(QIcon(Config.APP_LOGO))
+
+    def set_window_title(self, page_name):
+        self.setWindowTitle(" > ".join([Config.APP_NAME, page_name]))
 
     def resizeEvent(self, event):
         """lancé à chaque redimensionnement de la fenêtre"""
@@ -65,9 +72,9 @@ class FMainWindow(QMainWindow):
         d.exec_()
 
     def logout(self):
-        from Common.models import Owner, SettingsAdmin
+        from Common.models import Owner, Organization
         # print("logout")
-        if SettingsAdmin.get(id=1).login:
+        if Organization.get(id=1).is_login:
             for ur in Owner.select().where(Owner.islog == True):
                 ur.islog = False
                 ur.save()
@@ -370,15 +377,16 @@ class Deleted_btt(Button):
                 padding:6px 24px;
                 text-decoration:none;
                 """
-        # self.setStyleSheet(css)
+        self.setStyleSheet(css)
 
 
 class Warning_btt(Button):
 
     def __init__(self, *args, **kwargs):
         super(Warning_btt, self).__init__(*args, **kwargs)
-        self.setIcon(QIcon.fromTheme('save', QIcon(u"{img_media}{img}".format(img_media=Config.img_media,
-                                                                              img='warning.png'))))
+        self.setIcon(QIcon.fromTheme('save', QIcon(
+            u"{img_media}{img}".format(img_media=Config.img_media,
+                                       img='warning.png'))))
         css = """
                     background-color:#ffec64;
                     border-radius:6px;
@@ -390,7 +398,7 @@ class Warning_btt(Button):
                     padding:6px 24px;
 
                 """
-        # self.setStyleSheet(css)
+        self.setStyleSheet(css)
 
 
 class Button_save(Button):
@@ -398,8 +406,9 @@ class Button_save(Button):
     def __init__(self, *args, **kwargs):
         super(Button_save, self).__init__(*args, **kwargs)
 
-        self.setIcon(QIcon.fromTheme('', QIcon(u"{img_media}{img}".format(img_media=Config.img_media,
-                                                                          img='save.png'))))
+        self.setIcon(QIcon.fromTheme('', QIcon(
+            u"{img_media}{img}".format(img_media=Config.img_media,
+                                       img='save.png'))))
         css = """
         background-color:#dbe6c4;
         border-radius:6px;
@@ -446,24 +455,35 @@ class BttSmall(Button):
         # self.setFixedHeight(30)
 
 
-class BttExportXLS(Button):
+class BttExport(Button):
 
-    def __init__(self, *args, **kwargs):
-        super(BttExportXLS, self).__init__(*args, **kwargs)
-        self.setIcon(QIcon.fromTheme('xls', QIcon(
-            u"{img_media}{img}".format(img_media=Config.img_cmedia, img='xls.png'))))
-        self.setFixedWidth(35)
-        self.setFixedHeight(35)
+    def __init__(self, img, parent=None):
+        super(BttExport, self).__init__()
+
+        self.pixmap = QPixmap(
+            u"{img_media}{img}".format(
+                img_media=Config.img_cmedia, img="{}.png".format(img)))
+        self.setFixedHeight(85)
+        self.setFixedWidth(85)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.drawPixmap(event.rect(), self.pixmap)
+
+    def sizeHint(self):
+        return self.pixmap.size()
 
 
-class BttExportPDF(Button):
+class BttExportXLSX(BttExport):
 
-    def __init__(self, *args, **kwargs):
-        super(BttExportXLS, self).__init__(*args, **kwargs)
-        self.setIcon(QIcon.fromTheme('', QIcon(
-            u"{img_media}{img}".format(img_media=Config.img_cmedia, img='pdf.png'))))
-        self.setFixedWidth(30)
-        self.setFixedHeight(30)
+    def __init__(self, arg):
+        super(BttExportXLSX, self).__init__("xlsx")
+
+
+class BttExportPDF(BttExport):
+
+    def __init__(self, arg):
+        super(BttExportPDF, self).__init__("pdf")
 
 
 # class FLineEdit(QLineEdit):
@@ -496,18 +516,6 @@ class LineEdit(QLineEdit):
 
     def __init__(self, parent=None):
         QLineEdit.__init__(self, parent)
-        css = """
-            QLineEdit {
-            padding: 1px;
-            border-style: solid;
-            border: 1px solid ;
-            color: white;
-            border-radius: 2px;
-            border-color: #4984C7;
-            background-color: #6d6d80;
-            }
-        """
-        # self.setStyleSheet(css)
 
 
 class IntLineEdit(LineEdit):

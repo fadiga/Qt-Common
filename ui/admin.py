@@ -8,19 +8,19 @@ from __future__ import (
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QGridLayout, QSplitter,
                              QFrame, QCheckBox, QMessageBox, QTextEdit, QFormLayout,
-                             QListWidgetItem, QListWidget)
+                             QListWidgetItem, QListWidget, QComboBox)
 from PyQt5.QtGui import (QIcon, QPixmap, QFont)
 
 from Common.ui.user_add_or_edit import NewOrEditUserViewWidget
-from Common.ui.common import (FWidget, FLabel, FBoxTitle, Button,
+from Common.ui.common import (FWidget, FLabel, Button,
                               LineEdit, Button_save, FormLabel, IntLineEdit)
 
 from configuration import Config
 from Common.models import Owner
 
-from Common.models import Organization, SettingsAdmin
+from Common.models import Organization
 from Common.tabpane import tabbox
-from Common.ui.util import (formatted_number, raise_error)
+from Common.ui.util import check_is_empty
 from Common.ui.table import FTableWidget
 
 
@@ -84,10 +84,10 @@ class AdminViewWidget(FWidget):
             self.history_table.refresh_()
 
     def deletedseleted(self):
-        reply = QMessageBox.question(self, 'Suppression definitive',
-                                     self.tr(
-                                         "Voulez vous vraiment le supprimer? "),
-                                     QMessageBox.Yes, QMessageBox.No)
+        reply = QMessageBox.question(
+            self, 'Suppression definitive',
+            self.tr("Voulez vous vraiment le supprimer?"),
+            QMessageBox.Yes, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
             for doc in self.history_table.getSelectTableItems():
@@ -158,29 +158,39 @@ class OrganizationTableWidget(FWidget):
     def __init__(self, parent, *args, **kwargs):
         super(FWidget, self).__init__(parent=parent, *args, **kwargs)
 
-        self.organisation = Organization.get(id=1)
+        self.organization = Organization().get(id=1)
+        print(self.organization)
         self.parent = parent
         vbox = QVBoxLayout()
         # vbox.addWidget(FPageTitle(u"Utilisateur: %s " %
         # self.organisation.name_orga))
 
+        self.liste_devise = Organization.DEVISE
+        # Combobox widget
+        self.box_devise = QComboBox()
+        for index, value in enumerate(self.liste_devise):
+            self.box_devise.addItem(
+                "{} {}".format(self.liste_devise[value], value))
+            if self.organization.devise == value:
+                self.box_devise.setCurrentIndex(index)
+
         self.checked = QCheckBox("Active")
-        if SettingsAdmin.select().where(SettingsAdmin.login == True).count() != 0:
+        if self.organization.is_login:
             self.checked.setCheckState(Qt.Checked)
-        # self.setCellWidget(nb_rows, 2, checked)
         self.checked.setToolTip(u"""Cocher si vous voulez pour deactive
                                 le login continue à utiliser le systeme""")
-        self.name_orga = LineEdit(self.organisation.name_orga)
-        self.phone = IntLineEdit(str(self.organisation.phone))
-        self.bp = LineEdit(self.organisation.bp)
-        self.adress_org = QTextEdit(self.organisation.adress_org)
-        self.email_org = LineEdit(self.organisation.email_org)
+        self.name_orga = LineEdit(self.organization.name_orga)
+        self.phone = IntLineEdit(str(self.organization.phone))
+        self.bp = LineEdit(self.organization.bp)
+        self.adress_org = QTextEdit(self.organization.adress_org)
+        self.email_org = LineEdit(self.organization.email_org)
 
         formbox = QFormLayout()
         formbox.addRow(FormLabel(u"Nom de l'organisation:"), self.name_orga)
-        formbox.addRow(FormLabel(u"Activer le login"), self.checked)
-        formbox.addRow(FormLabel(u"B.P:"), self.bp)
         formbox.addRow(FormLabel(u"Tel:"), self.phone)
+        formbox.addRow(FormLabel(u"Activer le login"), self.checked)
+        formbox.addRow(FormLabel(u"Devise :"), self.box_devise)
+        formbox.addRow(FormLabel(u"B.P:"), self.bp)
         formbox.addRow(FormLabel(u"E-mail:"), self.email_org)
         formbox.addRow(FormLabel(u"Adresse complete:"), self.adress_org)
 
@@ -194,43 +204,31 @@ class OrganizationTableWidget(FWidget):
     def save_edit(self):
         ''' add operation '''
         name_orga = unicode(self.name_orga.text())
-        bp = unicode(self.bp.text())
-        email_org = unicode(self.email_org.text())
-        phone = unicode(self.phone.text())
-        adress_org = unicode(self.adress_org.toPlainText())
+        if check_is_empty(self.name_orga):
+            return
 
-        if self.check_impty:
-            login = False
-            org = Organization.get(id=self.organisation.id)
-            if self.checked.checkState() == Qt.Checked:
-                login = True
-            org.phone = phone
-            org.name_orga = name_orga
-            org.email_org = email_org
-            org.bp = bp
-            org.adress_org = adress_org
-            org.save()
-            sttg = SettingsAdmin.get(id=1)
-            sttg.login = login
-            sttg.save()
-            self.parent.parent.Notify(u"Le Compte %s a été mise à jour" %
-                                      org.name_orga, "success")
-        else:
-            raise_error(u"Error", u"Mot de passe pas correct")
+        if check_is_empty(self.phone):
+            return
 
-    def check_impty(self):
-        flag = False
-        for field in [self.name_orga, self.phone, self.bp, self.email_org]:
-            if field.text() == "":
-                flag = True
-        return flag
+        orga = Organization().get(id=1)
+        orga.name_orga = name_orga
+        orga.phone = unicode(self.phone.text())
+        orga.is_login = True if self.checked.checkState() == Qt.Checked else False
+        orga.devise = str(self.box_devise.currentText().split()[1])
+        orga.email_org = unicode(self.email_org.text())
+        orga.bp = unicode(self.bp.text())
+        orga.adress_org = unicode(self.adress_org.toPlainText())
+        orga.save()
+        print(orga.is_login)
+        self.parent.parent.Notify(u"Le Compte %s a été mise à jour" %
+                                  orga.name_orga, "success")
 
 
 class LoginManageWidget(FWidget):
 
     def __init__(self, parent, *args, **kwargs):
         super(FWidget, self).__init__(parent=parent, *args, **kwargs)
-        self.parentWidget().setWindowTitle(Config.NAME_ORGA + u"  Gestion ")
+        self.parentWidget().setWindowTitle("Utilisateur")
         self.parent = parent
 
         self.table_owner = OwnerTableWidget(parent=self)

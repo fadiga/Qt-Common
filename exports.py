@@ -11,9 +11,9 @@ import os
 from datetime import datetime
 
 from PyQt5.QtWidgets import QFileDialog, QWidget
-from Common.models import DB_FILE, Version
+from Common.models import DB_FILE, Version, Organization
 
-from configuration import Config
+# from configuration import Config
 
 from Common.ui.util import raise_success, raise_error, uopen_file, get_lcse_file
 
@@ -21,9 +21,10 @@ DATETIME = "{}".format(datetime.now().strftime('%d-%m-%Y-%Hh%M'))
 
 
 def export_database_as_file():
+
     destination = QFileDialog.getSaveFileName(
         QWidget(), u"Sauvegarder la base de Donnée.",
-        u"Sauvegarde du {} {}.db".format(DATETIME, Config.NAME_ORGA), "*.db")
+        u"Sauvegarde du {} {}.db".format(DATETIME, Organization.get(id=1).name_orga), "*.db")
     if not destination:
         return None
     try:
@@ -44,7 +45,7 @@ def export_backup(folder=None, dst_folder=None):
     directory = str(QFileDialog.getExistingDirectory(
         QWidget(), "Select Directory"))
     path_backup = u"{path}-{date}-{name}".format(path=os.path.join(
-        directory, 'BACKUP'), date=DATETIME, name=Config.NAME_ORGA)
+        directory, 'BACKUP'), date=DATETIME, name=Organization.get(id=1).name_orga)
 
     if not directory:
         return None
@@ -97,8 +98,5 @@ def copyanything(src, dest):
 
 def export_license_as_file():
 
-    # from Common.models import SettingsAdmin
-    # fil = os.path.join(os.path.dirname(os.path.abspath('__file__')), LICENCE)
-    # settg = SettingsAdmin().get(id=1)
     fil = get_lcse_file()
     uopen_file(fil)

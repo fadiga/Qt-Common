@@ -1,0 +1,600 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"re",
+				"request"
+			],
+			[
+				"h",
+				"h1\tTag"
+			],
+			[
+				"M",
+				"Member"
+			],
+			[
+				"te",
+				"timedelta"
+			],
+			[
+				"da",
+				"datetime"
+			],
+			[
+				"p",
+				"poll"
+			],
+			[
+				"o",
+				"organization"
+			],
+			[
+				"l",
+				"location"
+			],
+			[
+				"s",
+				"sburl"
+			],
+			[
+				"r",
+				"rps"
+			],
+			[
+				"B",
+				"BASE_DIR"
+			],
+			[
+				"nu",
+				"null"
+			],
+			[
+				"n",
+				"null"
+			],
+			[
+				"get",
+				"get_qrcode"
+			],
+			[
+				"q",
+				"get_qrcode"
+			],
+			[
+				"u",
+				"url"
+			],
+			[
+				"S",
+				"SmallNotice"
+			],
+			[
+				"con",
+				"Contract"
+			],
+			[
+				"c",
+				"Contracts"
+			],
+			[
+				"ma",
+				"CallForTenderManager"
+			],
+			[
+				"ve",
+				"verbose_name_plural"
+			],
+			[
+				"ver",
+				"verbose_name"
+			],
+			[
+				"f",
+				"filter"
+			],
+			[
+				"C",
+				"CharField"
+			],
+			[
+				"F",
+				"ForeignKey"
+			],
+			[
+				"I",
+				"I"
+			],
+			[
+				"va",
+				"validated"
+			],
+			[
+				"Comm",
+				"CommentInline"
+			],
+			[
+				"vr",
+				"verbose_name_plural"
+			],
+			[
+				"small",
+				"small_notice"
+			],
+			[
+				"def",
+				"default"
+			],
+			[
+				"v",
+				"verbose_name"
+			],
+			[
+				"Da",
+				"DateTimeField"
+			],
+			[
+				"t",
+				"tbody\tTag"
+			],
+			[
+				"tex",
+				"text-align"
+			],
+			[
+				"b",
+				"blank"
+			],
+			[
+				"di",
+				"div\tTag"
+			],
+			[
+				"fo",
+				"forms"
+			],
+			[
+				"de",
+				"default"
+			],
+			[
+				"m",
+				"models"
+			],
+			[
+				"E",
+				"EmailField"
+			],
+			[
+				"D",
+				"DateField"
+			],
+			[
+				"_",
+				"__str__"
+			],
+			[
+				"N",
+				"Notice"
+			],
+			[
+				"cha",
+				"CharField"
+			],
+			[
+				"J",
+				"Job"
+			],
+			[
+				"dateti",
+				"datetime"
+			],
+			[
+				"date",
+				"date_expired"
+			],
+			[
+				"enq",
+				"enquete_village"
+			],
+			[
+				"na",
+				"name_village"
+			],
+			[
+				"get_",
+				"get_other"
+			],
+			[
+				"for",
+				"format"
+			],
+			[
+				"pu",
+				"pub_date"
+			],
+			[
+				"d",
+				"div\tTag"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 400.0,
+		"last_filter": "Package Control: ",
+		"selected_items":
+		[
+			[
+				"Package Control: ",
+				"Package Control: Install Package"
+			],
+			[
+				"in",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 493.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/fad/projects/DJANGO/ultdk/superdk/settings.py",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/settings.py",
+		"/Users/fad/projects/DJANGO/ultdk/ultdk/forms.py",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/settings_local.py",
+		"/Users/fad/projects/DJANGO/kibaru/poll/templatetags/poll_tags.py",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/site/views.py",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/urls.py",
+		"/Users/fad/projects/DJANGO/kibaru/poll/models.py",
+		"/Users/fad/projects/DJANGO/kibaru/poll/templates/poll/poll.html",
+		"/Users/fad/projects/DJANGO/job/job/templates/user_new.html",
+		"/Users/fad/projects/DJANGO/job/job/admin.py",
+		"/Users/fad/projects/DJANGO/NCTT/requirement.pip",
+		"/Users/fad/projects/DJANGO/job/job/settings_local.example.py",
+		"/Users/fad/projects/DJANGO/job/job/templates/organization_manager.html",
+		"/Users/fad/projects/DJANGO/job/job/urls.py",
+		"/Users/fad/projects/DJANGO/job/job/static/js/counter.js",
+		"/Users/fad/projects/DJANGO/job/job/templates/_small_notice.html",
+		"/Users/fad/projects/DJANGO/job/job/forms.py",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/administration/__menu.html",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/site/_thumbnail_footer.html",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/site/__videos.html",
+		"/Users/fad/projects/DJANGO/job/job/models.py",
+		"/Users/fad/projects/DJANGO/job/job/templates/base.html",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/site/urls.py",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/_css_tags.html",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/administration/proposition_price.html",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/site/_banner.html",
+		"/Users/fad/projects/DJANGO/Doctix/doctix/models.py",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/site/index_publicity.html",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/static/kibaru.css",
+		"/Users/fad/projects/DJANGO/job/deployment.fad",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/administation/urls.py",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/administation/views.py",
+		"/Users/fad/projects/DJANGO/Doctix/doctix/views.py",
+		"/Users/fad/projects/DJANGO/job/job/templates/notice_new.html",
+		"/Users/fad/projects/DJANGO/job/job/templates/small_notice_manager.html",
+		"/Users/fad/projects/DJANGO/job/job/templates/notice_view.html",
+		"/Users/fad/projects/DJANGO/job/job/templates/small_notices_view.html",
+		"/Users/fad/projects/DJANGO/job/job/templates/user_manager.html",
+		"/Users/fad/projects/DJANGO/job/job/templates/user_change.html",
+		"/Users/fad/projects/DJANGO/job/job/templates/organization_new.html",
+		"/Users/fad/projects/DJANGO/job/job/templates/index.html",
+		"/Users/fad/projects/DJANGO/job/job/static/js/job.js",
+		"/Users/fad/Documents/Professional/Me/template CV Fad.tex",
+		"/Users/fad/projects/DJANGO/job/job/templates/organization_view.html",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/site/article_detail.html",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/static/kibaru_ar.css",
+		"/Volumes/DL/incoming/.move_and_clean.py",
+		"/Volumes/fad/M YLM/OUTIL NEW SYS/static ip",
+		"/Volumes/fad/M YLM/OUTIL NEW SYS/dev env necessai",
+		"/Volumes/fad/M YLM/OUTIL NEW SYS/INSTALL.txt",
+		"/Volumes/fad/M YLM/OUTIL NEW SYS/devel-requirements.pip",
+		"/Volumes/fad/M YLM/OUTIL NEW SYS/install ubuntu",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/site/_sticky.html",
+		"/Users/fad/projects/DJANGO/job/job/static/job.css",
+		"/Users/fad/Documents/Professional/Me/%% start of file `template.tex'.",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/admin.py",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/site/index.html",
+		"/Users/fad/projects/DJANGO/job/job/static/menu.css",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/404.html",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/_js_tags.html",
+		"/Users/fad/Library/Application Support/Sublime Text 3/Packages/Python Flake8 Lint/Flake8Lint.sublime-settings",
+		"/Users/fad/Library/Application Support/Sublime Text 3/Packages/AutoPEP8/AutoPep8.sublime-settings",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/site/about.html",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/models.py",
+		"/Users/fad/projects/DJANGO/kibaru/media/navbar.css",
+		"/Users/fad/projects/DJANGO/kibaru/media/kibaru.css",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/site/about_fr.html",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/site/about_ar.html",
+		"/Users/fad/projects/DJANGO/kibaru/kibaru/templates/site/_thumbnail_right.html",
+		"/Users/fad/projects/DJANGO/Doctix/doctix/urls.py",
+		"/Users/fad/.bashrc",
+		"/Users/fad/.config/fish/config.fish",
+		"/Volumes/fad/M PERSO/License sublime"
+	],
+	"find":
+	{
+		"height": 29.0
+	},
+	"find_in_files":
+	{
+		"height": 376.0,
+		"where_history":
+		[
+			"/Users/fad/projects/DJANGO/job/job",
+			"*.py"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"dasboard",
+			"ROOT_PATH",
+			"BASE_DIR",
+			"set_cookie",
+			"UserCreationForm",
+			"UserChangeForm",
+			"UserAdmin",
+			"is_admin",
+			"ImageField",
+			"image",
+			"partial",
+			"job",
+			"2",
+			"12",
+			"4",
+			"12",
+			"om",
+			"sond",
+			"timedelta",
+			"new",
+			"views",
+			"datetime",
+			"__",
+			"__l",
+			"__lg",
+			"views",
+			"poll",
+			"com",
+			"your-site",
+			"your-site.com ",
+			"docwp",
+			"-{}-{}",
+			"poll",
+			"Poll",
+			"get_qrcode",
+			"ROOT_DIR",
+			"BASE_DIR",
+			"\"Nom\"",
+			"slug",
+			"social_share",
+			"get_body_twitte",
+			"settings",
+			",",
+			"Organization",
+			"Notice",
+			"Event",
+			"Calendar",
+			"BASE_DIR",
+			"my_systemd_script",
+			"dtx",
+			"Dtx",
+			"doctix",
+			"home",
+			"SmallNoticeForm",
+			"small_notice_form",
+			"_small_notice",
+			"tenders",
+			"notice",
+			"Notice",
+			"CallForTender",
+			"Adresse",
+			"todayHighlight",
+			"timezone",
+			"datetimepicker",
+			"1",
+			"contract",
+			"datetimepicker",
+			"datepicker",
+			"notice_u",
+			"notice_url",
+			"notice_ne",
+			"notice_form",
+			"url_notice",
+			"notice",
+			"notice_url",
+			"url",
+			"_",
+			"NewcallForTenderForm",
+			"notice_form",
+			"notice",
+			"category",
+			"full_name",
+			"Locality",
+			"LocalityAdmin",
+			"IN",
+			"Category",
+			"Contract",
+			"Category",
+			"TYPE_CONTRACT",
+			"NoticeManager",
+			"CallForTender",
+			"type_notice",
+			"Locality",
+			"locality",
+			"type_notice",
+			"Locality",
+			"http://www.youtube.com/v/gb7A2nLaG1Q",
+			"\n                        <div style=\"margin-top: 9px;margin-bottom: 3em;\"\"><img src=\"https://fakeimg.pl/605x140/\"><h1 class=\"pub\"> B </h1></div>",
+			"LoginForm",
+			"Category",
+			"600",
+			"000",
+			"Accueil",
+			"\n        <th>",
+			"80",
+			"144",
+			"lib",
+			"libr",
+			"libre",
+			"img",
+			"120",
+			"144",
+			"800",
+			"X",
+			"\n        <td",
+			"<td>400 000</td>",
+			"\n        ",
+			"job",
+			"CommentInline",
+			"CommentNotice",
+			"Locality",
+			"N",
+			"Notice",
+			"timezone",
+			"not_expired",
+			"date_expired",
+			"NoticeManager",
+			"home"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"organization_new",
+			"user_new",
+			"notice_new",
+			"\nfrom __future__ import (absolute_import, division,\n                        print_function, unicode_literals)"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 29.0
+	},
+	"input":
+	{
+		"height": 38.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.autopep8":
+	{
+		"height": 140.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "models.sublime-project",
+	"replace":
+	{
+		"height": 54.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 275.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

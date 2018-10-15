@@ -13,7 +13,8 @@ from configuration import Config
 from Common.exports import export_database_as_file, export_backup, import_backup
 from Common.ui.common import FWidget
 from Common.ui.license_view import LicenseViewWidget
-from Common.models import SettingsAdmin
+from Common.ui.clean_db import DBCleanerWidget
+from Common.models import Organization
 from Common.ui.qss import dict_style
 
 
@@ -32,6 +33,8 @@ class FMenuBar(QMenuBar, FWidget):
 
         backup.addAction(u"Sauvegarder", self.goto_export_db)
         backup.addAction(u"Importer", self.goto_import_backup)
+        backup.addAction(
+            u"Suppression de tout les enregistrements", self.goto_clean_db)
 
         # Comptes utilisateur
         admin = self.file_.addMenu(u"Outils")
@@ -54,19 +57,18 @@ class FMenuBar(QMenuBar, FWidget):
 
         preference = self.addMenu(u"Préference")
         _theme = preference.addMenu("Theme")
-        list_theme = [({"name": dict_style[k][0], "icon": '', "admin": False,
-                        "shortcut": "", "style_number": k}) for k in dict_style]
+        styles = dict_style()
+        list_theme = [({"name": k, "icon": '', "admin": False,
+                        "shortcut": "", "theme": k}) for k in styles.keys()]
 
         for m in list_theme:
             icon = ""
-            if int(m.get('style_number')) == SettingsAdmin.get(id=1).style_number:
+            if m.get('theme') == Organization.get(id=1).theme:
                 icon = "accept"
             el_menu = QAction(QIcon("{}{}.png".format(
                 Config.img_cmedia, icon)), m.get('name'), self)
             el_menu.setShortcut(m.get("shortcut"))
-
-            # el_menu.triggered.connect(
-            #     lambda m=m: self.change_theme(int(m.get('style_number'))))
+            el_menu.triggered.connect(lambda m=m: self.change_theme(int(m.get('style_number'))))
             # self.connect(
             #     el_menu, pyqtSignal("triggered()"), lambda m=m: self.change_theme(
             #         int(m.get('style_number'))))
@@ -118,6 +120,9 @@ class FMenuBar(QMenuBar, FWidget):
         # u"<h3>Cette fonction n'est pas fini... </h3>")
         import_backup(folder=Config.des_image_record,
                       dst_folder=Config.ARMOIRE)
+
+    def goto_clean_db(self):
+        self.open_dialog(DBCleanerWidget, modal=True)
     # Admin
 
     def goto_admin(self):
@@ -128,14 +133,11 @@ class FMenuBar(QMenuBar, FWidget):
     def goto_license(self):
         self.open_dialog(LicenseViewWidget, modal=True)
 
-    def change_theme(self, style_number):
-        sttg = SettingsAdmin.get(id=1)
-        sttg.style_number = style_number
+    def change_theme(self, theme):
+        sttg = Organization.get(id=1)
+        sttg.theme = theme
         sttg.save()
         self.restart()
-
-    # def choise_theme(self):
-    #     from models import SettingsAdmin
 
     def restart(self):
         import subprocess
@@ -167,6 +169,8 @@ class FMenuBar(QMenuBar, FWidget):
 
     # About
     def goto_about(self):
+        from Common.models import Organization
+        org = Organization.get(id=1)
         QMessageBox.about(self, u"À propos",
                           u""" <h2>{app_name}  version: {version_app} </h2>
                             <hr>
@@ -177,21 +181,12 @@ class FMenuBar(QMenuBar, FWidget):
                                 <li><b>E-mail: </b> {email} <br/></li>
                                 <li>{org_out}</li>
                             </ul>
-                            <hr>
-                            <h3>Base de données</h3>
-                            <ul>
-                                <li>Date de mise à jour: {m_date_db}</li>
-                                <li>Version: {version_db}</li>
-                            </ul>
-                            """.format(email=Config.EMAIL_AUT,
-                                       app_name=Config.APP_NAME,
-                                       adress=Config.ADRESS_AUT,
-                                       autor=Config.AUTOR,
-                                       version_app=Config.APP_VERSION,
-                                       phone=Config.TEL_AUT,
-                                       org_out=Config.ORG_AUT,
-                                       version_db=Config.DB_VERS.display_name(),
-                                       m_date_db=Config.DB_VERS.date.strftime(
-                                           "%c")
-                                       )
-                          )
+                            """.format(
+                                email=org.email_org,
+                              app_name=Config.APP_NAME,
+                              adress=org.adress_org,
+                              autor=Config.AUTOR,
+                              version_app=Config.APP_VERSION,
+                              phone=org.phone,
+                              org_out=org.name_orga,
+                          ))

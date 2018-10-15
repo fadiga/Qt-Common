@@ -11,15 +11,17 @@ import locale
 import tempfile
 import subprocess
 import hashlib
+from time import mktime, strptime
 
 from uuid import getnode
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from PyQt5.QtWidgets import QTextEdit, QMessageBox
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QTimer
 from Common.ui.window import FWindow
+from Common.cstatic import CConstants
 
 try:
     unicode
@@ -29,19 +31,20 @@ except NameError:
 
 def device_amount(value, dvs=None):
 
-    from configuration import Config
+    from Common.models import Organization
     if dvs:
         return "{} {}".format(formatted_number(value), dvs)
 
     try:
-        devise = Config.DEVISE_M
+        organ = Organization().get(id=1)
     except Exception as e:
         print(e)
-
-    if devise == "USD":
-        return "${}".format(formatted_number(value))
-    if devise == "XOF":
-        return "{} F".format(formatted_number(value))
+    d = organ.DEVISE[organ.devise]
+    v = formatted_number(value)
+    if organ.devise == organ.USA:
+        return "{d}{v}".format(v=v, d=d)
+    else:
+        return "{v} {d}".format(v=v, d=d)
 
 
 def check_is_empty(field):
@@ -69,7 +72,7 @@ def field_error(field, msg):
     return False
 
 
-def check_field(field, msg, condition):
+def is_valide_codition_field(field, msg, condition):
     stylerreur = ""
     flag = False
     field.setToolTip("")
@@ -106,6 +109,7 @@ def openFile(file):
 
 
 def uopen_file(filename):
+    print(filename)
     if not os.path.exists(filename):
         raise IOError(u"Fichier %s non valable." % filename)
     subprocess.call('%(cmd)s %(file)s' %
@@ -138,23 +142,25 @@ def raise_success(title, message):
     box.exec_()
 
 
-def formatted_number(number, sep="."):
+def formatted_number(number, sep=".", aftergam=3):
     """ """
-    # locale_name, encoding = locale.getlocale()
+    locale_name, encoding = locale.getlocale()
     locale.setlocale(locale.LC_ALL, 'fra')
     # print(number)
     fmt = "%s"
     if (isinstance(number, int)):
+        # print("int ", number)
         fmt = u"%d"
     elif(isinstance(number, float)):
-        fmt = u"%.2f"
+        # print("float, ", number)
+        fmt = u"%.{}f".format(aftergam)
 
     try:
         return locale.format(fmt, number, grouping=True).decode(encoding)
     except AttributeError:
         return locale.format(fmt, number, grouping=True)
     except Exception as e:
-        print(e)
+        print("formatted_number : ", e)
         return "%s" % number
 
 
@@ -189,7 +195,7 @@ def is_float(val):
         val = val.replace(',', '.').replace(' ', '').replace('\xa0', '')
         return float(val)
     except Exception as e:
-        print("is_float", e)
+        # print("is_float", e)
         return 0
 
 
@@ -216,8 +222,13 @@ def format_date(dat):
     return '-'.join([year, month, day])
 
 
+def date_to_ts(date):
+    return mktime(strptime(date.strftime(
+        "%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S"))
+
+
 def to_jstimestamp(adate):
-    if not adate is None:
+    if not adate:
         return int(to_timestamp(adate)) * 1000
 
 
@@ -225,7 +236,7 @@ def to_timestamp(dt):
     """
     Return a timestamp for the given datetime object.
     """
-    if not dt is None:
+    if not dt:
         return (dt - datetime(1970, 1, 1)).total_seconds()
 
 
@@ -307,29 +318,42 @@ def getlog(text):
     return "Log-{}".format(text)
 
 
+def internet_on(url):
+    from urllib.request import urlopen, URLError
+    try:
+        urlopen(url, timeout=1)
+        return True
+    except URLError as err:
+        print(err)
+        return False
+    except Exception as e:
+        print(e)
+
+
 def is_valide_mac():
     """ check de license """
     from Common.models import License
-    if len(License.all()) == 0:
-        License.create(
-            can_expired=True, code="Evaluton", owner="Demo",
-            expiration_date=datetime.now() + timedelta(
-                days=30, milliseconds=4))
+    lcse = CConstants.IS_EXPIRED
+    # print(lcse)
+    if License.select(License.can_expired == 0).count() > 0:
+        return CConstants.OK
     try:
-        return License.get(License.code == str(make_lcse())).can_use()
+        lcse = License.get(License.code == str(make_lcse())).can_use()
     except Exception as e:
-        return License.get(License.code == "Evaluton").can_use()
-    else:
-        return False
+        print("/!\ invalide license.")
+        # print(e)
 
-
-def make_lcse(lcse=getnode()):
-    lcse = hashlib.md5(str(lcse).encode('utf-8')).hexdigest()
     return lcse
 
 
 def clean_mac():
     return getnode()
+
+
+def make_lcse(lcse=clean_mac()):
+    # print("lcse:", lcse)
+    lcse = hashlib.md5(str(lcse).encode('utf-8')).hexdigest()
+    return lcse
 
 
 def get_lcse_of_file():
