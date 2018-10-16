@@ -45,16 +45,12 @@ def load_stylesheet(file_qss):
 
 
 def dict_style():
-    return {"Theme systeme": "",
+    return {"Par defaut": "",
             "Dark": load_stylesheet("dark"),
-            "DSVie": load_stylesheet("DSView"),
-            "Tangerine": load_stylesheet("tangerine"),
-            "Coffee": load_stylesheet("coffee"),
-            "F": load_stylesheet("fad"),
-            "Fat": load_stylesheet("fat"),
+            "Blue": load_stylesheet("blue"),
             }
 
 try:
     theme = dict_style()[(Organization.get(id=1).theme)]
 except Exception as e:
-    theme = dict_style()["Theme systeme"]
+    theme = dict_style()["Par defaut"]
