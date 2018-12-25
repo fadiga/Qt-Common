@@ -45,22 +45,21 @@ def device_amount(value, dvs=None):
         return "{v} {d}".format(v=v, d=d)
 
 
-def check_is_empty(field):
-    stylerreur = ""
+def check_is_empty(field, zero=True):
+
+    field.setStyleSheet("")
     flag = False
-    containt = ""
-    # if isinstance(field, )
     field.setToolTip("")
     if isinstance(field, QtGui.QTextEdit):
         containt = field.toPlainText()
     else:
         containt = field.text()
-
     if len(containt) == 0:
-        field.setToolTip("Champs requis")
-        stylerreur = "background-color: #fff79a;"
-        flag = True
-    field.setStyleSheet(stylerreur)
+        flag = not field_error(field, "Champs requis")
+    if not zero and containt == "0":
+        flag = not field_error(
+            field, "La valeur zéro est n'est pas acceptable.")
+
     return flag
 
 
@@ -211,6 +210,26 @@ def is_int(val):
 
 def alerte():
     pass
+
+
+def date_to_str(date):
+    if not date:
+        return None
+    if isinstance(date, str):
+        d, m, y = date.split("/")
+        if len(y) == 4:
+            return "{}-{}-{}".format(y, m, d)
+        else:
+            return date.replace("/", "-")
+    return date.strftime("%Y-%m-%d")
+
+
+def datetime_to_str(date):
+    if not date:
+        return None
+    if isinstance(date, str):
+        return date
+    return date.strftime("%Y-%m-%d %H:%M")
 
 
 def format_date(dat):

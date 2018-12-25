@@ -23,16 +23,23 @@ style_label = {"border": 0}
 style_headers = {"border": 1}
 
 
-def align_style(val):
-    try:
-        int(val)
-        return int_align
-    except ValueError:
-        return str_align
-    except TypeError:
-        return "ERROR"
-    else:
-        return 0
+def colnum_string(n):
+    string = ""
+    while n > 0:
+        n, remainder = divmod(n - 1, 26)
+        string = chr(65 + remainder) + string
+    return string
+
+# def align_style(val):
+#     try:
+#         int(val)
+#         return int_align
+#     except ValueError:
+#         return str_align
+#     except TypeError:
+#         return "ERROR"
+#     else:
+#         return 0
 
 
 def export_dynamic_data(dict_data):
@@ -68,18 +75,6 @@ def export_dynamic_data(dict_data):
     footers = dict_data.get("footers")
     exclude_row = dict_data.get("exclude_row")
     format_money = dict_data.get("format_money")
-    # print(data)
-
-    dict_alph = {
-        1: "A",
-        2: "C",
-        3: "D",
-        4: "E",
-        5: "F",
-        6: "G",
-        7: "H",
-        8: "I",
-    }
 
     if date_ == "None":
         date_ = datetime.now()
@@ -99,29 +94,26 @@ def export_dynamic_data(dict_data):
     end_colx = len(headers) - 1
     if Config.ORG_LOGO:
         worksheet.insert_image(
-            'A1:B2', os.path.join(Config.img_media, Config.ORG_LOGO),
+            'A1:B{}'.format(colnum_string(end_colx)), os.path.join(
+                Config.img_media, Config.ORG_LOGO),
             {'x_offset': 1.5, 'y_offset': 0.5})
         rowx += 6
     else:
-        worksheet.merge_range('A{}:E{}'.format(
-            rowx, rowx), organization.name_orga, workbook.add_format(
+        worksheet.merge_range('A{}:{}{}'.format(
+            rowx, colnum_string(end_colx), rowx), organization.name_orga, workbook.add_format(
             style_org))
         rowx += 1
-        worksheet.merge_range(
-            'A{}:E{}'.format(rowx, rowx), "Adresse : {}".format(
-                organization.adress_org), style_def)
-        rowx += 1
-        worksheet.merge_range('A{}:B{}'.format(
-            rowx, rowx), "BP : {}".format(organization.bp), style_def)
-        worksheet.merge_range(
-            '{}{}:{}{}'.format(dict_alph.get(end_colx - 1),
-                               rowx, dict_alph.get(end_colx), rowx),
-            "E-mail : {}".format(organization.email_org), style_def)
+        worksheet.merge_range('A{}:{}{}'.format(
+            rowx, colnum_string(end_colx), rowx), "{}".format(organization.adress_org or ""), style_def)
         rowx += 1
         worksheet.merge_range(
-            'A{}:{}{}'.format(rowx, dict_alph.get(end_colx - 1), rowx),
-            "Tel : {}".format(organization.phone), style_def)
-        rowx += 2
+            'A{}:{}{}'.format(rowx, colnum_string(end_colx), rowx), "BP : {} E-mail : {} Tel : {}".format(
+                organization.bp or "", organization.email_org or "", organization.phone or ""
+            ), workbook.add_format(style_title))
+        rowx += 1
+    worksheet.merge_range("{}{}:{}{}".format(
+        colnum_string(end_colx - 2), rowx, colnum_string(end_colx), rowx), "Le {}".format(date_.strftime("%x")), date_format)
+    rowx += 1
     for col in widths:
         w = (120 / len(headers))
         worksheet.set_column(col, col, w)
@@ -130,12 +122,9 @@ def export_dynamic_data(dict_data):
     if format_money:
         for col_str in format_money:
             worksheet.set_column(col_str, 18, money)
-    rowx += 1
-    worksheet.merge_range("D{}:{}{}".format(
-        rowx, dict_alph.get(end_colx), rowx), date_, date_format)
     rowx += 2
     worksheet.add_table(
-        'A{}:{}{}'.format(rowx, dict_alph.get(end_colx), end_row_table),
+        'A{}:{}{}'.format(rowx, colnum_string(end_colx), end_row_table),
         {'autofilter': 0, 'data': data, 'columns': columns})
     rowx = end_row_table
     # rowx += 1
@@ -171,20 +160,20 @@ def xexport_dynamic_data(dict_data):
     wb = Workbook()
     ws = wb.active
 
-    organization = Organization.get(id=1)
+    # organization = Organization.get(id=1)
 
     file_name = "{}.xlsx".format(dict_data.get("file_name"))
     headers = dict_data.get("headers")
-    sheet_name = str(dict_data.get("sheet"))
-    title = str(dict_data.get("title"))
+    # sheet_name = str(dict_data.get("sheet"))
+    # title = str(dict_data.get("title"))
     data = dict_data.get("data")
-    widths = dict_data.get("widths")
-    date_ = str(dict_data.get("date"))
-    extend_rows = dict_data.get("extend_rows")
-    others = dict_data.get("others")
-    footers = dict_data.get("footers")
-    exclude_row = dict_data.get("exclude_row")
-    format_money = dict_data.get("format_money")
+    # widths = dict_data.get("widths")
+    # date_ = str(dict_data.get("date"))
+    # extend_rows = dict_data.get("extend_rows")
+    # others = dict_data.get("others")
+    # footers = dict_data.get("footers")
+    # exclude_row = dict_data.get("exclude_row")
+    # format_money = dict_data.get("format_money")
 
     # add column headings. NB. these must be strings
     ws.append(headers)
@@ -192,17 +181,7 @@ def xexport_dynamic_data(dict_data):
         print(row)
         ws.append(row)
 
-    dict_alph = {
-        1: "A",
-        2: "C",
-        3: "D",
-        4: "E",
-        5: "F",
-        6: "G",
-        7: "H",
-        8: "I",
-    }
-    REF = "A1:{}{}".format(dict_alph.get(len(headers)), len(data) + 1)
+    REF = "A1:{}{}".format(colnum_string(len(headers)), len(data) + 1)
     print(REF)
     tab = Table(displayName="Table1", ref=REF)
 

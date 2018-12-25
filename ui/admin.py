@@ -86,7 +86,7 @@ class AdminViewWidget(FWidget):
     def deletedseleted(self):
         reply = QMessageBox.question(
             self, 'Suppression definitive',
-            self.tr("Voulez vous vraiment le supprimer?"),
+            self.tr("Voulez vous vraiment le supprimer ?"),
             QMessageBox.Yes, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
@@ -159,7 +159,6 @@ class OrganizationTableWidget(FWidget):
         super(FWidget, self).__init__(parent=parent, *args, **kwargs)
 
         self.organization = Organization().get(id=1)
-        print(self.organization)
         self.parent = parent
         vbox = QVBoxLayout()
         # vbox.addWidget(FPageTitle(u"Utilisateur: %s " %
@@ -219,7 +218,7 @@ class OrganizationTableWidget(FWidget):
         orga.bp = unicode(self.bp.text())
         orga.adress_org = unicode(self.adress_org.toPlainText())
         orga.save()
-        print(orga.is_login)
+
         self.parent.parent.Notify(u"Le Compte %s a été mise à jour" %
                                   orga.name_orga, "success")
 
@@ -233,7 +232,6 @@ class LoginManageWidget(FWidget):
 
         self.table_owner = OwnerTableWidget(parent=self)
         self.table_info = InfoTableWidget(parent=self)
-        self.operation = OperationWidget(parent=self)
         # self.operation.
 
         splitter = QSplitter(Qt.Vertical)
@@ -241,38 +239,9 @@ class LoginManageWidget(FWidget):
         _splitter.addWidget(self.table_owner)
         _splitter.addWidget(self.table_info)
         splitter.addWidget(_splitter)
-        splitter.addWidget(self.operation)
-        # self.operation.resize(10, 10)
         vbox = QHBoxLayout(self)
         vbox.addWidget(splitter)
         self.setLayout(vbox)
-
-
-class OperationWidget(FWidget):
-
-    """docstring for OperationWidget"""
-
-    def __init__(self, parent, *args, **kwargs):
-        super(FWidget, self).__init__(parent=parent, *args, **kwargs)
-
-        vbox = QVBoxLayout(self)
-        gridbox = QGridLayout()
-        self.parent = parent
-
-        self.add_ow_but = Button(_(u"Nouvel utilisateur"))
-        self.add_ow_but.setIcon(
-            QIcon.fromTheme('', QIcon(u"{}user_add.png".format(Config.img_cmedia))))
-        self.add_ow_but.clicked.connect(self.add_owner)
-
-        gridbox.addWidget(self.add_ow_but, 0, 0)
-
-        gridbox.setColumnStretch(1, 5)
-        vbox.addLayout(gridbox)
-        self.setLayout(vbox)
-
-    def add_owner(self):
-        self.parent.parent.open_dialog(
-            NewOrEditUserViewWidget, modal=True, pp=self.parent.table_owner)
 
 
 class OwnerTableWidget(QListWidget):
@@ -348,20 +317,34 @@ class InfoTableWidget(FWidget):
         self.refresh()
 
         self.details = FLabel()
+
+        self.add_ow_but = Button(_(u"Nouvel utilisateur"))
+        self.add_ow_but.setMaximumWidth(300)
+        self.add_ow_but.setMaximumHeight(50)
+        self.add_ow_but.setIcon(
+            QIcon.fromTheme('', QIcon(u"{}user_add.png".format(Config.img_cmedia))))
+        self.add_ow_but.clicked.connect(self.add_owner)
         self.edit_ow_but = Button(u"Mettre à jour")
-        self.edit_ow_but.setIcon(QIcon.fromTheme('document-new',
-                                                 QIcon(u"{}edit_user.png".format(Config.img_cmedia))))
+        self.edit_ow_but.setIcon(QIcon.fromTheme(
+            'document-new', QIcon(u"{}edit_user.png".format(Config.img_cmedia))))
         self.edit_ow_but.setEnabled(False)
+        self.edit_ow_but.setMaximumWidth(200)
+        self.edit_ow_but.setMaximumHeight(50)
         self.edit_ow_but.clicked.connect(self.edit_owner)
 
         self.formbox = QGridLayout()
-        self.formbox.addWidget(self.details, 0, 0)
-        self.formbox.addWidget(self.edit_ow_but, 0, 1)
+        self.formbox.addWidget(self.add_ow_but, 0, 0)
+        self.formbox.addWidget(self.details, 1, 0)
+        self.formbox.addWidget(self.edit_ow_but, 2, 0)
         # self.formbox.ColumnStretch(4, 2)
         # self.formbox.RowStretch(6, 2)
         vbox = QVBoxLayout()
         vbox.addLayout(self.formbox)
         self.setLayout(vbox)
+
+    def add_owner(self):
+        self.parent.parent.open_dialog(
+            NewOrEditUserViewWidget, modal=True, pp=self.parent.table_owner)
 
     def refresh_(self, owner):
         self.refresh()
@@ -384,5 +367,5 @@ class InfoTableWidget(FWidget):
                        username=self.owner.username))
 
     def edit_owner(self):
-        self.parent.parent.open_dialog(NewOrEditUserViewWidget, owner=self.owner,
-                                       modal=True, pp=self.parent.table_info)
+        self.parent.parent.open_dialog(
+            NewOrEditUserViewWidget, owner=self.owner, modal=True, pp=self.parent.table_info)

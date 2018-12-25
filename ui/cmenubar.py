@@ -46,12 +46,12 @@ class FMenuBar(QMenuBar, FWidget):
         admin_.setShortcut("Ctrl+G")
         self.connect(admin_, SIGNAL("triggered()"), self.goto_admin)
         admin.addAction(admin_)
-
-        license = QAction(QIcon.fromTheme('emblem-system', QIcon('')),
-                          u"Licience", self)
-        license.setShortcut("Alt+L")
-        self.connect(license, SIGNAL("triggered()"), self.goto_license)
-        admin.addAction(license)
+        if Config.LSE:
+            license = QAction(QIcon.fromTheme('emblem-system', QIcon('')),
+                              u"Licience", self)
+            license.setShortcut("Alt+L")
+            self.connect(license, SIGNAL("triggered()"), self.goto_license)
+            admin.addAction(license)
 
         preference = self.addMenu(u"Préference")
 
@@ -145,7 +145,6 @@ class FMenuBar(QMenuBar, FWidget):
             subprocess.Popen(
                 [sys.executable, path_main_name])
         except Exception as e:
-            print('EEEE ', e)
             subprocess.call(
                 "python.exe " + path_main_name, shell=True)
 
@@ -165,24 +164,18 @@ class FMenuBar(QMenuBar, FWidget):
 
     # About
     def goto_about(self):
-        from Common.models import Organization
-        org = Organization.get(id=1)
         QMessageBox.about(self, u"À propos",
                           u""" <h2>{app_name}  version: {version_app} </h2>
                             <hr>
                             <h4><i>Logiciel de {app_name}.</i></h4>
-                            <ul><li></li> <li><b>Developpeur</b>: {autor} </li>
-                                <li><b>Adresse: </b>{adress} </li>
-                                <li><b>Tel: </b> {phone} </li>
-                                <li><b>E-mail: </b> {email} <br/></li>
-                                <li>{org_out}</li>
+                            <ul><li></li> <li><b>Developper par : </b>IBS-Mali </li>
+                                <li><b>Adresse : </b>Bamako, Boulkassoumbougou Rue : 580 Porte : 388 </li>
+                                <li><b>Tel: </b> +223 76 43 38 90 </li>
+                                <li><b>E-mail : </b> info@ibsmali.ml <br/></li>
+                                <li><a herf="https:ibsmail.ml"> ibsmail.ml</li>
                             </ul>
                             """.format(
-                                email=org.email_org,
                               app_name=Config.APP_NAME,
-                              adress=org.adress_org,
                               autor=Config.AUTOR,
                               version_app=Config.APP_VERSION,
-                              phone=org.phone,
-                              org_out=org.name_orga,
                           ))

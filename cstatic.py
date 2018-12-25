@@ -47,7 +47,8 @@ class CConstants(object):
     DEBUG = False
 
     EXCLUDE_MENU_ADMIN = []
-
+    LSE = False
+    ORG = False
     SERV = None
     list_models = []
     APP_LOGO = os.path.join(img_cmedia, "logo.png")

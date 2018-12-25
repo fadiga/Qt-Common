@@ -35,12 +35,15 @@ def cmain():
     if Owner().select().where(Owner.isactive == True).count() == 0:
         if not NewOrEditUserViewWidget().exec_() == QDialog.Accepted:
             return
+
     if Organization().select().count() == 0:
         if not NewOrEditOrganizationViewWidget().exec_() == QDialog.Accepted:
             return
-    if not is_valide_mac() == CConstants.OK:
-        if not LicenseViewWidget(parent=None).exec_() == QDialog.Accepted:
-            return
-    if not Organization().get(id=1).is_login or LoginWidget().exec_() == QDialog.Accepted:
+
+    if CConstants.LSE:
+        if not is_valide_mac() == CConstants.OK:
+            if not LicenseViewWidget(parent=None).exec_() == QDialog.Accepted:
+                return
+    if LoginWidget().exec_() == QDialog.Accepted:
         return True
     return False

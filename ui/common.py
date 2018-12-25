@@ -13,7 +13,7 @@ from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QPalette,
                          QCommandLinkButton, QRadialGradient, QPainter, QBrush,
                          QPainterPath, QPen, QPushButton,
                          QCompleter, QComboBox, QSortFilterProxyModel,
-                         QPixmap)
+                         QPixmap, QFrame)
 # from PyQt4.QtWebKit import QWebView
 
 from Common.ui.statusbar import GStatusBar
@@ -25,7 +25,6 @@ class FMainWindow(QMainWindow):
 
     def __init__(self, parent=0, *args, **kwargs):
         QMainWindow.__init__(self)
-        print("FMainWindow")
         # self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setWindowIcon(QIcon.fromTheme(
             'logo', QIcon(u"{}logo.png".format(Config.img_media))))
@@ -40,7 +39,7 @@ class FMainWindow(QMainWindow):
         self.setWindowIcon(QIcon(Config.APP_LOGO))
 
     def set_window_title(self, page_name):
-        self.setWindowTitle(" > ".join([Config.APP_NAME, page_name]))
+        self.setWindowTitle(" ".join([Config.APP_NAME, page_name]))
 
     def resizeEvent(self, event):
         """lancé à chaque redimensionnement de la fenêtre"""
@@ -84,14 +83,10 @@ class FWidget(QWidget):
 
         QWidget.__init__(self, parent=parent, *args, **kwargs)
         self.pp = parent
-        # self.wc = self.pp.wc - 100
-        # self.hc = self.pp.hc
-        # self.css = """
-        #     QWidget{
-        # /* background: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #4984C7, stop: 1 #ccf);*/
-        #     }
-        #     """
-        # self.setStyleSheet(self.css)
+
+        # self.setStyleSheet("font-family:Garamond")
+        # self.setStyleSheet("font-family:Trebuchet MS;")
+        self.setStyleSheet("font-family:Times New Roman;")
 
     def refresh(self):
         pass
@@ -142,10 +137,25 @@ class TabPane(QTabBar):
         self.setLayout(box)
 
 
+class Fhelper(QLabel):
+
+    def __init__(self, *args, **kwargs):
+        super(Fhelper, self).__init__(*args, **kwargs)
+        css = """color: gry;font-size:20px"""
+        self.setStyleSheet(css)
+
+
 class FLabel(QLabel):
 
     def __init__(self, *args, **kwargs):
         super(FLabel, self).__init__(*args, **kwargs)
+        self.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
+
+
+class FRLabel(QLabel):
+
+    def __init__(self, *args, **kwargs):
+        super(FRLabel, self).__init__(*args, **kwargs)
         # self.setFont(QFont("Times New Roman", 50))
         css = """
                 color: gry;
@@ -154,22 +164,25 @@ class FLabel(QLabel):
         font = QFont()
         font.setBold(True)
         font.setWeight(75)
-        self.setFont(font)
-        self.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
+        # self.setFont(font)
+        self.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
+
+
+class FHeader(FLabel):
+
+    def __init__(self, text, css=None, parent=None):
+        FLabel.__init__(self, text, parent)
+        self.setStyleSheet(css)
 
 
 class FPageTitle(FLabel):
 
     def __init__(self, *args, **kwargs):
         super(FPageTitle, self).__init__(*args, **kwargs)
-        # self.setFont(QFont("Times New Roman", 50))
         self.setAlignment(Qt.AlignCenter)
 
-        css = """
-                font-weight: bold;
-                font-size: 20px;
-                color: gry;"""
-        # self.setStyleSheet(css)
+        css = """font-weight: bold;font-size: 30px;color: green;"""
+        self.setStyleSheet(css)
 
 
 class FBoxTitle(FLabel):
@@ -182,7 +195,7 @@ class FBoxTitle(FLabel):
 
 class ErrorLabel(FLabel):
 
-    def __init__(self, text, parent=None):
+    def __init__(self, text, css=None, parent=None):
         FLabel.__init__(self, text, parent)
         font = QFont()
         self.setFont(font)
@@ -340,7 +353,7 @@ class Button(QCommandLinkButton):
 class BttRond(Button):
 
     def __init__(self, *args, **kwargs):
-        super(Button_rond, self).__init__(*args, **kwargs)
+        super(BttRond, self).__init__(*args, **kwargs)
         self.setIcon(QIcon.fromTheme('', QIcon('')))
         css = """
                 border-radius:9px;
@@ -390,7 +403,6 @@ class Warning_btt(Button):
                     font-size:15px;
                     font-weight:bold;
                     padding:6px 24px;
-
                 """
         self.setStyleSheet(css)
 
@@ -401,7 +413,7 @@ class Button_save(Button):
         super(Button_save, self).__init__(*args, **kwargs)
 
         self.setIcon(QIcon.fromTheme('', QIcon(
-            u"{img_media}{img}".format(img_media=Config.img_media,
+            u"{img_media}{img}".format(img_media=Config.img_cmedia,
                                        img='save.png'))))
         css = """
         background-color:#dbe6c4;
@@ -510,6 +522,9 @@ class LineEdit(QLineEdit):
 
     def __init__(self, parent=None):
         QLineEdit.__init__(self, parent)
+        # self.setMaximumHeight(20)
+        # self.setDisplayText("kkkkkk")
+        self.setMaximumWidth(350)
 
 
 class IntLineEdit(LineEdit):

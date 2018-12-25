@@ -58,7 +58,7 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
         self.password_field_v.setEchoMode(LineEdit.PasswordEchoOnEdit)
         self.password_field_v.textChanged.connect(
             self.check_password_is_valide)
-        self.phone_field = IntLineEdit(self.owner.phone)
+        # self.phone_field = IntLineEdit(self.owner.phone)
 
         self.liste_group = [Owner.ADMIN, Owner.USER]
         # Combobox widget
@@ -76,7 +76,7 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
         if self.new:
             formbox.addRow(
                 FLabel(u"Verification du Mot de passe"), self.password_field_v)
-        formbox.addRow(FLabel(u"Numero de Téléphone"), self.phone_field)
+        # formbox.addRow(FLabel(u"Numero de Téléphone"), self.phone_field)
         formbox.addRow(FLabel(u"Groupe"), self.box_group)
         formbox.addRow(cancel_but, butt)
         vbox.addWidget(self.checked)
@@ -117,7 +117,7 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
 
         username = str(self.username_field.text()).strip()
         password = str(self.password_field.text()).strip()
-        phone = str(self.phone_field.text())
+        # phone = str(self.phone_field.text())
         group = self.liste_group[self.box_group.currentIndex()]
         status = False
         if self.checked.checkState() == Qt.Checked:
@@ -128,7 +128,7 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
         ow.password = Owner().crypt_password(
             password) if self.new else password
 
-        ow.phone = phone
+        # ow.phone = phone
         ow.group = group
         ow.isactive = status
         try:

@@ -60,8 +60,8 @@ class Notification(QtGui.QWidget):
         self.workThread = WorkThread(self)
         self.connect(
             self.workThread, QtCore.SIGNAL("update(QString)"), self.animate)
-        self.connect(
-            self.workThread, QtCore.SIGNAL("update2(QString)"), self.animate2)
+        # self.connect(
+        # self.workThread, QtCore.SIGNAL("update2(QString)"), self.animate2)
         self.connect(
             self.workThread, QtCore.SIGNAL("vanish(QString)"), self.disappear)
         self.connect(self.workThread, QtCore.SIGNAL("finished()"), self.done)

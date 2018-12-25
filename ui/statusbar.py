@@ -7,7 +7,7 @@ from PyQt4.QtCore import QThread, SIGNAL, QObject
 
 import os
 import requests
-from server import desktop_client
+from server import Network
 from configuration import Config
 
 
@@ -24,7 +24,7 @@ class GStatusBar(QStatusBar):
             print("Not Serveur ")
             return
 
-        self.rsp = {}
+        # self.rsp = {}
         self.check = TaskThreadServer(self)
         QObject.connect(self.check, SIGNAL("download_"), self.download_)
         self.check.start()
@@ -77,7 +77,6 @@ class GStatusBar(QStatusBar):
         self.b.setText("Téléchargement en cours ...")
 
         self.installer_name = "{}.exe".format(self.check.data.get("app"))
-
         url = "{}{}".format(base_url, self.check.data.get("setup_file_url"))
         r = requests.get(url, stream=True)
         if r.status_code == 200:
@@ -112,10 +111,10 @@ class TaskThreadServer(QThread):
         self.parent = parent
 
     def run(self):
-
-        self.data = desktop_client()
-        print(self.data)
+        self.data = Network().update_version_checher()
+        # print(self.data)
         if not self.data:
             return
         if not self.data.get("is_last"):
             self.emit(SIGNAL("download_"))
+        self.emit(SIGNAL("update_data"))
