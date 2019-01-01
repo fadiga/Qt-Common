@@ -15,24 +15,13 @@ from configuration import Config
 base_url = Config.BASE_URL
 
 
-# class TaskThreadServerM(QThread):
-
-#     def __init__(self, parent):
-#         QThread.__init__(self, parent)
-#         self.parent = parent
-
-#     def run(self):
-#         self.parent.submit()
-#         self.emit(SIGNAL("download_finish"))
-
-
 class Network(QObject):
 
     def __init__(self):
         QObject.__init__(self)
 
         if not Config.SERV:
-            print("Not Serveur ")
+            # print("Not Serveur ")
             return
 
         # self.check = TaskThreadServerM(self)
@@ -40,17 +29,18 @@ class Network(QObject):
         # self.check.start()
 
     def submit(self, url, data):
-        print("submit")
+        # print("submit")
         if internet_on(Config.BASE_URL):
             client = requests.session()
             response = client.get(url, data=json.dumps(data))
-            print("response: ", response)
             try:
                 return json.loads(response.content.decode('UTF-8'))
             except ValueError:
                 return False
+            except Exception as e:
+                print(e)
         else:
-            print("Pas de Connexion")
+            pass
 
     def update_version_checher(self):
         url_ = base_url + "client/desktop_client"

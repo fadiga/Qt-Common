@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 # maintainer: fadiga
 
-from PyQt4.QtGui import QStatusBar, QProgressBar, QLabel, QCommandLinkButton
+from PyQt4.QtGui import (QStatusBar, QProgressBar, QPixmap,
+                         QLabel, QCommandLinkButton)
 from PyQt4.QtCore import QThread, SIGNAL, QObject
 
 import os
@@ -10,52 +11,73 @@ import requests
 from server import Network
 from configuration import Config
 
+from Common.ui.util import internet_on
 
 base_url = Config.BASE_URL
 
 
 class GStatusBar(QStatusBar):
 
-    def __init__(self, parent):
+    def __init__(self, parent=None):
 
         QStatusBar.__init__(self, parent)
 
         if not Config.SERV:
-            print("Not Serveur ")
+            # print("Not Serveur ")
             return
+        self.info_label = QLabel()
+        icon_label = QLabel()
+        name_label = QLabel()
+        name_label.setText(
+            'Développer par IBS-Mali | <a href="http://ibsmali.ml/">ibsmali.ml</a>')
+        name_label.setOpenExternalLinks(True)
+        icon_label.setPixmap(QPixmap("{}".format(Config.IBS_LOGO)))
+        self.addWidget(icon_label, 0)
+        self.addWidget(name_label, 1)
+        self.addWidget(self.info_label, 1)
 
-        # self.rsp = {}
+        text = """
+            <table><tr><th>Internet : </th><td style='color:green'>OK</td></tr>
+            <tr><th>Serveur : </th><td style='color:red'>{}</td></tr>
+            </table>"""
+        if internet_on(Config.BASE_URL):
+            css = "color: gray; border: 1px solid gray"
+            msg = text.format("No response")
+
+        else:
+            css = 'color: red'
+            msg = text.format("No connection")
+        self.info_label.setText(msg)
+        self.info_label.setStyleSheet(css)
+
         self.check = TaskThreadServer(self)
         QObject.connect(self.check, SIGNAL("download_"), self.download_)
         self.check.start()
 
     def download_(self):
-        print("download_")
+        # print("download_")
         self.b = QCommandLinkButton("")
         self.b.clicked.connect(self.get_setup)
-        msg = QLabel("Connexion ...")
-        self.addWidget(msg)
-        msg.hide()
         self.b.setText(self.check.data.get("message"))
         self.addWidget(self.b)
 
     def get_setup(self):
         self.progressBar = QProgressBar(self)
         # self.progressBar.setGeometry(430, 30, 400, 25)
-        self.addWidget(self.progressBar)
+        self.addWidget(self.progressBar, 2)
         self.t = TaskThread(self)
         QObject.connect(self.t, SIGNAL("download_finish"),
                         self.download_finish)
         self.t.start()
 
     def failure(self):
-        print("failure")
-        self.b.setText("La mise à jour a échoué.")
+        # print("failure")
+        self.info_label.setText("La mise à jour a échoué.")
         self.progressBar.close()
         self.b.setEnabled(True)
 
     def download_finish(self):
-        print('download_finish')
+        # print('download_finish')
         self.b.hide()
         self.progressBar.close()
         self.instb = QCommandLinkButton("installer la Ver. {}".format(
@@ -74,7 +96,7 @@ class GStatusBar(QStatusBar):
 
     def download_setup_file(self):
         self.b.setEnabled(False)
-        self.b.setText("Téléchargement en cours ...")
+        self.info_label.setText("Téléchargement en cours ...")
 
         self.installer_name = "{}.exe".format(self.check.data.get("app"))
         url = "{}{}".format(base_url, self.check.data.get("setup_file_url"))
@@ -91,6 +113,8 @@ class GStatusBar(QStatusBar):
                         f.write(data)
                         done = int(100 * dl / int(total_length))
                         self.progressBar.setValue(done)
+
+        self.info_label.setText("Fin de téléchargement ...")
 
 
 class TaskThread(QThread):

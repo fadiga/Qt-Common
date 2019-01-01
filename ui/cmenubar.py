@@ -142,8 +142,7 @@ class FMenuBar(QMenuBar, FWidget):
         path_main_name = os.path.join(
             os.path.dirname(os.path.abspath('__file__')), Config.NAME_MAIN)
         try:
-            subprocess.Popen(
-                [sys.executable, path_main_name])
+            subprocess.Popen([sys.executable, path_main_name])
         except Exception as e:
             subprocess.call(
                 "python.exe " + path_main_name, shell=True)
@@ -172,7 +171,7 @@ class FMenuBar(QMenuBar, FWidget):
                                 <li><b>Adresse : </b>Bamako, Boulkassoumbougou Rue : 580 Porte : 388 </li>
                                 <li><b>Tel: </b> +223 76 43 38 90 </li>
                                 <li><b>E-mail : </b> info@ibsmali.ml <br/></li>
-                                <li><a herf="https:ibsmail.ml"> ibsmail.ml</li>
+                                <li><a herf="https://ibsmail.ml"/> ibsmail.ml</li>
                             </ul>
                             """.format(
                               app_name=Config.APP_NAME,
