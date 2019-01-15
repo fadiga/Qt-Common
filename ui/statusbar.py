@@ -3,7 +3,7 @@
 # maintainer: fadiga
 
 from PyQt4.QtGui import (QStatusBar, QProgressBar, QPixmap,
-                         QLabel, QCommandLinkButton)
+                         QLabel, QPushButton, QIcon)
 from PyQt4.QtCore import QThread, SIGNAL, QObject
 
 import os
@@ -37,18 +37,14 @@ class GStatusBar(QStatusBar):
         self.addWidget(self.info_label, 1)
 
         text = """
-            <table><tr><th>Internet : </th><td style='color:green'>OK</td></tr>
-            <tr><th>Serveur : </th><td style='color:red'>{}</td></tr>
+            <table>
+            <tr><th>Connection Serveur : </th><td style={}>{}</td></tr>
             </table>"""
         if internet_on(Config.BASE_URL):
-            css = "color: gray; border: 1px solid gray"
-            msg = text.format("No response")
-
+            msg = text.format('color:green', "OK")
         else:
-            css = 'color: red'
-            msg = text.format("No connection")
+            msg = text.format('color:red', "/!\ ")
         self.info_label.setText(msg)
-        self.info_label.setStyleSheet(css)
 
         self.check = TaskThreadServer(self)
         QObject.connect(self.check, SIGNAL("download_"), self.download_)
@@ -56,7 +52,10 @@ class GStatusBar(QStatusBar):
 
     def download_(self):
         # print("download_")
-        self.b = QCommandLinkButton("")
+        self.b = QPushButton("")
+        self.b.setIcon(QIcon.fromTheme('', QIcon(
+            u"{img_media}{img}".format(img_media=Config.img_cmedia,
+                                       img='setup.png'))))
         self.b.clicked.connect(self.get_setup)
         self.b.setText(self.check.data.get("message"))
         self.addWidget(self.b)
@@ -80,8 +79,12 @@ class GStatusBar(QStatusBar):
         # print('download_finish')
         self.b.hide()
         self.progressBar.close()
-        self.instb = QCommandLinkButton("installer la Ver. {}".format(
+        self.instb = QPushButton("installer la Ver. {}".format(
             self.check.data.get("version")))
+
+        self.instb.setIcon(QIcon.fromTheme('', QIcon(
+            u"{img_media}{img}".format(img_media=Config.img_cmedia,
+                                       img='setup.png'))))
         self.instb.clicked.connect(self.start_install)
         # self.progressBar.close()
         self.addWidget(self.instb)

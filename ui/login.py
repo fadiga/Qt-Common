@@ -7,7 +7,7 @@ from __future__ import (
 
 from PyQt4.QtGui import (QHBoxLayout, QGroupBox, QIcon,
                          QPushButton, QDialog, QComboBox,
-                         QFormLayout)
+                         QFormLayout, QLabel)
 
 from PyQt4.QtCore import Qt
 
@@ -28,19 +28,18 @@ class LoginWidget(QDialog, FMainWindow):
         self.hibernate = hibernate
 
         self.setWindowFlags(Qt.FramelessWindowHint)
-        self.title = FormLabel(
-            "<h4>{app_name}</h4><stromg>Ver: {version}</stromg>".format(
-                app_name=Config.APP_NAME, version=Config.APP_VERSION))
-        self.title.setStyleSheet(
-            """ background: url({})#DAF7A6;
-                border-radius: 14px 14px 8px 8px; border: 10px double #128a76 ;
-                width: 100%; height: auto; padding: 1em;
-                font: 8pt 'URW Bookman L';""".format(
-                Config.APP_LOGO))
         vbox = QHBoxLayout()
 
         self.loginUserGroupBox()
-        vbox.addWidget(self.title)
+        title = QLabel()
+        title.setTextFormat(Qt.RichText)
+        title.setText("<img src={logo}><h4>{app_name}</h4><stromg>Ver: {version}</stromg>".format(
+            app_name=Config.APP_NAME, version=Config.APP_VERSION, logo=Config.APP_LOGO))
+
+        title.setStyleSheet(
+            """ background:#3a4055;color:#fff;border-radius: 14px 14px 8px 8px;
+             border: 10px double #c8c8c8; width: 100%; height: auto; padding: 1em;""")
+        vbox.addWidget(title)
         vbox.addWidget(self.topLeftGroupBox)
         # set focus to username field
         self.setFocusProxy(self.password_field)
@@ -68,6 +67,8 @@ class LoginWidget(QDialog, FMainWindow):
         self.login_button.clicked.connect(self.login)
 
         self.cancel_button = QPushButton(u"&Quiter")
+        self.cancel_button.setIcon(QIcon.fromTheme(
+            'save', QIcon(u"{}exit.png".format(Config.img_cmedia))))
         self.cancel_button.clicked.connect(self.cancel)
         self.cancel_button.setFlat(True)
 
