@@ -47,7 +47,7 @@ class CConstants(object):
     DEBUG = False
 
     EXCLUDE_MENU_ADMIN = []
-    LSE = False
+    LSE = True
     ORG = False
     SERV = None
     list_models = []

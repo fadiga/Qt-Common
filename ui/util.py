@@ -27,18 +27,18 @@ except NameError:
     unicode = str
 
 
-def device_amount(value, dvs=None):
+def device_amount(value, aftergam=0, dvs=None):
 
     from Common.models import Organization
     if dvs:
-        return "{} {}".format(formatted_number(value), dvs)
+        return "{} {}".format(formatted_number(value, aftergam), dvs)
 
     try:
         organ = Organization().get(id=1)
     except Exception as e:
         print(e)
     d = organ.DEVISE[organ.devise]
-    v = formatted_number(value)
+    v = formatted_number(value, aftergam)
     if organ.devise == organ.USA:
         return "{d}{v}".format(v=v, d=d)
     else:
@@ -139,7 +139,7 @@ def raise_success(title, message):
     box.exec_()
 
 
-def formatted_number(number, sep=".", aftergam=3):
+def formatted_number(number, sep=".", aftergam=4):
     """ """
     locale_name, encoding = locale.getlocale()
     locale.setlocale(locale.LC_ALL, 'fra')

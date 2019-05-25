@@ -111,21 +111,26 @@ def export_dynamic_data(dict_data):
                 organization.bp or "", organization.email_org or "", organization.phone or ""
             ), workbook.add_format(style_title))
         rowx += 1
-    worksheet.merge_range("{}{}:{}{}".format(
-        colnum_string(end_colx - 2), rowx, colnum_string(end_colx), rowx), "Le {}".format(date_.strftime("%x")), date_format)
+    try:
+        worksheet.merge_range("{}{}:{}{}".format(
+            colnum_string(end_colx - 2), rowx, colnum_string(end_colx), rowx), "Le {}".format(date_.strftime("%x")), date_format)
+    except:
+        worksheet.merge_range("{}{}:{}{}".format(
+            colnum_string(end_colx - 2), rowx, colnum_string(end_colx), rowx), "Le {}".format(date_), date_format)
+
     rowx += 1
     for col in widths:
         w = (120 / len(headers))
         worksheet.set_column(col, col, w)
     columns = [({'header': item}) for item in headers]
-    end_row_table = len(data) + rowx + 3
+    end_row_table = len(data) + rowx + 4
     if format_money:
         for col_str in format_money:
             worksheet.set_column(col_str, 18, money)
-    rowx += 2
+    rowx += 4
     worksheet.add_table(
         'A{}:{}{}'.format(rowx, colnum_string(end_colx), end_row_table),
-        {'autofilter': 0, 'data': data, 'columns': columns})
+        {'autofilter': 1, 'data': data, 'columns': columns})
     rowx = end_row_table
     # rowx += 1
     if extend_rows:
