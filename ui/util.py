@@ -72,6 +72,10 @@ def field_error(field, msg):
     return False
 
 
+def check_field(field, msg, condition):
+    return is_valide_codition_field(field, msg, condition)
+
+
 def is_valide_codition_field(field, msg, condition):
     stylerreur = ""
     flag = False
@@ -109,7 +113,7 @@ def openFile(file):
 
 
 def uopen_file(filename):
-    print(filename)
+    # print(filename)
     if not os.path.exists(filename):
         raise IOError(u"Fichier %s non valable." % filename)
     subprocess.call('%(cmd)s %(file)s' %
