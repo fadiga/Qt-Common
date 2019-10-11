@@ -1,7 +1,7 @@
-from database import Setup
+# from database import Setup
 
 # from Common.server import Network
 
-Setup().create_all_or_pass()
+# Setup().create_all_or_pass()
 
 # setup()
