@@ -14,7 +14,7 @@ from PyQt4.QtGui import (QVBoxLayout, QGroupBox, QIcon,
                          QFormLayout)
 
 from Common.ui.common import (FWidget, FormLabel, EnterTabbedLineEdit,
-                              ErrorLabel, LineEdit, FPageTitle, Deleted_btt)
+                              ErrorLabel, LineEdit, FPageTitle, DeletedBtt)
 from Common.ui.util import check_is_empty, field_error
 from Common.models import Owner, DB_FILE
 from configuration import Config
@@ -55,7 +55,7 @@ class DBCleanerWidget(QDialog, FWidget):
         self.password_field.setEchoMode(LineEdit.Password)
         self.password_field.setFocus()
         # login button
-        self.login_button = Deleted_btt("&Supprimer")
+        self.login_button = DeletedBtt("&Supprimer")
         self.login_button.setIcon(QIcon.fromTheme(
             'delete', QIcon(u"{}login.png".format(Config.img_cmedia))))
         self.login_button.clicked.connect(self.login)

@@ -15,8 +15,8 @@ from Common.models import License
 from Common.exports import export_license_as_file
 from Common.ui.util import (clean_mac, make_lcse, get_lcse_file,
                             check_is_empty, is_valide_codition_field)
-from Common.ui.common import (FWidget, Button_save, LineEdit, PyTextViewer,
-                              Deleted_btt, Button, FormLabel)
+from Common.ui.common import (FWidget, ButtonSave, LineEdit, PyTextViewer,
+                              DeletedBtt, Button, FormLabel)
 
 
 class LicenseViewWidget(QDialog, FWidget):
@@ -71,7 +71,7 @@ class LicenseViewWidget(QDialog, FWidget):
         cancel_but.clicked.connect(self.cancel)
         export_lcse = Button(u"Exporter la licence")
         export_lcse.clicked.connect(self.export_license)
-        remove_trial_lcse = Deleted_btt(u"Expirer la licence")
+        remove_trial_lcse = DeletedBtt(u"Expirer la licence")
         remove_trial_lcse.clicked.connect(self.remove_trial)
         # grid layout
         gridbox.addWidget(self.intro, 0, 1)
@@ -102,7 +102,7 @@ class LicenseViewWidget(QDialog, FWidget):
         if self.lcse.expiration_date:
             trial_lcse.setEnabled(False)
 
-        self.butt = Button_save(u"Enregistrer")
+        self.butt = ButtonSave(u"Enregistrer")
         self.butt.clicked.connect(self.add_lience)
 
         cancel_but = Button(u"Annuler")

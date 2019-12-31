@@ -13,7 +13,6 @@ from __future__ import (
 
 import platform
 import os
-
 from Common.models import Organization
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -44,6 +43,13 @@ def load_stylesheet(file_qss):
         return stylesheet
 
 
+def read_qss_file(file_name):
+    styleFile = os.path.join(ROOT_DIR, file_name + ".qss")
+    print(styleFile)
+    styleSheetStr = open(styleFile, "r").read()
+    return styleSheetStr
+
+
 def dict_style():
     return {"Theme systeme": "",
             "Dark": load_stylesheet("dark"),
@@ -51,6 +57,7 @@ def dict_style():
             "Tangerine": load_stylesheet("tangerine"),
             "Coffee": load_stylesheet("coffee"),
             "F": load_stylesheet("fad"),
+            # "DDD KK": read_qss_file("styleD"),
             "Fat": load_stylesheet("fat"),
             }
 

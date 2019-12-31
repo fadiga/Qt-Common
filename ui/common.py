@@ -20,6 +20,11 @@ from Common.ui.statusbar import GStatusBar
 from configuration import Config
 from Common.periods import Period
 
+try:
+    unicode
+except:
+    unicode = str
+
 
 class FMainWindow(QMainWindow):
 
@@ -58,7 +63,7 @@ class FMainWindow(QMainWindow):
         # attach context to window
         self.setCentralWidget(self.view_widget)
 
-    def open_dialog(self, dialog, modal=False, opacity=0.90, *args, **kwargs):
+    def open_dialog(self, dialog, modal=False, opacity=1, *args, **kwargs):
         d = dialog(parent=self, *args, **kwargs)
         d.setModal(modal)
         # d.setWindowFlags(Qt.FramelessWindowHint)
@@ -88,7 +93,7 @@ class FWidget(QWidget):
         # self.hc = self.pp.hc
         # self.css = """
         #     QWidget{
-        # /* background: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #4984C7, stop: 1 #ccf);*/
+        #      background: #fff;
         #     }
         #     """
         # self.setStyleSheet(self.css)
@@ -337,10 +342,37 @@ class Button(QCommandLinkButton):
         # self.setFixedSize(100, 40)
 
 
+class MenuBtt(Button):
+
+    def __init__(self, *args, **kwargs):
+        super(MenuBtt, self).__init__(*args, **kwargs)
+        self.setIcon(QIcon.fromTheme('', QIcon('')))
+
+        css = """
+            QCommandLinkButton {
+                max-width:4em;
+                border: 1px solid #0095ff;
+                font-size: 30px;
+                border-top-left-radius: 5px;
+                border-top-left-radius: 5px;
+                border-bottom-left-radius: 5px;
+                border-bottom-right-radius: 5px;
+                background-color: none;
+                color: #000;
+                padding: 35px 30px 15px 32px;
+                }
+            QCommandLinkButton:hover {
+                    background-color: #0095ff;
+                    color: #FFF;
+            }
+            """
+        self.setStyleSheet(css)
+
+
 class BttRond(Button):
 
     def __init__(self, *args, **kwargs):
-        super(Button_rond, self).__init__(*args, **kwargs)
+        super(BttRond, self).__init__(*args, **kwargs)
         self.setIcon(QIcon.fromTheme('', QIcon('')))
         css = """
                 border-radius:9px;
@@ -352,13 +384,13 @@ class BttRond(Button):
                 padding:6px 12px;
 
         """
-        # self.setStyleSheet(css)
+        self.setStyleSheet(css)
 
 
-class Deleted_btt(Button):
+class DeletedBtt(Button):
 
     def __init__(self, *args, **kwargs):
-        super(Deleted_btt, self).__init__(*args, **kwargs)
+        super(DeletedBtt, self).__init__(*args, **kwargs)
         self.setIcon(QIcon.fromTheme('edit-delete', QIcon('')))
         css = """
                 background-color:#fc8d83;
@@ -374,10 +406,10 @@ class Deleted_btt(Button):
         self.setStyleSheet(css)
 
 
-class Warning_btt(Button):
+class WarningBtt(Button):
 
     def __init__(self, *args, **kwargs):
-        super(Warning_btt, self).__init__(*args, **kwargs)
+        super(WarningBtt, self).__init__(*args, **kwargs)
         self.setIcon(QIcon.fromTheme('save', QIcon(
             u"{img_media}{img}".format(img_media=Config.img_media,
                                        img='warning.png'))))
@@ -395,10 +427,10 @@ class Warning_btt(Button):
         self.setStyleSheet(css)
 
 
-class Button_save(Button):
+class ButtonSave(Button):
 
     def __init__(self, *args, **kwargs):
-        super(Button_save, self).__init__(*args, **kwargs)
+        super(ButtonSave, self).__init__(*args, **kwargs)
 
         self.setIcon(QIcon.fromTheme('', QIcon(
             u"{img_media}{img}".format(img_media=Config.img_media,
@@ -612,13 +644,6 @@ class EnterDoesTab(QWidget):
 
 class EnterTabbedLineEdit(LineEdit, EnterDoesTab):
     pass
-
-from PyQt4.QtGui import QCompleter, QComboBox, QSortFilterProxyModel
-
-try:
-    unicode
-except:
-    unicode = str
 
 
 class ExtendedComboBox(QComboBox):

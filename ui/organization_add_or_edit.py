@@ -12,7 +12,7 @@ from Common.ui.util import check_is_empty
 from Common.models import Organization
 
 from Common.ui.common import (
-    IntLineEdit, FWidget, Button_save, LineEdit, FormLabel)
+    IntLineEdit, FWidget, ButtonSave, LineEdit, FormLabel)
 
 try:
     unicode
@@ -66,7 +66,7 @@ class NewOrEditOrganizationViewWidget(QDialog, FWidget):
         formbox.addRow(FormLabel(u"E-mail:"), self.email_org)
         formbox.addRow(FormLabel(u"Adresse complete:"), self.adress_org)
 
-        butt = Button_save(u"Enregistrer")
+        butt = ButtonSave(u"Enregistrer")
         butt.clicked.connect(self.save_edit)
         formbox.addRow("", butt)
 

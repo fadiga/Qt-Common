@@ -13,7 +13,7 @@ from PyQt4.QtGui import (
 
 from Common.ui.user_add_or_edit import NewOrEditUserViewWidget
 from Common.ui.common import (FWidget, FLabel, Button,
-                              LineEdit, Button_save, FormLabel, IntLineEdit)
+                              LineEdit, ButtonSave, FormLabel, IntLineEdit)
 
 from configuration import Config
 from Common.models import Owner
@@ -194,7 +194,7 @@ class OrganizationTableWidget(FWidget):
         formbox.addRow(FormLabel(u"E-mail:"), self.email_org)
         formbox.addRow(FormLabel(u"Adresse complete:"), self.adress_org)
 
-        butt = Button_save(u"Enregistrer")
+        butt = ButtonSave(u"Enregistrer")
         butt.clicked.connect(self.save_edit)
         formbox.addRow("", butt)
 

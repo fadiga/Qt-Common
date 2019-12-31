@@ -352,7 +352,7 @@ def clean_mac():
 
 
 def make_lcse(lcse=clean_mac()):
-    # print("lcse:", lcse)
+    print("lcse:", lcse)
     lcse = hashlib.md5(str(lcse).encode('utf-8')).hexdigest()
     return lcse
 
