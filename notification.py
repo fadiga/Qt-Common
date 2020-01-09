@@ -109,14 +109,14 @@ class WorkThread(QtCore.QThread):
     def run(self):
         while True:
             # Bring em in :D
-            for i in range(336):
+            for i in range(36):
                 time.sleep(0.001)
                 self.emit(QtCore.SIGNAL('update(QString)'), "ping")
-            for j in range(336):
+            for j in range(36):
                 time.sleep(0.001)
                 self.emit(QtCore.SIGNAL('update2(QString)'), "ping")
             # Hide u bitch :P
-            for j in range(50):
+            for j in range(10):
                 time.sleep(0.2)
                 self.emit(QtCore.SIGNAL('vanish(QString)'), "ping")
             return

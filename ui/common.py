@@ -181,7 +181,7 @@ class FPageTitle(FLabel):
         super(FPageTitle, self).__init__(*args, **kwargs)
         self.setAlignment(Qt.AlignCenter)
 
-        css = """font-weight: bold;font-size: 30px;color: green;"""
+        css = """font-weight: bold;font-size: 20px;color: green;"""
         self.setStyleSheet(css)
 
 
@@ -524,7 +524,7 @@ class LineEdit(QLineEdit):
         QLineEdit.__init__(self, parent)
         # self.setMaximumHeight(20)
         # self.setDisplayText("kkkkkk")
-        self.setMaximumWidth(350)
+        self.setMaximumWidth(800)
 
 
 class IntLineEdit(LineEdit):

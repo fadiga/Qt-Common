@@ -46,6 +46,7 @@ class CConstants(object):
     APP_VERSION = "1.7"
     DEBUG = False
 
+    des_image_record = ROOT_DIR
     EXCLUDE_MENU_ADMIN = []
     LSE = True
     ORG = False
