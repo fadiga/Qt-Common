@@ -303,7 +303,7 @@ def show_date(dat, time=True):
     if not dat:
         return "pas de date"
     return dat.strftime(
-        u"%d %b %Y à %Hh:%Mmn") if time else dat.strftime("%d %b %Y")
+        u"%Y-%m-%d à %Hh:%Mmn") if time else dat.strftime("%Y-%m-%d")
 
 
 def date_to_datetime(dat):

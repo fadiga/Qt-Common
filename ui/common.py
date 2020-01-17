@@ -351,13 +351,13 @@ class MenuBtt(Button):
         css = """
             QCommandLinkButton {
                 max-width:4em;
-                border: 1px solid #0095ff;
+                border: 1px solid #0D00FF;
                 font-size: 30px;
                 border-top-left-radius: 5px;
                 border-top-left-radius: 5px;
                 border-bottom-left-radius: 5px;
                 border-bottom-right-radius: 5px;
-                background-color: none;
+                background-color: #fff;
                 color: #000;
                 padding: 35px 30px 15px 32px;
                 }
