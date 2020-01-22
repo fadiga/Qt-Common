@@ -7,7 +7,7 @@ from __future__ import (
 from datetime import datetime
 
 # from PyQt4.QtCore import Qt
-from PyQt4.QtGui import (QVBoxLayout, QGridLayout, QGroupBox,
+from PyQt4.QtGui import (QVBoxLayout, QGridLayout, QGroupBox, QLabel,
                          QDialog, QTextEdit, QFormLayout)
 
 from Common.cstatic import CConstants
@@ -15,8 +15,9 @@ from Common.models import License
 from Common.exports import export_license_as_file
 from Common.ui.util import (clean_mac, make_lcse, get_lcse_file,
                             check_is_empty, is_valide_codition_field)
-from Common.ui.common import (FWidget, Button_save, LineEdit, PyTextViewer,
+from Common.ui.common import (FWidget, Button_save, PyTextViewer,
                               Deleted_btt, Button, FormLabel)
+# from models import Office
 
 
 class LicenseViewWidget(QDialog, FWidget):
@@ -32,7 +33,6 @@ class LicenseViewWidget(QDialog, FWidget):
             self.lcse = License.get(License.code == str(make_lcse()))
             rep = self.lcse.can_use()
         except Exception as e:
-            print(e)
             self.lcse = License()
             rep = CConstants.IS_EXPIRED
             # self.lcse = License.create(
@@ -53,9 +53,9 @@ class LicenseViewWidget(QDialog, FWidget):
         self.intro = FormLabel(
             u""" <hr> <h4> Version {v_type} </h4>
             <h2> Elle est n'est valable que pour cette machine</h2>
-            <p><b>proprièteur: </b> {name} </p>
-            <p><b>date d'activation:</b> {a_date} </p><hr>
-            <p><b>date d'activation:</b> {ex_date} </p><hr>
+            <p><b>proprièteur : </b> {name} </p>
+            <p><b>date d'activation :</b> {a_date} </p><hr>
+            <p><b>date d'expiration :</b> {ex_date} </p><hr>
              <p><b>Merci.</b></li>
             """.format(
                 name=self.lcse.owner,
@@ -86,23 +86,23 @@ class LicenseViewWidget(QDialog, FWidget):
         self.topLeftGroupBox.setLayout(gridbox)
 
     def activation_group_box(self):
-        self.topLeftGroupBoxBtt = QGroupBox(self.tr("Nouvelle license"))
+        self.topLeftGroupBoxBtt = QGroupBox(self.tr("Demande d'autorisation"))
         # self.setWindowTitle(u"License")
-        self.setWindowTitle(u"Activation de la license")
+        self.setWindowTitle(u"Activation")
         self.cpt = 0
         self.info_field = PyTextViewer(
-            u"""Vous avez besoin du code ci desous pour l'activation:
-            <hr> <b>{code}</b><hr> <h4>Contacts:</h4>{contact}"""
-            .format(code=clean_mac(), contact=CConstants.TEL_AUT))
-        self.name_field = LineEdit()
+            u"""Pour l'activation:
+            <hr> AppKey : <b>{code}</b><hr> <h4>Contacter la base DNPSES</h4>"""
+            .format(code=clean_mac()))
+        # self.name_field = LineEdit()
         self.license_field = QTextEdit()
 
-        trial_lcse = Button(u"Activée l'evaluation")
+        trial_lcse = Button(u"Activer le mode démonstration")
         trial_lcse.clicked.connect(self.active_trial)
         if self.lcse.expiration_date:
             trial_lcse.setEnabled(False)
 
-        self.butt = Button_save(u"Enregistrer")
+        self.butt = Button_save(u"Activer")
         self.butt.clicked.connect(self.add_lience)
 
         cancel_but = Button(u"Annuler")
@@ -110,7 +110,7 @@ class LicenseViewWidget(QDialog, FWidget):
 
         formbox = QFormLayout()
         formbox.addRow(FormLabel(""), self.info_field)
-        formbox.addRow(FormLabel("Nom :"), self.name_field)
+        # formbox.addRow(FormLabel("Nom :"), QLabel(Office.get(id=1).display_name()))
         formbox.addRow(FormLabel("Code license :"), self.license_field)
         formbox.addRow(FormLabel(""), trial_lcse)
         formbox.addRow(cancel_but, self.butt)
@@ -143,7 +143,7 @@ class LicenseViewWidget(QDialog, FWidget):
             print(e)
 
     def add_lience(self):
-        name = str(self.name_field.text()).strip()
+        # name = str(self.name_field.text()).strip()
         license = str(self.license_field.toPlainText())
         if check_is_empty(self.license_field):
             return
@@ -156,13 +156,12 @@ class LicenseViewWidget(QDialog, FWidget):
             print(key)
             if self.cpt > 2 and license == str(key):
                 self.license_field.setText(m_lcse)
-
             return
 
-        if check_is_empty(self.name_field):
-            return
+        # if check_is_empty(self.name_field):
+        #     return
         self.lcse.can_expired = False
-        self.lcse.owner = name
+        self.lcse.owner = "Licence"
         if not self.lcse.code:
             self.lcse.code = license
         self.lcse.activation()

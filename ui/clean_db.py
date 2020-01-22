@@ -20,7 +20,7 @@ from Common.models import Owner, DB_FILE
 from configuration import Config
 
 
-DATETIME = "{}".format(datetime.now().strftime('%d-%m-%Y-%Hh%M'))
+DATETIME = "{}".format(datetime.now().strftime('%d-%m-%Y-%Hh%M%S'))
 
 
 class DBCleanerWidget(QDialog, FWidget):
@@ -34,7 +34,8 @@ class DBCleanerWidget(QDialog, FWidget):
 
         self.loginUserGroupBox()
         vbox.addWidget(FPageTitle(
-            "<h1 style='color: red;'>Suppression des enregistrements<h1>"))
+            """<h1 style='color: red;'>Suppression des enregistrements<h1>
+            <h4> /!\ Cette suppression entrenera la pert pernate de toutes vos données.</h4>"""))
         vbox.addWidget(self.topLeftGroupBox)
         self.setLayout(vbox)
 
@@ -109,13 +110,16 @@ class DBCleanerWidget(QDialog, FWidget):
 
         path_db_file = os.path.join(os.path.dirname(
             os.path.abspath('__file__')), DB_FILE)
-        shutil.copy(path_db_file, "{}__{}.old".format(DB_FILE, DATETIME))
+        shutil.copy(path_db_file, "Avant le nettoyage {}__{}.old".format(DB_FILE, DATETIME))
 
         for mod in Config.list_models:
             print(mod)
             for m in mod:
                 print(m)
-                m.delete_instance()
+                try:
+                    m.delete_instance()
+                except Exception as e:
+                    print(e)
 
         self.parent.update()
         self.cancel()

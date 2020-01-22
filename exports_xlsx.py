@@ -12,7 +12,6 @@ from datetime import datetime
 
 from Common.ui.util import openFile
 from configuration import Config
-from Common.models import Organization
 
 style_org = {'align': 'center', 'valign': 'vcenter', 'font_size': 26,
              'border': 1, 'font_color': 'blue', 'bold': True}
@@ -61,7 +60,8 @@ def export_dynamic_data(dict_data):
         merge_range((nbre ligne - 1), (nbre ligne - 1) + nbre de ligne à merger, (nbre de colonne - 1), (nbre de colonne - 1) + nbre
         de colonne à merger, u"contenu", style(optionnel)).
     '''
-    organization = Organization.get(id=1)
+    from models import Office
+    office = Office.get(id=1)
 
     file_name = "{}.xlsx".format(dict_data.get("file_name"))
     headers = dict_data.get("headers")
@@ -100,15 +100,15 @@ def export_dynamic_data(dict_data):
         rowx += 6
     else:
         worksheet.merge_range('A{}:{}{}'.format(
-            rowx, colnum_string(end_colx), rowx), organization.name_orga, workbook.add_format(
+            rowx, colnum_string(end_colx), rowx), office.display_name(), workbook.add_format(
             style_org))
         rowx += 1
         worksheet.merge_range('A{}:{}{}'.format(
-            rowx, colnum_string(end_colx), rowx), "{}".format(organization.adress_org or ""), style_def)
+            rowx, colnum_string(end_colx), rowx), "{}".format(office.adress_org or ""), style_def)
         rowx += 1
         worksheet.merge_range(
             'A{}:{}{}'.format(rowx, colnum_string(end_colx), rowx), "BP : {} E-mail : {} Tel : {}".format(
-                organization.bp or "", organization.email_org or "", organization.phone or ""
+                office.bp or "", office.email_org or "", office.phone or ""
             ), workbook.add_format(style_title))
         rowx += 1
     try:

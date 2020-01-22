@@ -68,8 +68,8 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
 
         butt = Button_save(u"Enregistrer")
         butt.clicked.connect(self.add_or_edit_user)
-        cancel_but = Button(u"Annuler")
-        cancel_but.clicked.connect(self.cancel)
+        # cancel_but = Button(u"Annuler")
+        # cancel_but.clicked.connect(self.cancel)
 
         formbox.addRow(FLabel(u"Identifiant"), self.username_field)
         formbox.addRow(FLabel(u"Mot de passe"), self.password_field)
@@ -78,7 +78,7 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
                 FLabel(u"Verification du Mot de passe"), self.password_field_v)
         # formbox.addRow(FLabel(u"Numero de Téléphone"), self.phone_field)
         formbox.addRow(FLabel(u"Groupe"), self.box_group)
-        formbox.addRow(cancel_but, butt)
+        formbox.addRow(FLabel(""), butt)
         vbox.addWidget(self.checked)
         vbox.addLayout(formbox)
         self.setLayout(vbox)

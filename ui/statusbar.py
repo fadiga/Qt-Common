@@ -6,6 +6,7 @@ from PyQt4.QtGui import (QStatusBar, QProgressBar, QPixmap,
                          QLabel, QPushButton, QIcon)
 from PyQt4.QtCore import QThread, SIGNAL, QObject
 
+from threading import Event
 import os
 import requests
 from server import Network
@@ -25,6 +26,8 @@ class GStatusBar(QStatusBar):
         if not Config.SERV:
             # print("Not Serveur ")
             return
+
+        self.stopFlag = Event()
         self.info_label = QLabel()
         icon_label = QLabel()
         name_label = QLabel()
@@ -36,19 +39,29 @@ class GStatusBar(QStatusBar):
         self.addWidget(name_label, 1)
         self.addWidget(self.info_label, 1)
 
-        text = """
-            <table>
-            <tr><th>Connection Serveur : </th><td style={}>{}</td></tr>
-            </table>"""
-        if internet_on(Config.BASE_URL):
-            msg = text.format('color:green', "OK")
-        else:
-            msg = text.format('color:red', "/!\ ")
-        self.info_label.setText(msg)
-
         self.check = TaskThreadServer(self)
         QObject.connect(self.check, SIGNAL("download_"), self.download_)
+        QObject.connect(self.check, SIGNAL("contact_server"), self.contact_server)
         self.check.start()
+
+    def contact_server(self):
+        print("check contact")
+        text = """
+            <strong> Connection Serveur : </strong><span style={}>{} </span> <br>
+            <strong> Synchronisation    : </strong><span style={}>{}</span></tr>
+            """
+        msg_web = ('color:red', "Connexion perdue ! ")
+        if internet_on(Config.BASE_URL):
+            from Common.models import License
+            msg_web = ('color:green', "Connecté")
+
+        lse = License().select().where(License.id == 1).get()
+        msg_aut = ('color:red', "Non autorisée")
+        if lse.isactivated:
+            msg_aut = ('color:green', "Autorisée")
+        msg = text.format(msg_web[0], msg_web[1], msg_aut[0], msg_aut[1])
+
+        self.info_label.setText(msg)
 
     def download_(self):
         # print("download_")
@@ -136,12 +149,18 @@ class TaskThreadServer(QThread):
     def __init__(self, parent):
         QThread.__init__(self, parent)
         self.parent = parent
+        self.stopped = parent.stopFlag
 
     def run(self):
         self.data = Network().update_version_checher()
         # print(self.data)
-        if not self.data:
-            return
-        if not self.data.get("is_last"):
-            self.emit(SIGNAL("download_"))
-        self.emit(SIGNAL("update_data"))
+        p = 1
+        while not self.stopped.wait(10):
+            self.emit(SIGNAL("contact_server"))
+            if not self.data:
+                return
+            if not self.data.get("is_last") and p == 1:
+                p += 1
+                print('download_')
+                self.emit(SIGNAL("download_"))
+            # self.emit(SIGNAL("update_data"))

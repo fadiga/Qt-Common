@@ -140,7 +140,7 @@ class FileJoin(BaseModel):
 
 class Owner(BaseModel):
 
-    """ The web user who is also owner of the Organization
+    """ The web user who is also owner of the Settings
     """
 
     class Meta:
@@ -181,10 +181,8 @@ class Owner(BaseModel):
         return Owner.select().get(islog=True)
 
 
-class Organization(BaseModel):
-
-    """docstring for Organization"""
-
+class Settings(BaseModel):
+    """docstring for Settings"""
     PREV = 0
     CURRENT = 1
     DEFAULT = 2
@@ -200,36 +198,32 @@ class Organization(BaseModel):
         XOF: "F",
         EURO: "€"
     }
-
+    DF = "systeme"
+    BL = "blue"
+    DK = "dark"
+    THEME = {
+        DF: "Par defaut",
+        BL: "Dark",
+        DK: "Blue",
+    }
     slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
     is_login = peewee.BooleanField(default=True)
     theme = peewee.CharField(default=1)
-    name_orga = peewee.CharField(verbose_name=(""))
-    phone = peewee.IntegerField(null=True, verbose_name=(""))
-    bp = peewee.CharField(null=True, verbose_name=(""))
-    email_org = peewee.CharField(null=True, verbose_name=(""))
-    adress_org = peewee.TextField(null=True, verbose_name=(""))
     devise = peewee.CharField(choices=DEVISE, default=XOF)
-    # file_join = peewee.ForeignKeyField(
-    #     FileJoin, null=True, verbose_name=("image de la societe"))
 
     def __str__(self):
         return self.display_name()
 
-    def change_prev(self):
-        self.slug = self.PREV
-        self.save()
-
     def display_name(self):
-        return u"{}/{}/{}".format(self.name_orga, self.phone, self.email_org)
+        return u"{}/{}/{}".format(self.slug, self.is_login, self.theme)
 
-    @classmethod
-    def get_or_create(cls, name_orga, typ):
-        try:
-            ctct = cls.get(name_orga=name_orga, type_=typ)
-        except cls.DoesNotExist:
-            ctct = cls.create(name_orga=name_orga, type_=typ)
-        return ctct
+#     @classmethod
+#     def get_or_create(cls, name_orga, typ):
+#         try:
+#             ctct = cls.get(name_orga=name_orga, type_=typ)
+#         except cls.DoesNotExist:
+#             ctct = cls.create(name_orga=name_orga, type_=typ)
+#         return ctct
 
 
 class License(BaseModel):
@@ -237,7 +231,7 @@ class License(BaseModel):
     code = peewee.CharField(unique=True)
     isactivated = peewee.BooleanField(default=False)
     activation_date = peewee.DateTimeField(default=NOW)
-    can_expired = peewee.BooleanField(default=False)
+    can_expired = peewee.BooleanField(default=True)
     expiration_date = peewee.DateTimeField(null=True)
     owner = peewee.CharField(default="USER")
     update_date = peewee.DateTimeField(default=NOW)
@@ -285,9 +279,15 @@ class License(BaseModel):
 
 class Version(BaseModel):
 
+    DL = 'dl'
+    IN = "in"
+    DO = "do"
+
     date = peewee.DateTimeField(
         default=NOW, verbose_name="Date de Version")
     number = peewee.IntegerField(default=1, verbose_name="Numéro de Version")
+    name = peewee.CharField()
+    stat = peewee.CharField(default=DL)
 
     def __str__(self):
         return u"{}/{}".format(self.number, self.date)

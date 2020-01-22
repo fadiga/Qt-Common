@@ -13,8 +13,7 @@ from Common.exports import export_database_as_file, export_backup, import_backup
 from Common.ui.common import FWidget
 from Common.ui.license_view import LicenseViewWidget
 from Common.ui.clean_db import DBCleanerWidget
-from Common.models import Organization
-from Common.ui.qss import dict_style
+from Common.models import Settings
 
 
 class FMenuBar(QMenuBar, FWidget):
@@ -46,7 +45,7 @@ class FMenuBar(QMenuBar, FWidget):
         admin_.setShortcut("Ctrl+G")
         self.connect(admin_, SIGNAL("triggered()"), self.goto_admin)
         admin.addAction(admin_)
-        if Config.LSE:
+        if "license" not in exclude_mn:
             license = QAction(QIcon.fromTheme('emblem-system', QIcon('')),
                               u"Licience", self)
             license.setShortcut("Alt+L")
@@ -57,13 +56,14 @@ class FMenuBar(QMenuBar, FWidget):
 
         if "theme" not in exclude_mn:
             _theme = preference.addMenu("Theme")
-            styles = dict_style()
+            # styles = dict_style()
+            styles = Settings.THEME
             list_theme = [({"name": k, "icon": '', "admin": False,
                             "shortcut": "", "theme": k}) for k in styles.keys()]
 
             for m in list_theme:
                 icon = ""
-                if m.get('theme') == Organization.get(id=1).theme:
+                if m.get('theme') == Settings.get(id=1).theme:
                     icon = "accept"
                 el_menu = QAction(QIcon("{}{}.png".format(
                     Config.img_cmedia, icon)), m.get('name'), self)
@@ -129,7 +129,7 @@ class FMenuBar(QMenuBar, FWidget):
         self.open_dialog(LicenseViewWidget, modal=True)
 
     def change_theme(self, theme):
-        sttg = Organization.get(id=1)
+        sttg = Settings.get(id=1)
         sttg.theme = theme
         sttg.save()
         self.restart()

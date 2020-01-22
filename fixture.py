@@ -6,12 +6,15 @@ from __future__ import (
     unicode_literals, absolute_import, division, print_function)
 
 
-from Common.models import Version
+from Common.models import Version, Settings
+from configuration import Config
 
 
 class AdminFixture(object):
 
-    LIST_CREAT = [Version(number=1)]
+    LIST_CREAT = [
+        Version(name=Config.APP_NAME, number=Config.APP_VERSION),
+        Settings(sulg=Settings.DEFAULT)]
 
     def create_all_or_pass(self):
 
@@ -22,3 +25,4 @@ class AdminFixture(object):
                 f.save()
             except Exception as e:
                 print(e)
+                raise

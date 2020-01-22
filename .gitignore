@@ -6,4 +6,5 @@
 *.exe
 doc/
 *.pdf
+*.old
 cmedia/img_media/product/

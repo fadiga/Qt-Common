@@ -7,12 +7,12 @@ from __future__ import (
     unicode_literals, absolute_import, division, print_function)
 
 from Common.models import (
-    Owner, Organization, License, Version, FileJoin, History)
+    Owner, License, Version, FileJoin, History, Settings)
 
 
 class AdminDatabase(object):
 
-    LIST_CREAT = [History, Owner, Organization, License, Version, FileJoin]
+    LIST_CREAT = [History, Owner, License, Version, FileJoin, Settings]
     CREATE_DB = True
 
     def create_all_or_pass(self, drop_tables=False):

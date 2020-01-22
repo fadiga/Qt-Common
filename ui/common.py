@@ -13,7 +13,7 @@ from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QPalette,
                          QCommandLinkButton, QRadialGradient, QPainter, QBrush,
                          QPainterPath, QPen, QPushButton,
                          QCompleter, QComboBox, QSortFilterProxyModel,
-                         QPixmap, QFrame)
+                         QPixmap)
 # from PyQt4.QtWebKit import QWebView
 
 from Common.ui.statusbar import GStatusBar
@@ -65,9 +65,9 @@ class FMainWindow(QMainWindow):
         d.exec_()
 
     def logout(self):
-        from Common.models import Owner, Organization
+        from Common.models import Owner, Settings
         # print("logout")
-        if Organization.get(id=1).is_login:
+        if Settings.get(id=1).is_login:
             for ur in Owner.select().where(Owner.islog == True):
                 ur.islog = False
                 ur.save()

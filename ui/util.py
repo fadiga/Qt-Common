@@ -29,12 +29,12 @@ except NameError:
 
 def device_amount(value, aftergam=0, dvs=None):
 
-    from Common.models import Organization
+    from Common.models import Settings
     if dvs:
         return "{} {}".format(formatted_number(value, aftergam), dvs)
 
     try:
-        organ = Organization().get(id=1)
+        organ = Settings().get(id=1)
     except Exception as e:
         print(e)
     d = organ.DEVISE[organ.devise]
@@ -198,7 +198,7 @@ def is_float(val):
 def is_int(val):
 
     try:
-        val = str(val).split()
+        val = str(val.replace(" ", "")).split()
         v = ''
         for i in val:
             v += i

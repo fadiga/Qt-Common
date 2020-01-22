@@ -11,7 +11,8 @@ import os
 from datetime import datetime
 
 from PyQt4.QtGui import QFileDialog, QWidget
-from Common.models import DB_FILE, Version, Organization
+from Common.models import DB_FILE, Version
+from models import Office
 
 # from configuration import Config
 
@@ -24,7 +25,7 @@ def export_database_as_file():
 
     destination = QFileDialog.getSaveFileName(
         QWidget(), u"Sauvegarder la base de Donnée.",
-        u"Sauvegarde du {} {}.db".format(DATETIME, Organization.get(id=1).name_orga), "*.db")
+        u"Sauvegarde du {} {}.db".format(DATETIME, Office.get(id=1).display_name()), "*.db")
     if not destination:
         return None
     try:
@@ -45,7 +46,7 @@ def export_backup(folder=None, dst_folder=None):
     directory = str(QFileDialog.getExistingDirectory(
         QWidget(), "Select Directory"))
     path_backup = u"{path}-{date}-{name}".format(path=os.path.join(
-        directory, 'BACKUP'), date=DATETIME, name=Organization.get(id=1).name_orga)
+        directory, 'BACKUP'), date=DATETIME, name=Office.get(id=1).display_name())
 
     if not directory:
         return None
@@ -79,10 +80,8 @@ def import_backup(folder=None, dst_folder=None):
         QWidget(), "Open Data File", "", "CSV data files (*.db)")
     shutil.copy(name_select_f, path_db_file)
 
-    raise_error(u"Restoration des Donnée.",
-                u"""Les données ont été correctement restorée
-                    La version actualle de la base de donnée est {}
-                    """.format(Version().get(id=1).display_name()))
+    raise_success(u"Restoration des Donnée.",
+                  u"""Les données ont été correctement restorée.""")
 
 
 def copyanything(src, dest):

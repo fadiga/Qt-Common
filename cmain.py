@@ -13,13 +13,14 @@ import gettext
 import gettext_windows
 
 from Common.cstatic import CConstants
-from Common.models import Organization, Owner
+from Common.models import Owner
 
 from Common.ui.util import is_valide_mac
 from Common.ui.login import LoginWidget
+from Common.ui.import_db import ImportBDWidget
 from Common.ui.license_view import LicenseViewWidget
 from Common.ui.user_add_or_edit import NewOrEditUserViewWidget
-from Common.ui.organization_add_or_edit import NewOrEditOrganizationViewWidget
+# from Common.ui.organization_add_or_edit import NewOrEditOrganizationViewWidget
 
 
 def cmain():
@@ -33,12 +34,16 @@ def cmain():
         return True
 
     if Owner().select().where(Owner.isactive == True).count() == 0:
+        if not ImportBDWidget().exec_() == QDialog.Accepted:
+            return
+
+    if Owner().select().where(Owner.isactive == True).count() == 0:
         if not NewOrEditUserViewWidget().exec_() == QDialog.Accepted:
             return
 
-    if Organization().select().count() == 0:
-        if not NewOrEditOrganizationViewWidget().exec_() == QDialog.Accepted:
-            return
+    # if Organization().select().count() == 0:
+    #     if not NewOrEditOrganizationViewWidget().exec_() == QDialog.Accepted:
+    #         return
 
     if CConstants.LSE:
         if not is_valide_mac() == CConstants.OK:

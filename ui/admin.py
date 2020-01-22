@@ -16,9 +16,7 @@ from Common.ui.common import (FWidget, FLabel, Button,
                               LineEdit, Button_save, FormLabel, IntLineEdit)
 
 from configuration import Config
-from Common.models import Owner
-
-from Common.models import Organization
+from Common.models import Owner, Settings
 from Common.tabpane import tabbox
 from Common.ui.util import check_is_empty
 from Common.ui.table import FTableWidget
@@ -42,7 +40,7 @@ class AdminViewWidget(FWidget):
 
         editbox = QGridLayout()
         table_config = QVBoxLayout()
-        self.table_config = OrganizationTableWidget(parent=self)
+        self.table_config = SettingsTableWidget(parent=self)
         table_config.addLayout(editbox)
         table_config.addWidget(self.table_config)
 
@@ -153,18 +151,26 @@ class TrashTableWidget(FTableWidget):
         pass
 
 
-class OrganizationTableWidget(FWidget):
+class SettingsTableWidget(FWidget):
 
     def __init__(self, parent, *args, **kwargs):
         super(FWidget, self).__init__(parent=parent, *args, **kwargs)
 
-        self.organization = Organization().get(id=1)
+        self.organization = Settings().get(id=1)
         self.parent = parent
         vbox = QVBoxLayout()
-        # vbox.addWidget(FPageTitle(u"Utilisateur: %s " %
-        # self.organisation.name_orga))
+        # self.slug_field =
 
-        self.liste_devise = Organization.DEVISE
+        self.list_theme = Settings.THEME
+        # Combobox widget
+        self.box_theme = QComboBox()
+        for index, value in enumerate(self.liste_devise):
+            self.box_theme.addItem(
+                "{} {}".format(self.list_theme[value], value))
+            if self.organization.theme == value:
+                self.box_theme.setCurrentIndex(index)
+
+        self.liste_devise = Settings.DEVISE
         # Combobox widget
         self.box_devise = QComboBox()
         for index, value in enumerate(self.liste_devise):
@@ -178,20 +184,11 @@ class OrganizationTableWidget(FWidget):
             self.checked.setCheckState(Qt.Checked)
         self.checked.setToolTip(u"""Cocher si vous voulez pour deactive
                                 le login continue à utiliser le systeme""")
-        self.name_orga = LineEdit(self.organization.name_orga)
-        self.phone = IntLineEdit(str(self.organization.phone))
-        self.bp = LineEdit(self.organization.bp)
-        self.adress_org = QTextEdit(self.organization.adress_org)
-        self.email_org = LineEdit(self.organization.email_org)
 
         formbox = QFormLayout()
-        formbox.addRow(FormLabel(u"Nom de l'organisation:"), self.name_orga)
         formbox.addRow(FormLabel(u"Tel:"), self.phone)
         formbox.addRow(FormLabel(u"Activer le login"), self.checked)
         formbox.addRow(FormLabel(u"Devise :"), self.box_devise)
-        formbox.addRow(FormLabel(u"B.P:"), self.bp)
-        formbox.addRow(FormLabel(u"E-mail:"), self.email_org)
-        formbox.addRow(FormLabel(u"Adresse complete:"), self.adress_org)
 
         butt = Button_save(u"Enregistrer")
         butt.clicked.connect(self.save_edit)
@@ -202,25 +199,13 @@ class OrganizationTableWidget(FWidget):
 
     def save_edit(self):
         ''' add operation '''
-        name_orga = unicode(self.name_orga.text())
-        if check_is_empty(self.name_orga):
-            return
-
-        if check_is_empty(self.phone):
-            return
-
-        orga = Organization().get(id=1)
-        orga.name_orga = name_orga
-        orga.phone = unicode(self.phone.text())
-        orga.is_login = True if self.checked.checkState() == Qt.Checked else False
-        orga.devise = str(self.box_devise.currentText().split()[1])
-        orga.email_org = unicode(self.email_org.text())
-        orga.bp = unicode(self.bp.text())
-        orga.adress_org = unicode(self.adress_org.toPlainText())
-        orga.save()
+        settg = Settings().get(id=1)
+        settg.is_login = True if self.checked.checkState() == Qt.Checked else False
+        settg.devise = str(self.box_devise.currentText().split()[1])
+        settg.save()
 
         self.parent.parent.Notify(u"Le Compte %s a été mise à jour" %
-                                  orga.name_orga, "success")
+                                  settg.slug, "success")
 
 
 class LoginManageWidget(FWidget):

@@ -9,7 +9,7 @@ from PyQt4.QtGui import (QComboBox, QVBoxLayout, QCheckBox, QGroupBox,
                          QFormLayout, QDialog, QTextEdit)
 # from peewee import IntegrityError
 from Common.ui.util import check_is_empty
-from Common.models import Organization
+from Common.models import Settings
 
 from Common.ui.common import (
     IntLineEdit, FWidget, Button_save, LineEdit, FormLabel)
@@ -20,7 +20,7 @@ except:
     unicode = str
 
 
-class NewOrEditOrganizationViewWidget(QDialog, FWidget):
+class NewOrEditSettingsViewWidget(QDialog, FWidget):
 
     def __init__(self, pp=None, owner=None, parent=None, *args, **kwargs):
         QDialog.__init__(self, parent, *args, **kwargs)
@@ -39,7 +39,7 @@ class NewOrEditOrganizationViewWidget(QDialog, FWidget):
     def organization_group_box(self):
         self.organGroupBoxBtt = QGroupBox(self.tr("Nouvelle Organisation"))
 
-        self.liste_devise = Organization.DEVISE
+        self.liste_devise = Settings.DEVISE
         # Combobox widget
         self.box_devise = QComboBox()
         for index in self.liste_devise:
@@ -50,14 +50,14 @@ class NewOrEditOrganizationViewWidget(QDialog, FWidget):
         self.checked.setChecked(True)
         self.checked.setToolTip(u"""Cocher si vous voulez pour deactive
                                 le login continue à utiliser le systeme""")
-        self.name_orga = LineEdit()
+        # self.name_orga = LineEdit()
         self.phone = IntLineEdit()
         self.bp = LineEdit()
         self.adress_org = QTextEdit()
         self.email_org = LineEdit()
 
         formbox = QFormLayout()
-        formbox.addRow(FormLabel(u"Nom de l'organisation *"), self.name_orga)
+        # formbox.addRow(FormLabel(u"Nom de l'organisation *"), self.name_orga)
         formbox.addRow(FormLabel(u"Tel *"), self.phone)
         formbox.addRow(
             FormLabel(u"Activer la saisie de mot de passe"), self.checked)
@@ -74,21 +74,21 @@ class NewOrEditOrganizationViewWidget(QDialog, FWidget):
 
     def save_edit(self):
         ''' add operation '''
-        if check_is_empty(self.name_orga):
-            return
-        if check_is_empty(self.phone):
-            return
-        name_orga = str(self.name_orga.text())
+        # if check_is_empty(self.name_orga):
+        #     return
+        # if check_is_empty(self.phone):
+        #     return
+        # name_orga = str(self.name_orga.text())
         device = str(self.box_devise.currentText().split()[1])
         bp = str(self.bp.text())
         email_org = str(self.email_org.text())
         phone = str(self.phone.text())
         adress_org = str(self.adress_org.toPlainText())
 
-        org = Organization()
+        org = Settings()
         org.phone = phone
         org.device = device
-        org.name_orga = name_orga
+        # org.name_orga = name_orga
         org.email_org = email_org
         org.bp = bp
         org.adress_org = adress_org
