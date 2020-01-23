@@ -164,9 +164,9 @@ class SettingsTableWidget(FWidget):
         self.list_theme = Settings.THEME
         # Combobox widget
         self.box_theme = QComboBox()
-        for index, value in enumerate(self.liste_devise):
+        for index, value in enumerate(self.list_theme):
             self.box_theme.addItem(
-                "{} {}".format(self.list_theme[value], value))
+                "{}".format(self.list_theme[value]), value)
             if self.organization.theme == value:
                 self.box_theme.setCurrentIndex(index)
 
@@ -175,7 +175,7 @@ class SettingsTableWidget(FWidget):
         self.box_devise = QComboBox()
         for index, value in enumerate(self.liste_devise):
             self.box_devise.addItem(
-                "{} {}".format(self.liste_devise[value], value))
+                "{}".format(self.liste_devise[value]), value)
             if self.organization.devise == value:
                 self.box_devise.setCurrentIndex(index)
 
@@ -186,7 +186,7 @@ class SettingsTableWidget(FWidget):
                                 le login continue à utiliser le systeme""")
 
         formbox = QFormLayout()
-        formbox.addRow(FormLabel(u"Tel:"), self.phone)
+        formbox.addRow(FormLabel(u"Theme :"), self.box_theme)
         formbox.addRow(FormLabel(u"Activer le login"), self.checked)
         formbox.addRow(FormLabel(u"Devise :"), self.box_devise)
 
@@ -199,9 +199,11 @@ class SettingsTableWidget(FWidget):
 
     def save_edit(self):
         ''' add operation '''
+        print(self.box_theme.itemData(self.box_theme.currentIndex()))
         settg = Settings().get(id=1)
         settg.is_login = True if self.checked.checkState() == Qt.Checked else False
-        settg.devise = str(self.box_devise.currentText().split()[1])
+        settg.theme = self.box_theme.itemData(self.box_theme.currentIndex())
+        settg.devise = self.box_devise.itemData(self.box_devise.currentIndex())
         settg.save()
 
         self.parent.parent.Notify(u"Le Compte %s a été mise à jour" %

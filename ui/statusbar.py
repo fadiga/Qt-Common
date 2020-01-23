@@ -47,15 +47,15 @@ class GStatusBar(QStatusBar):
     def contact_server(self):
         print("check contact")
         text = """
-            <strong> Connection Serveur : </strong><span style={}>{} </span> <br>
-            <strong> Synchronisation    : </strong><span style={}>{}</span></tr>
+            <strong>Serveur : </strong><span style={}>{} </span> <br>
+            <strong> Synchronisation : </strong><span style={}>{}</span></tr>
             """
         msg_web = ('color:red', "Connexion perdue ! ")
         if internet_on(Config.BASE_URL):
-            from Common.models import License
             msg_web = ('color:green', "Connecté")
 
-        lse = License().select().where(License.id == 1).get()
+        from Common.models import License
+        lse = License().get(License.id == 1)
         msg_aut = ('color:red', "Non autorisée")
         if lse.isactivated:
             msg_aut = ('color:green', "Autorisée")

@@ -106,7 +106,7 @@ def openFile(file):
 
 
 def uopen_file(filename):
-    print(filename)
+    # print(filename)
     if not os.path.exists(filename):
         raise IOError(u"Fichier %s non valable." % filename)
     subprocess.call('%(cmd)s %(file)s' %
@@ -156,7 +156,7 @@ def formatted_number(number, sep=".", aftergam=4):
     except AttributeError:
         return locale.format(fmt, number, grouping=True)
     except Exception as e:
-        print("formatted_number : ", e)
+        # print("formatted_number : ", e)
         return "%s" % number
 
 
@@ -340,7 +340,7 @@ def internet_on(url):
         urlopen(url, timeout=1)
         return True
     except URLError as err:
-        print(err)
+        # print(err)
         return False
     except Exception as e:
         print(e)
