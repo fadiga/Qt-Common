@@ -208,6 +208,7 @@ class Settings(BaseModel):
     }
     slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
     is_login = peewee.BooleanField(default=True)
+    url = peewee.CharField(default="https://dnds.ml")
     theme = peewee.CharField(default=1)
     devise = peewee.CharField(choices=DEVISE, default=XOF)
 

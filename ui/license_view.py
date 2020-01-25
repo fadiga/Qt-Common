@@ -26,8 +26,8 @@ class LicenseViewWidget(QDialog, FWidget):
         QDialog.__init__(self, parent=parent, *args, **kwargs)
         self.parent = parent
 
-        self.intro = FormLabel("<h3>Vous devez activé la license pour pouvoir"
-                               "<i>utiliser.</i></h3>")
+        self.intro = FormLabel("<h3>Vous devez activé application pour pouvoir"
+                               "<i>synchroniser avec le serveur.</i></h3>")
         vbox = QVBoxLayout()
         try:
             self.lcse = License.get(License.code == str(make_lcse()))
@@ -51,33 +51,31 @@ class LicenseViewWidget(QDialog, FWidget):
     def show_license_group_box(self):
 
         self.intro = FormLabel(
-            u""" <hr> <h4> Version {v_type} </h4>
-            <h2> Elle est n'est valable que pour cette machine</h2>
-            <p><b>proprièteur : </b> {name} </p>
-            <p><b>date d'activation :</b> {a_date} </p><hr>
-            <p><b>date d'expiration :</b> {ex_date} </p><hr>
-             <p><b>Merci.</b></li>
+            u"""
+            <p><b>Proprièteur : </b> {name} </p>
+            <p><b>Date d'activation :</b> {a_date} </p><hr>
+            <p><b>Date d'expiration :</b> {ex_date} </p><hr></li>
             """.format(
                 name=self.lcse.owner,
                 a_date=self.lcse.activation_date.strftime('%c'),
                 ex_date="néant" if not self.lcse.can_expired else
                 self.lcse.expiration_date.strftime('%c'),
-                v_type="d'evalution" if self.lcse.can_expired else "activée"
             ))
-        self.topLeftGroupBox = QGroupBox(self.tr("Licence"))
+        self.topLeftGroupBox = QGroupBox(
+            self.tr("Version de demo" if self.lcse.can_expired else "Version activée"))
         gridbox = QGridLayout()
 
         cancel_but = Button(u"OK")
         cancel_but.clicked.connect(self.cancel)
-        export_lcse = Button(u"Exporter la licence")
-        export_lcse.clicked.connect(self.export_license)
-        remove_trial_lcse = Deleted_btt(u"Expirer la licence")
+        # export_lcse = Button(u"Exporter la licence")
+        # export_lcse.clicked.connect(self.export_license)
+        remove_trial_lcse = Deleted_btt(u"supprimer la vesion demo")
         remove_trial_lcse.clicked.connect(self.remove_trial)
         # grid layout
         gridbox.addWidget(self.intro, 0, 1)
-        gridbox.addWidget(cancel_but, 0, 2)
-        gridbox.addWidget(export_lcse, 4, 1)
-        gridbox.addWidget(remove_trial_lcse, 4, 2)
+        # gridbox.addWidget(cancel_but, 0, 2)
+        # gridbox.addWidget(export_lcse, 4, 1)
+        gridbox.addWidget(remove_trial_lcse, 4, 1)
 
         # gridbox.setColumnStretch(2, 1)
         # gridbox.setRowStretch(4, 1)

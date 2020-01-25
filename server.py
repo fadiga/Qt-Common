@@ -2,8 +2,7 @@
 
 import json
 import requests
-# import platform
-# import os
+import os
 
 from Common.models import License
 
@@ -12,11 +11,10 @@ from PyQt4.QtCore import QObject
 from Common.ui.util import internet_on, date_to_ts
 from configuration import Config
 
-base_url = Config.BASE_URL
-
 
 class Network(QObject):
 
+    # base_url =
     def __init__(self):
         QObject.__init__(self)
 
@@ -43,7 +41,7 @@ class Network(QObject):
             pass
 
     def update_version_checher(self):
-        url_ = base_url + "client/desktop_client"
+        url_ = Config.BASE_URL + "/client/desktop_client"
         print("update_version_checher")
         data = {
             "app_info": {

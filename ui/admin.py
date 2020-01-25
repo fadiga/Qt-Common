@@ -160,7 +160,7 @@ class SettingsTableWidget(FWidget):
         self.parent = parent
         vbox = QVBoxLayout()
         # self.slug_field =
-
+        self.url_field = LineEdit(self.organization.url)
         self.list_theme = Settings.THEME
         # Combobox widget
         self.box_theme = QComboBox()
@@ -186,6 +186,7 @@ class SettingsTableWidget(FWidget):
                                 le login continue à utiliser le systeme""")
 
         formbox = QFormLayout()
+        formbox.addRow(FormLabel(u"URL :*"), self.url_field)
         formbox.addRow(FormLabel(u"Theme :"), self.box_theme)
         formbox.addRow(FormLabel(u"Activer le login"), self.checked)
         formbox.addRow(FormLabel(u"Devise :"), self.box_devise)
@@ -199,8 +200,10 @@ class SettingsTableWidget(FWidget):
 
     def save_edit(self):
         ''' add operation '''
-        print(self.box_theme.itemData(self.box_theme.currentIndex()))
+        if check_is_empty(self.url_field):
+            return
         settg = Settings().get(id=1)
+        settg.url = str(self.url_field.text())
         settg.is_login = True if self.checked.checkState() == Qt.Checked else False
         settg.theme = self.box_theme.itemData(self.box_theme.currentIndex())
         settg.devise = self.box_devise.itemData(self.box_devise.currentIndex())

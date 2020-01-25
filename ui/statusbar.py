@@ -115,7 +115,7 @@ class GStatusBar(QStatusBar):
         self.info_label.setText("Téléchargement en cours ...")
 
         self.installer_name = "{}.exe".format(self.check.data.get("app"))
-        url = "{}{}".format(base_url, self.check.data.get("setup_file_url"))
+        url = "{}/{}".format(base_url, self.check.data.get("setup_file_url"))
         r = requests.get(url, stream=True)
         if r.status_code == 200:
             total_length = r.headers.get('content-length')
@@ -129,7 +129,6 @@ class GStatusBar(QStatusBar):
                         f.write(data)
                         done = int(100 * dl / int(total_length))
                         self.progressBar.setValue(done)
-
         self.info_label.setText("Fin de téléchargement ...")
 
 
