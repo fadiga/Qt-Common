@@ -13,7 +13,7 @@ from Common.exports import export_database_as_file, export_backup, import_backup
 from Common.ui.common import FWidget
 from Common.ui.license_view import LicenseViewWidget
 from Common.ui.clean_db import DBCleanerWidget
-from Common.models import Settings
+from Common.models import Settings, Owner
 
 
 class FMenuBar(QMenuBar, FWidget):
@@ -29,26 +29,29 @@ class FMenuBar(QMenuBar, FWidget):
         # Menu File
         self.file_ = self.addMenu(u"&Fichier")
         # Export
-        backup = self.file_.addMenu(u"&Basse de données")
+        backup = self.file_.addMenu(u"&Base de données")
 
         backup.addAction(u"Sauvegarder", self.goto_export_db)
         backup.addAction(u"Importer", self.goto_import_backup)
-        if "del_all" not in exclude_mn:
-            backup.addAction(
-                u"Suppression de tout les enregistrements", self.goto_clean_db)
+
+        if Owner.get(Owner.islog == True).group == Owner.ADMIN:
+            if "del_all" not in exclude_mn:
+                backup.addAction(
+                    u"Suppression de tout les enregistrements", self.goto_clean_db)
 
         # Comptes utilisateur
         admin = self.file_.addMenu(u"Outils")
-
         admin_ = QAction(QIcon.fromTheme('emblem-system', QIcon('')),
                          u"Gestion Admistration", self)
         admin_.setShortcut("Ctrl+G")
         self.connect(admin_, SIGNAL("triggered()"), self.goto_admin)
-        admin.addAction(admin_)
+        if Owner.get(Owner.islog==True).group == Owner.ADMIN:
+            admin.addAction(admin_)
+
         if "license" not in exclude_mn:
             license = QAction(QIcon.fromTheme('emblem-system', QIcon('')),
-                              u"Licience", self)
-            license.setShortcut("Alt+L")
+                              u"Activation", self)
+            license.setShortcut("Alt+A")
             self.connect(license, SIGNAL("triggered()"), self.goto_license)
             admin.addAction(license)
 

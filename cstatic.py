@@ -30,6 +30,8 @@ class CConstants(object):
         img_cmedia = file_img
     else:
         img_cmedia = os.path.join(ROOT_DIR, "Common", "cimages/")
+
+    IBS_LOGO = os.path.join(img_cmedia, "ibs.jpg")
     # ------------------------- Autor --------------------------#
     AUTOR = u"Fadiga Ibrahima"
     EMAIL_AUT = u"ibfadiga@gmail.com"

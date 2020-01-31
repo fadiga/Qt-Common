@@ -56,7 +56,7 @@ class GStatusBar(QStatusBar):
 
         from Common.models import License
         lse = License().get(License.id == 1)
-        msg_aut = ('color:red', "Non autorisée")
+        msg_aut = ('color:yellow', "Non autorisée")
         if lse.isactivated:
             msg_aut = ('color:green', "Autorisée")
         msg = text.format(msg_web[0], msg_web[1], msg_aut[0], msg_aut[1])
