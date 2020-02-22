@@ -28,27 +28,6 @@ NOW = datetime.now()
 dbh = peewee.SqliteDatabase(DB_FILE)
 migrator = SqliteMigrator(dbh)
 
-list_migrate = [
-    ('License', 'code', CharField(default="")),
-    ('Organization', 'devise', CharField(default="xof")),
-    ('Organization', 'theme', CharField(default="Theme systeme")),
-    ('Organization', 'is_login', BooleanField(default=True)),
-    ('License', 'update_date', DateTimeField(default=NOW))]
-
-try:
-    from migrations import make_migrate
-    list_migrate += make_migrate()
-except Exception as e:
-    print(e)
-
-for x, y, z in list_migrate:
-    try:
-        migrate(migrator.add_column(x, y, z))
-        print(x, " : ", y)
-    except Exception as e:
-        print(e)
-        # raise e
-
 
 class BaseModel(peewee.Model):
 
