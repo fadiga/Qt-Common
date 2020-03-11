@@ -13,8 +13,7 @@ from Common.exports import export_database_as_file, export_backup, import_backup
 from Common.ui.common import FWidget
 from Common.ui.license_view import LicenseViewWidget
 from Common.ui.clean_db import DBCleanerWidget
-from Common.models import Organization
-from Common.ui.qss import dict_style
+from Common.models import Organization, Settings, Owner
 
 
 class FMenuBar(QMenuBar, FWidget):
@@ -26,14 +25,18 @@ class FMenuBar(QMenuBar, FWidget):
 
         self.parent = parent
         # Menu File
+        exclude_mn = Config.EXCLUDE_MENU_ADMIN
         self.file_ = self.addMenu(u"&Fichier")
         # Export
         backup = self.file_.addMenu(u"&Basse de données")
 
         backup.addAction(u"Sauvegarder", self.goto_export_db)
         backup.addAction(u"Importer", self.goto_import_backup)
-        backup.addAction(
-            u"Suppression de tout les enregistrements", self.goto_clean_db)
+
+        if Owner.get(Owner.islog == True).group == Owner.ADMIN:
+            if "del_all" not in exclude_mn:
+                backup.addAction(
+                    u"Suppression de tout les enregistrements", self.goto_clean_db)
 
         # Comptes utilisateur
         admin = self.file_.addMenu(u"Outils")
@@ -51,23 +54,25 @@ class FMenuBar(QMenuBar, FWidget):
         admin.addAction(license)
 
         preference = self.addMenu(u"Préference")
-        _theme = preference.addMenu("Theme")
-        styles = dict_style()
-        list_theme = [({"name": k, "icon": '', "admin": False,
-                        "shortcut": "", "theme": k}) for k in styles.keys()]
+        if "theme" not in exclude_mn:
+            _theme = preference.addMenu("Theme")
+            # styles = dict_style()
+            styles = Settings.THEME
+            list_theme = [({"name": k, "icon": '', "admin": False,
+                            "shortcut": "", "theme": k}) for k in styles.keys()]
 
-        for m in list_theme:
-            icon = ""
-            if m.get('theme') == Organization.get(id=1).theme:
-                icon = "accept"
-            el_menu = QAction(QIcon("{}{}.png".format(
-                Config.img_cmedia, icon)), m.get('name'), self)
-            el_menu.setShortcut(m.get("shortcut"))
-            self.connect(
-                el_menu, SIGNAL("triggered()"), lambda m=m: self.change_theme(
-                    m.get('theme')))
-            _theme.addSeparator()
-            _theme.addAction(el_menu)
+            for m in list_theme:
+                icon = ""
+                if m.get('theme') == Settings.get(id=1).theme:
+                    icon = "accept"
+                el_menu = QAction(QIcon("{}{}.png".format(
+                    Config.img_cmedia, icon)), m.get('name'), self)
+                el_menu.setShortcut(m.get("shortcut"))
+                self.connect(
+                    el_menu, SIGNAL("triggered()"), lambda m=m: self.change_theme(
+                        m.get('theme')))
+                _theme.addSeparator()
+                _theme.addAction(el_menu)
 
         # logout
         lock = QAction(

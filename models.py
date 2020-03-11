@@ -294,3 +294,49 @@ class History(BaseModel):
 
     def __str__(self, arg):
         return "{} à {} par {}".format(date=self.date, action=self.action)
+
+
+class Settings(BaseModel):
+    """docstring for Settings"""
+    PREV = 0
+    CURRENT = 1
+    DEFAULT = 2
+    LCONFIG = ((PREV, u"Precedent"),
+               (DEFAULT, u"Par defaut"),
+               (CURRENT, u"Actuel"),)
+
+    USA = "dollar"
+    XOF = "xof"
+    EURO = "euro"
+    DEVISE = {
+        USA: "$",
+        XOF: "F",
+        EURO: "€"
+    }
+    DF = "systeme"
+    BL = "blue"
+    DK = "dark"
+    THEME = {
+        DF: "Par defaut",
+        DK: "Dark",
+        BL: "Blue",
+    }
+    slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
+    is_login = peewee.BooleanField(default=True)
+    url = peewee.CharField(default="https://dnds.ml")
+    theme = peewee.CharField(default=1)
+    devise = peewee.CharField(choices=DEVISE, default=XOF)
+
+    def __str__(self):
+        return self.display_name()
+
+    def display_name(self):
+        return u"{}/{}/{}".format(self.slug, self.is_login, self.theme)
+
+#     @classmethod
+#     def get_or_create(cls, name_orga, typ):
+#         try:
+#             ctct = cls.get(name_orga=name_orga, type_=typ)
+#         except cls.DoesNotExist:
+#             ctct = cls.create(name_orga=name_orga, type_=typ)
+#         return ctct

@@ -486,8 +486,7 @@ drak_ccs = """/*
     QSplitter::handle:vertical {height: 1px;}
     QHeaderView::section {color:#fff;}
 """
-default = """
-"""
+default = ""
 
 
 def get_style():
