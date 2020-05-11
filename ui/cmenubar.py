@@ -13,7 +13,7 @@ from Common.exports import export_database_as_file, export_backup, import_backup
 from Common.ui.common import FWidget
 from Common.ui.license_view import LicenseViewWidget
 from Common.ui.clean_db import DBCleanerWidget
-from Common.models import Organization, Settings, Owner
+from Common.models import Settings, Owner
 
 
 class FMenuBar(QMenuBar, FWidget):
@@ -24,11 +24,12 @@ class FMenuBar(QMenuBar, FWidget):
         self.setWindowIcon(QIcon(QPixmap("{}".format(Config.APP_LOGO_ICO))))
 
         self.parent = parent
-        # Menu File
+
         exclude_mn = Config.EXCLUDE_MENU_ADMIN
+        # Menu File
         self.file_ = self.addMenu(u"&Fichier")
         # Export
-        backup = self.file_.addMenu(u"&Basse de données")
+        backup = self.file_.addMenu(u"&Base de données")
 
         backup.addAction(u"Sauvegarder", self.goto_export_db)
         backup.addAction(u"Importer", self.goto_import_backup)
@@ -40,20 +41,22 @@ class FMenuBar(QMenuBar, FWidget):
 
         # Comptes utilisateur
         admin = self.file_.addMenu(u"Outils")
-
         admin_ = QAction(QIcon.fromTheme('emblem-system', QIcon('')),
                          u"Gestion Admistration", self)
         admin_.setShortcut("Ctrl+G")
         self.connect(admin_, SIGNAL("triggered()"), self.goto_admin)
-        admin.addAction(admin_)
+        if Owner.get(Owner.islog==True).group == Owner.ADMIN:
+            admin.addAction(admin_)
 
-        license = QAction(QIcon.fromTheme('emblem-system', QIcon('')),
-                          u"Licience", self)
-        license.setShortcut("Alt+L")
-        self.connect(license, SIGNAL("triggered()"), self.goto_license)
-        admin.addAction(license)
+        if "license" not in exclude_mn:
+            license = QAction(QIcon.fromTheme('emblem-system', QIcon('')),
+                              u"Activation", self)
+            license.setShortcut("Alt+A")
+            self.connect(license, SIGNAL("triggered()"), self.goto_license)
+            admin.addAction(license)
 
         preference = self.addMenu(u"Préference")
+
         if "theme" not in exclude_mn:
             _theme = preference.addMenu("Theme")
             # styles = dict_style()
@@ -142,10 +145,8 @@ class FMenuBar(QMenuBar, FWidget):
         path_main_name = os.path.join(
             os.path.dirname(os.path.abspath('__file__')), Config.NAME_MAIN)
         try:
-            subprocess.Popen(
-                [sys.executable, path_main_name])
+            subprocess.Popen([sys.executable, path_main_name])
         except Exception as e:
-            print('EEEE ', e)
             subprocess.call(
                 "python.exe " + path_main_name, shell=True)
 
@@ -165,24 +166,18 @@ class FMenuBar(QMenuBar, FWidget):
 
     # About
     def goto_about(self):
-        from Common.models import Organization
-        org = Organization.get(id=1)
         QMessageBox.about(self, u"À propos",
                           u""" <h2>{app_name}  version: {version_app} </h2>
                             <hr>
                             <h4><i>Logiciel de {app_name}.</i></h4>
-                            <ul><li></li> <li><b>Developpeur</b>: {autor} </li>
-                                <li><b>Adresse: </b>{adress} </li>
-                                <li><b>Tel: </b> {phone} </li>
-                                <li><b>E-mail: </b> {email} <br/></li>
-                                <li>{org_out}</li>
+                            <ul><li></li> <li><b>Developper par : </b>IBS-Mali </li>
+                                <li><b>Adresse : </b>Bamako, Boulkassoumbougou Rue : 580 Porte : 388 </li>
+                                <li><b>Tel: </b> +223 76 43 38 90 </li>
+                                <li><b>E-mail : </b> info@ibsmali.ml <br/></li>
+                                <li><a herf="https://ibsmail.ml"/> ibsmail.ml</li>
                             </ul>
                             """.format(
-                                email=org.email_org,
                               app_name=Config.APP_NAME,
-                              adress=org.adress_org,
                               autor=Config.AUTOR,
                               version_app=Config.APP_VERSION,
-                              phone=org.phone,
-                              org_out=org.name_orga,
                           ))
