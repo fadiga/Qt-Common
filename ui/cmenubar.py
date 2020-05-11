@@ -129,7 +129,7 @@ class FMenuBar(QMenuBar, FWidget):
         self.open_dialog(LicenseViewWidget, modal=True)
 
     def change_theme(self, theme):
-        sttg = Organization.get(id=1)
+        sttg = Settings.get(id=1)
         sttg.theme = theme
         sttg.save()
         self.restart()
