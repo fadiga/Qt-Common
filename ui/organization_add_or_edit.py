@@ -7,17 +7,12 @@ from __future__ import (
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import (QComboBox, QVBoxLayout, QCheckBox, QGroupBox,
                          QFormLayout, QDialog, QTextEdit)
-# from peewee import IntegrityError
+
 from Common.ui.util import check_is_empty
 from Common.models import Organization
 
 from Common.ui.common import (
     IntLineEdit, FWidget, ButtonSave, LineEdit, FormLabel)
-
-try:
-    unicode
-except:
-    unicode = str
 
 
 class NewOrEditOrganizationViewWidget(QDialog, FWidget):

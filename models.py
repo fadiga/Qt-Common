@@ -187,7 +187,7 @@ class Organization(BaseModel):
 
     slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
     is_login = peewee.BooleanField(default=True)
-    theme = peewee.CharField(default=1)
+    theme = peewee.CharField(default=CURRENT)
     name_orga = peewee.CharField(verbose_name=(""))
     phone = peewee.IntegerField(null=True, verbose_name=(""))
     bp = peewee.CharField(null=True, verbose_name=(""))
@@ -332,11 +332,3 @@ class Settings(BaseModel):
 
     def display_name(self):
         return u"{}/{}/{}".format(self.slug, self.is_login, self.theme)
-
-#     @classmethod
-#     def get_or_create(cls, name_orga, typ):
-#         try:
-#             ctct = cls.get(name_orga=name_orga, type_=typ)
-#         except cls.DoesNotExist:
-#             ctct = cls.create(name_orga=name_orga, type_=typ)
-#         return ctct
