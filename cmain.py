@@ -27,8 +27,8 @@ def cmain():
     gettext_windows.setup_env()
     locale.setlocale(locale.LC_ALL, '')
     gettext.install('main.py', localedir='locale')
-
     # window.setStyleSheet(theme)
+
     if CConstants.DEBUG:
         print("Debug is True")
         return True

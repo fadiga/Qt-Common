@@ -4,4 +4,4 @@ from database import Setup
 
 Setup().create_all_or_pass()
 
-# setup()
+Setup().make_migrate()

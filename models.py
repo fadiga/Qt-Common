@@ -166,16 +166,6 @@ class Owner(BaseModel):
 
 
 class Organization(BaseModel):
-
-    """docstring for Organization"""
-
-    PREV = 0
-    CURRENT = 1
-    DEFAULT = 2
-    LCONFIG = ((PREV, u"Precedent"),
-               (DEFAULT, u"Par defaut"),
-               (CURRENT, u"Actuel"),)
-
     USA = "dollar"
     XOF = "xof"
     EURO = "euro"
@@ -185,24 +175,17 @@ class Organization(BaseModel):
         EURO: "€"
     }
 
-    slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
     is_login = peewee.BooleanField(default=True)
-    theme = peewee.CharField(default=CURRENT)
     name_orga = peewee.CharField(verbose_name=(""))
     phone = peewee.IntegerField(null=True, verbose_name=(""))
     bp = peewee.CharField(null=True, verbose_name=(""))
+    devise = peewee.CharField(choices=DEVISE, default=XOF)
     email_org = peewee.CharField(null=True, verbose_name=(""))
     adress_org = peewee.TextField(null=True, verbose_name=(""))
-    devise = peewee.CharField(choices=DEVISE, default=XOF)
-    # file_join = peewee.ForeignKeyField(
-    #     FileJoin, null=True, verbose_name=("image de la societe"))
+    logo_org = peewee.TextField(null=True, verbose_name=(""))
 
     def __str__(self):
         return self.display_name()
-
-    def change_prev(self):
-        self.slug = self.PREV
-        self.save()
 
     def display_name(self):
         return u"{}/{}/{}".format(self.name_orga, self.phone, self.email_org)
@@ -305,14 +288,6 @@ class Settings(BaseModel):
                (DEFAULT, u"Par defaut"),
                (CURRENT, u"Actuel"),)
 
-    USA = "dollar"
-    XOF = "xof"
-    EURO = "euro"
-    DEVISE = {
-        USA: "$",
-        XOF: "F",
-        EURO: "€"
-    }
     DF = "systeme"
     BL = "blue"
     DK = "dark"
@@ -325,7 +300,6 @@ class Settings(BaseModel):
     is_login = peewee.BooleanField(default=True)
     url = peewee.CharField(default="https://dnds.ml")
     theme = peewee.CharField(default=1)
-    devise = peewee.CharField(choices=DEVISE, default=XOF)
 
     def __str__(self):
         return self.display_name()

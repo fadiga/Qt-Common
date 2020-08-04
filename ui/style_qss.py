@@ -1,15 +1,9 @@
 from Common.models import Settings
 
 blue_css = """/* Theme Blue*/
-    palette {
-        background: rgb(17, 133, 209, 255); disabled: rgb(200, 200, 200, 255);
-    }
-    QMainWindow {
-        icon-size: 28px, 28px; background: #118CED
-    }
-    QDialog {
-        border: none; background: rgb(17, 133, 209, 255);
-    }
+    palette {background: rgb(17, 133, 209, 255); disabled: rgb(200, 200, 200, 255);}
+    QMainWindow {icon-size: 28px, 28px; background: #118CED}
+    QDialog {border: none; background: rgb(17, 133, 209, 255);}
     QToolBar {
         border: none;
         /*background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
@@ -31,14 +25,11 @@ blue_css = """/* Theme Blue*/
         color: white;
         font: bold 10ft;
         min-height: 50px;
-        min-width: 50px;
-    }
+        min-width: 50px;}
     QPushButton:hover, QPushButton:pressed, QToolButton:hover, QToolButton:pressed {
-        background-color: rgb(238, 178, 17, 200);
-    }
+        background-color: rgb(238, 178, 17, 200);}
     QPushButton:checked, QToolButton:checked {
-        background-color: rgb(255, 255, 255, 50);
-    }
+        background-color: rgb(255, 255, 255, 50);}
     QPushButton {
         padding: 3px;
         border: none;
@@ -48,29 +39,23 @@ blue_css = """/* Theme Blue*/
         background-color: rgb(255, 255, 255, 50);
         font: bold 10ft;
         min-height: 20px;
-        min-width: 20px;
-    }
+        min-width: 20px;}
     /* >>> QToolBar: QLineEdit/QComboBox */
     QLineEdit, QComboBox:!editable, QSpinBox {
         border: none;
         border-radius: 4px;
         background-color: white;
         padding: 3px;
-        min-height: 20px;
-    }
+        min-height: 20px;}
     QLineEdit:disabled, QComboBox:disabled, QSpinBox:disabled {
-        background-color: rgb(200, 200, 200, 255);
-    }
+        background-color: rgb(200, 200, 200, 255);}
     QComboBox:!editable {
-        padding-right: 5px;
-    }
+        padding-right: 5px;}
     /* QComboBox gets the "on" state when the popup is open */
     QComboBox:!editable:on, QToolBar > QComboBox::drop-down:editable:on {
-     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #D3D3D3, stop: 0.4 #D8D8D8, stop: 0.5 #DDDDDD, stop: 1.0 #E1E1E1);
-    }
+     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #D3D3D3, stop: 0.4 #D8D8D8, stop: 0.5 #DDDDDD, stop: 1.0 #E1E1E1);}
     QComboBox:on { /* shift the text when the popup opens */
-        padding-top: 3px; padding-left: 4px;
-    }
+        padding-top: 3px; padding-left: 4px;}
     QComboBox::drop-down {
      subcontrol-origin: padding;
      subcontrol-position: top right;
@@ -82,8 +67,7 @@ blue_css = """/* Theme Blue*/
     QComboBox::down-arrow {image: url(:/icons/down-arrow.png);}
     QComboBox::down-arrow:disabled {image: none;}
     QComboBox::down-arrow:on { /* shift the arrow when popup is open */
-     top: 1px; left: 1px;
-    }
+     top: 1px; left: 1px;}
     /* <<< QToolBar: QLineEdit/QComboBox */
     /* >>> QDockWidget */
     QDockWidget {
@@ -198,32 +182,37 @@ blue_css = """/* Theme Blue*/
     }"""
 drak_ccs = """/* Theme Drak by FADIGA */
     QProgressBar:horizontal {border: 1px solid #3A3939;text-align: center;padding: 1px;background: #201F1F;}
-    QProgressBar::chunk:horizontal {background-color: qlineargradient(spread:reflect, x1:1, y1:0.545, x2:1, y2:0, stop:0 rgba(28, 66, 111, 255), stop:1 rgba(37, 87, 146, 255));
-    }
-    QTableWidget {
-    border: 1px solid #3A3A3A;
-    border-radius: 8px;}
-    QTableWidget::item {
-        color: white;
-        /*border-bottom: 1px solid #3A3A3A;*/
-        background-color: qlineargradient(spread:pad, x1:1, y1:1, x2:1, y2:0, stop:0 #3A3A3A, stop:1 black);
-        /*background-color: #3A3A3A;*/
-    }
-    QTableWidget::item:hover {
-        border: 1px solid #F37021;border-radius: 8px;background-color: #3A3A3A;
-    }
+    QProgressBar::chunk:horizontal {background-color: qlineargradient(spread:reflect, x1:1, y1:0.545, x2:1, y2:0, stop:0 rgba(28, 66, 111, 255), stop:1 rgba(37, 87, 146, 255));}
+
+    QHeaderView{border: 1px transparent;margin: 0px;padding: 0px;}
+    QHeaderView::section{background-color: qlineargradient(spread:pad, x1:1, y1:1, x2:1, y2:0, stop:0 #3A3A3A, stop:1 #bbb);
+        color: white;border-radius:0px;padding: 4px;border: 1px solid #6c6c6c;text-align: center;text-transform: uppercase;font:bold}
+    QHeaderView::section::vertical::first, QHeaderView::section::vertical::only-one {border-top: 1px solid #6c6c6c;}
+    QHeaderView::section::vertical{border-top: transparent;}
+    QHeaderView::section::horizontal::first, QHeaderView::section::horizontal::only-one {border-left: 1px solid #6c6c6c;}
+    QHeaderView::section::horizontal{border-left: transparent;}
+    QHeaderView::section:checked{color: white;background-color: #5A5959;}
+    /* style the sort indicator */
+    QHeaderView::down-arrow {/*    image: url(:/down_arrow.png);*/}
+    QHeaderView::up-arrow {/*    image: url(:/up_arrow.png);*/}
+    /*TABLE*/
+    QTableWidget::item:hover {border: 1px solid #bbb;border-radius: 1px;background-color: #3A3A3A;}
+    QTableView{border: 3px solid #444;gridline-color: #FFFFFF;background-color: #4A4949;color: #FFFFFF;}
+    QTableView, QHeaderView{border-radius: 1px;color: #FFFFFF;}
+    QTableView::item:pressed, QListView::item:pressed, QTreeView::item:pressed  {background: #78879b;color: #FFFFFF;}
+    QTableView::item:selected:active, QTreeView::item:selected:active, QListView::item:selected:active  {background: #3d8ec9;color: #FFFFFF;}
+    QTableCornerButton::section {background-color: #3A3939;border: 1px solid #3A3939;border-radius: 2px;}
+    QTableWidget::item {color: white;/*border-bottom: 1px solid #3A3A3A;*/color: #fff; /*background-color: #3A3A3A;*/}
     QToolTip{border: 1px solid #3A3939;background-color: rgb(90, 102, 117);color: white;padding: 1px;opacity: 200;}
-    QWidget{color: silver;background-color: #302F2F;selection-background-color:#3d8ec9;selection-color: black;background-clip: border;
-    /*    border-image: none;*/outline: 0;}
+    QWidget{color: silver;background-color: #302F2F;selection-background-color:#3d8ec9;selection-color: black;background-clip: border;/*    border-image: none;*/outline: 0;}
     QWidget:item:hover{background-color: #78879b;color: black;}
     QWidget:item:selected{background-color: #3d8ec9;}
     QCheckBox{spacing: 5px;outline: none;color: #bbb;margin-bottom: 2px;}
     QCheckBox:disabled{color: #777777;}
     QCheckBox::indicator, QGroupBox::indicator{width: 18px;height: 18px;}
     QGroupBox::indicator{margin-left: 2px;}
-    QCheckBox::indicator:unchecked,QCheckBox::indicator:unchecked:hover,
-    QGroupBox::indicator:unchecked,
-    QGroupBox::indicator:unchecked:hover{/*    image: url(:/checkbox_unchecked.png);*/}
+    QCheckBox::indicator:unchecked,QCheckBox::indicator:unchecked:hover,QGroupBox::indicator:unchecked,
+    QGroupBox::indicator:unchecked:hover {/*    image: url(:/checkbox_unchecked.png);*/}
     QCheckBox::indicator:unchecked:focus, QCheckBox::indicator:unchecked:pressed,
     QGroupBox::indicator:unchecked:focus, QGroupBox::indicator:unchecked:pressed{border: none;/*    image: url(:/checkbox_unchecked_focus.png);*/}
     QCheckBox::indicator:checked,QCheckBox::indicator:checked:hover,QGroupBox::indicator:checked,
@@ -269,7 +258,7 @@ drak_ccs = """/* Theme Drak by FADIGA */
     QMenu::indicator:exclusive:checked:selected {/*    image: url(:/radio_checked_disabled.png);*/}
     QMenu::right-arrow {margin: 5px;/*    image: url(:/right_arrow.png)*/}
     QWidget:disabled{color: #404040;background-color: #302F2F;}
-    QAbstractItemView{alternate-background-color: #3A3939;color: silver;border: 1px solid 3A3939;border-radius: 2px;padding: 1px;}
+    QAbstractItemView{alternate-background-color: #3A3939;color: silver;border: 1px solid 3A3939;border-radius: 0px;padding: 1px;}
     QWidget:focus, QMenuBar:focus{border: 1px solid #78879b;}
     QTabWidget:focus, QCheckBox:focus, QRadioButton:focus, QSlider:focus{border: none;}
     QLineEdit{background-color: #201F1F;padding: 2px;border-style: solid;border: 1px solid #3A3939;border-radius: 2px;color: silver;}QGroupBox {border:1px solid #3A3939;border-radius: 2px;margin-top: 20px;}
@@ -282,58 +271,36 @@ drak_ccs = """/* Theme Drak by FADIGA */
     QScrollBar::sub-line:horizontal{margin: 0px 3px 0px 3px;
     /*    border-image: url(:/left_arrow_disabled.png);*/height: 10px;width: 10px;subcontrol-position: left;subcontrol-origin: margin;}
     QScrollBar::add-line:horizontal:hover,QScrollBar::add-line:horizontal:on{
-    /*    border-image: url(:/right_arrow.png);*/height: 10px;width: 10px;subcontrol-position: right;subcontrol-origin: margin;
-    }
-    QScrollBar::sub-line:horizontal:hover, QScrollBar::sub-line:horizontal:on
-    {
+    /*    border-image: url(:/right_arrow.png);*/height: 10px;width: 10px;subcontrol-position: right;subcontrol-origin: margin;}
+    QScrollBar::sub-line:horizontal:hover, QScrollBar::sub-line:horizontal:on{
     /*    border-image: url(:/left_arrow.png);*/height: 10px;width: 10px;subcontrol-position: left;subcontrol-origin: margin;}
-    QScrollBar::up-arrow:horizontal, QScrollBar::down-arrow:horizontal{background: none;
-    }
-    QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal
-    {background: none;}
+    QScrollBar::up-arrow:horizontal, QScrollBar::down-arrow:horizontal{background: none;}
+    QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal{background: none;}
     QScrollBar:vertical{background-color: #2A2929;width: 15px;margin: 15px 3px 15px 3px;border: 1px transparent #2A2929;border-radius: 4px;}
-    QScrollBar::handle:vertical{background-color: #605F5F;min-height: 5px;border-radius: 4px;}
+    QScrollBar::handle:vertical{background-color: #605F5F;min-height: 5px;border-radius: 2px;}
     QScrollBar::sub-line:vertical{margin: 3px 0px 3px 0px;
     /*    border-image: url(:/up_arrow_disabled.png);*/height: 10px;width: 10px;subcontrol-position: top;subcontrol-origin: margin;}
     QScrollBar::add-line:vertical{margin: 3px 0px 3px 0px;
     /*    border-image: url(:/down_arrow_disabled.png);*/height: 10px;width: 10px;subcontrol-position: bottom;subcontrol-origin: margin;}
-    QScrollBar::sub-line:vertical:hover,QScrollBar::sub-line:vertical:on{
-
-    /*    border-image: url(:/up_arrow.png);*/height: 10px;width: 10px;subcontrol-position: top;subcontrol-origin: margin;
-    }
-    QScrollBar::add-line:vertical:hover, QScrollBar::add-line:vertical:on
-    {
+    QScrollBar::sub-line:vertical:hover,QScrollBar::sub-line:vertical:on {
+        /*    border-image: url(:/up_arrow.png);*/height: 10px;width: 10px;subcontrol-position: top;subcontrol-origin: margin;}
+    QScrollBar::add-line:vertical:hover, QScrollBar::add-line:vertical:on {
     /*    border-image: url(:/down_arrow.png);*/height: 10px;width: 10px;subcontrol-position: bottom;subcontrol-origin: margin;}
-    QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical{background: none;
-    }
-    QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical
-    {background: none;}
+    QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical{background: none;}
+    QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical{background: none;}
     QTextEdit{background-color: #201F1F;color: silver;border: 1px solid #3A3939;}
-    QPlainTextEdit{background-color: #201F1F;;color: silver;border-radius: 2px;border: 1px solid #3A3939;}
-    QSizeGrip {/*    image: url(:/sizegrip.png);*/width: 12px;height: 12px;
-    }
-    QMainWindow::separator
-    {background-color: #302F2F;color: white;padding-left: 4px;spacing: 2px;border: 1px dashed #3A3939;}
-    QMainWindow::separator:hover{
-    background-color: #787876;color: white;padding-left: 4px;border: 1px solid #3A3939;spacing: 2px;
-    }
-    QMenu::separator
-    {height: 1px;background-color: #3A3939;color: white;padding-left: 4px;margin-left: 10px;margin-right: 5px;
-    }
-    QFrame
-    {border-radius: 2px;border: 1px solid #444;}
+    QPlainTextEdit{background-color: #201F1F;color: silver;border-radius: 2px;border: 1px solid #3A3939;}
+    QSizeGrip {/*    image: url(:/sizegrip.png);*/width: 12px;height: 12px;}
+    QMainWindow::separator {background-color: #302F2F;color: white;padding-left: 4px;spacing: 2px;border: 1px dashed #3A3939;}
+    QMainWindow::separator:hover{background-color: #787876;color: white;padding-left: 4px;border: 1px solid #3A3939;spacing: 2px;}
+    QMenu::separator{height: 1px;background-color: #3A3939;color: white;padding-left: 4px;margin-left: 10px;margin-right: 5px;}
+    QFrame {border-radius: 2px;border: 1px solid #444;}
     QFrame[frameShape="0"]{border-radius: 2px;border: 1px transparent #444;}
     QStackedWidget{border: 1px transparent black;}QToolBar {border: 1px transparent #393838;background: 1px solid #302F2F;font-weight: bold;}
-    QToolBar::handle:horizontal {/*    image: url(:/Hmovetoolbar.png);*/
-    }
-    QToolBar::handle:vertical {
-    /*    image: url(:/Vmovetoolbar.png);*/
-    }
-    QToolBar::separator:horizontal {
-    /*    image: url(:/Hsepartoolbar.png);*/
-    }
-    QToolBar::separator:vertical {
-    /*    image: url(:/Vsepartoolbars.png);*/}
+    QToolBar::handle:horizontal {/*    image: url(:/Hmovetoolbar.png);*/}
+    QToolBar::handle:vertical {/*    image: url(:/Vmovetoolbar.png);*/}
+    QToolBar::separator:horizontal {/*    image: url(:/Hsepartoolbar.png);*/}
+    QToolBar::separator:vertical {/*    image: url(:/Vsepartoolbars.png);*/}
     QPushButton{color: silver;background-color: #302F2F;border-width: 1px;border-color: #4A4949;border-style: solid;padding-top: 5px;padding-bottom: 5px;padding-left: 5px;padding-right: 5px;border-radius: 2px;outline: none;}
     QPushButton:disabled{background-color: #302F2F;border-width: 1px;border-color: #3A3939;border-style: solid;padding-top: 5px;padding-bottom: 5px;padding-left: 10px;padding-right: 10px;/*border-radius: 2px;*/color: #454545;}QPushButton:focus {background-color: #3d8ec9;color: white;}
     QComboBox{selection-background-color: #3d8ec9;background-color: #201F1F;border-style: solid;border: 1px solid #3A3939;border-radius: 2px;padding: 2px;min-width: 75px;}QPushButton:checked{background-color: #4A4949;border-color: #6A6969;}
@@ -342,29 +309,23 @@ drak_ccs = """/* Theme Drak by FADIGA */
     QComboBox QAbstractItemView{background-color: #201F1F;border-radius: 2px;border: 1px solid #444;selection-background-color: #3d8ec9;}
     QComboBox::drop-down{subcontrol-origin: padding;subcontrol-position: top right;width: 15px;
     border-left-width: 0px;border-left-color: darkgray;border-left-style: solid;border-top-right-radius: 3px;border-bottom-right-radius: 3px;}
-    QComboBox::down-arrow{
-    /*    image: url(:/down_arrow_disabled.png);*/}
-    QComboBox::down-arrow:on, QComboBox::down-arrow:hover,QComboBox::down-arrow:focus
-    {
-    /*    image: url(:/down_arrow.png);*/}
+    QComboBox::down-arrow{/*    image: url(:/down_arrow_disabled.png);*/}
+    QComboBox::down-arrow:on, QComboBox::down-arrow:hover,QComboBox::down-arrow:focus {/*    image: url(:/down_arrow.png);*/}
     QPushButton:pressed{background-color: #484846;}QAbstractSpinBox {padding-top: 2px;padding-bottom: 2px;border: 1px solid #3A3939;background-color: #201F1F;color: silver;border-radius: 2px;min-width: 75px;}
     QAbstractSpinBox:up-button{background-color: transparent;subcontrol-origin: border;subcontrol-position: center right;}
     QAbstractSpinBox:down-button{background-color: transparent;subcontrol-origin: border;subcontrol-position: center left;}
     QAbstractSpinBox::up-arrow,QAbstractSpinBox::up-arrow:disabled,QAbstractSpinBox::up-arrow:off {/*    image: url(:/up_arrow_disabled.png);*/width: 10px;height: 10px;}
-    QAbstractSpinBox::up-arrow:hover{
-    /*    image: url(:/up_arrow.png);*/}
+    QAbstractSpinBox::up-arrow:hover{/*    image: url(:/up_arrow.png);*/}
     QAbstractSpinBox::down-arrow,QAbstractSpinBox::down-arrow:disabled,QAbstractSpinBox::down-arrow:off{
     /*    image: url(:/down_arrow_disabled.png);*/width: 10px;height: 10px;}
-    QAbstractSpinBox::down-arrow:hover
-    {/*    image: url(:/down_arrow.png);*/}
+    QAbstractSpinBox::down-arrow:hover {/*    image: url(:/down_arrow.png);*/}
     QLabel{border: 0px solid black;color: #b1b1b1;background-color: transparent;}
     QTabWidget{border: 1px transparent black;color: white;}
     QTabWidget::pane {border: 1px solid #444;border-radius: 3px;padding: 3px;}
     QTabBar{qproperty-drawBase: 0;left: 5px; /* move to the right by 5px */}
     QTabBar:focus{border: 0px transparent black;}
     QTabBar::close-button  {/*    image: url(:/close.png);*/background: transparent;}
-    QTabBar::close-button:hover{
-    /*    image: url(:/close-hover.png);*/background: transparent;}
+    QTabBar::close-button:hover{/*    image: url(:/close-hover.png);*/background: transparent;}
     QTabBar::close-button:pressed {/*    image: url(:/close-pressed.png);*/background: transparent;}
     /* TOP TABS */QTabBar::tab:top {color: #b1b1b1;border: 1px solid #4A4949;border-bottom: 1px transparent black;background-color: #302F2F;padding: 5px;border-top-left-radius: 2px;border-top-right-radius: 2px;}
     QTabBar::tab:top:!selected{color: #b1b1b1;background-color: #201F1F;border: 1px transparent #4A4949;border-bottom: 1px transparent #4A4949;border-top-left-radius: 0px;border-top-right-radius: 0px;}QTabBar::tab:top:!selected:hover {background-color: #48576b;}
@@ -372,15 +333,14 @@ drak_ccs = """/* Theme Drak by FADIGA */
     QTabBar::tab:bottom:!selected{color: #b1b1b1;background-color: #201F1F;border: 1px transparent #4A4949;border-top: 1px transparent #4A4949;border-bottom-left-radius: 0px;border-bottom-right-radius: 0px;}QTabBar::tab:bottom:!selected:hover {background-color: #78879b;}
     /* LEFT TABS */QTabBar::tab:left {color: #b1b1b1;border: 1px solid #4A4949;border-left: 1px transparent black;background-color: #302F2F;padding: 5px;border-top-right-radius: 2px;border-bottom-right-radius: 2px;}
     QTabBar::tab:left:!selected{color: #b1b1b1;background-color: #201F1F;border: 1px transparent #4A4949;border-right: 1px transparent #4A4949;border-top-right-radius: 0px;border-bottom-right-radius: 0px;}
-    QTabBar::tab:left:!selected:hover {background-color: #48576b;}
-    /* RIGHT TABS */
+    QTabBar::tab:left:!selected:hover {background-color: #48576b;}/* RIGHT TABS */
     QTabBar::tab:right {color: #b1b1b1;border: 1px solid #4A4949;border-right: 1px transparent black;background-color: #302F2F;padding: 5px;border-top-left-radius: 2px;border-bottom-left-radius: 2px;}
     QTabBar::tab:right:!selected{color: #b1b1b1;background-color: #201F1F;border: 1px transparent #4A4949;border-right: 1px transparent #4A4949;border-top-left-radius: 0px;border-bottom-left-radius: 0px;}QTabBar::tab:right:!selected:hover {background-color: #48576b;}
     QTabBar QToolButton::right-arrow:enabled {/*     image: url(:/right_arrow.png);*/ }
-     QTabBar QToolButton::left-arrow:enabled {/*     image: url(:/left_arrow.png);*/ }
+    QTabBar QToolButton::left-arrow:enabled {/*     image: url(:/left_arrow.png);*/ }
     QTabBar QToolButton::right-arrow:disabled {/*     image: url(:/right_arrow_disabled.png);*/ }
-     QTabBar QToolButton::left-arrow:disabled {/*     image: url(:/left_arrow_disabled.png);*/}
-     QDockWidget {border: 1px solid #403F3F;titlebar-close-icon: url(:/close.png);titlebar-normal-icon: url(:/undock.png);}QDockWidget::close-button, QDockWidget::float-button {border: 1px solid transparent;border-radius: 2px;background: transparent;}QDockWidget::close-button:hover, QDockWidget::float-button:hover {background: rgba(255, 255, 255, 10);}QDockWidget::close-button:pressed, QDockWidget::float-button:pressed {padding: 1px -1px -1px 1px;background: rgba(255, 255, 255, 10);}
+    QTabBar QToolButton::left-arrow:disabled {/*     image: url(:/left_arrow_disabled.png);*/}
+    QDockWidget {border: 1px solid #403F3F;titlebar-close-icon: url(:/close.png);titlebar-normal-icon: url(:/undock.png);}QDockWidget::close-button, QDockWidget::float-button {border: 1px solid transparent;border-radius: 2px;background: transparent;}QDockWidget::close-button:hover, QDockWidget::float-button:hover {background: rgba(255, 255, 255, 10);}QDockWidget::close-button:pressed, QDockWidget::float-button:pressed {padding: 1px -1px -1px 1px;background: rgba(255, 255, 255, 10);}
     QTreeView, QListView{border: 1px solid #444;background-color: #201F1F;}
     QTreeView:branch:selected, QTreeView:branch:hover{background: url(:/transparent.png);}
     QTreeView::branch:has-siblings:!adjoins-item {/*    border-image: url(:/transparent.png);*/}
@@ -401,23 +361,7 @@ drak_ccs = """/* Theme Drak by FADIGA */
     QToolButton::menu-arrow {/*    image: url(:/down_arrow.png);*/}
     QToolButton::menu-arrow:open {top: 1px; left: 1px; /* shift it a bit */border: 1px solid #3A3939;}
     QPushButton::menu-indicator  {subcontrol-origin: padding;subcontrol-position: bottom right;left: 8px;}
-    QTableView{border: 1px solid #444;gridline-color: #FFFFFF;background-color: #4A4949;color: #FFFFFF;}
-    QTableView, QHeaderView{border-radius: 1px;color: #FFFFFF;}
-    QTableView::item:pressed, QListView::item:pressed, QTreeView::item:pressed  {background: #78879b;color: #FFFFFF;}
-    QTableView::item:selected:active, QTreeView::item:selected:active, QListView::item:selected:active  {background: #3d8ec9;color: #FFFFFF;}
-    QHeaderView{border: 1px transparent;border-radius: 2px;margin: 0px;padding: 0px;}
-    QHeaderView::section{background-color:green;color: white;border-radius:12px;padding: 4px;border: 1px solid #6c6c6c;text-align: center;text-transform: uppercase;font:bold}
-    QHeaderView::section::vertical::first, QHeaderView::section::vertical::only-one
-    {border-top: 1px solid #6c6c6c;}
-    QHeaderView::section::vertical{border-top: transparent;}
-    QHeaderView::section::horizontal::first, QHeaderView::section::horizontal::only-one
-    {border-left: 1px solid #6c6c6c;}
-    QHeaderView::section::horizontal{border-left: transparent;}
-    QHeaderView::section:checked{color: white;background-color: #5A5959;}
-    /* style the sort indicator */
-    QHeaderView::down-arrow {/*    image: url(:/down_arrow.png);*/}
-    QHeaderView::up-arrow {/*    image: url(:/up_arrow.png);*/}
-    QTableCornerButton::section {background-color: #3A3939;border: 1px solid #3A3939;border-radius: 2px;}
+
     QToolBox  {padding: 3px;border: 1px transparent black;}
     QToolBox::tab {color: #b1b1b1;background-color: #302F2F;border: 1px solid #4A4949;border-bottom: 1px transparent #302F2F;border-top-left-radius: 5px;border-top-right-radius: 5px;}
     QToolBox::tab:selected { /* italicize selected tabs */font: italic;background-color: #302F2F;border-color: #3d8ec9;}
