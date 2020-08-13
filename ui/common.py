@@ -7,13 +7,12 @@ from __future__ import (
 from datetime import date
 
 from PyQt4.QtCore import Qt, QSize
-from PyQt4.QtGui import (QMainWindow, QLabel, QIcon, QLineEdit, QPalette,
-                         QDateTimeEdit, QFont, QWidget, QTabBar, QToolButton,
-                         QTextEdit, QColor, QIntValidator, QDoubleValidator,
-                         QCommandLinkButton, QRadialGradient, QPainter, QBrush,
-                         QPainterPath, QPen, QPushButton,
-                         QCompleter, QComboBox, QSortFilterProxyModel,
-                         QPixmap)
+from PyQt4.QtGui import (
+    QMainWindow, QLabel, QIcon, QLineEdit, QPalette, QDateTimeEdit, QFont,
+    QWidget, QTabBar, QToolButton, QTextEdit, QColor, QIntValidator,
+    QDoubleValidator, QCommandLinkButton, QRadialGradient, QPainter, QBrush,
+    QPainterPath, QPen, QPushButton, QCompleter, QComboBox, QSortFilterProxyModel,
+    QPixmap, QDialog)
 # from PyQt4.QtWebKit import QWebView
 
 from Common.ui.statusbar import GStatusBar
@@ -89,6 +88,9 @@ class FWidget(QWidget):
 
         QWidget.__init__(self, parent=parent, *args, **kwargs)
         self.pp = parent
+
+    def page_names(self, app_name, txt):
+        self.parentWidget().setWindowTitle("{} | {}".format(app_name, txt.upper()))
         # self.wc = self.pp.wc - 100
         # self.hc = self.pp.hc
         # self.css = """
@@ -108,6 +110,15 @@ class FWidget(QWidget):
     def open_dialog(self, dialog, modal=False, *args, **kwargs):
         return self.parentWidget().open_dialog(dialog, modal=modal, *args, **kwargs)
 
+
+class FDialog(QDialog, FWidget):
+
+    def __init__(self, parent=0, *args, **kwargs):
+
+        QDialog.__init__(self, parent=parent, *args, **kwargs)
+
+    def page_names(self, app_name, txt):
+        self.setWindowTitle("{} | {}".format(app_name, txt.upper()))
 
 # class FWebView(QWebView):
 

@@ -58,15 +58,16 @@ def check_is_empty(field):
 
     if len(containt) == 0:
         field.setToolTip("Champs requis")
-        stylerreur = "background-color: #fff79a;"
+        stylerreur = "background-color: #fff79a; border : 2px solid red"
         flag = True
     field.setStyleSheet(stylerreur)
     return flag
 
 
 def field_error(field, msg):
-    field.setStyleSheet("background-color: #fff79a;")
-    field.setToolTip("%s" % msg)
+    field.setStyleSheet(
+        "background-color: #DF8F1F; border : 2px solid red")
+    field.setToolTip("{}".format(msg))
     return False
 
 
