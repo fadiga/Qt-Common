@@ -34,8 +34,9 @@ class FMenuBar(QMenuBar, FWidget):
         backup.addAction(u"Sauvegarder", self.goto_export_db)
         backup.addAction(u"Importer", self.goto_import_backup)
 
-        if Owner.get(Owner.islog == True).group == Owner.ADMIN:
-            if "del_all" not in exclude_mn:
+        ow = Owner.select().where(Owner.islog == True)
+        if ow.exists():
+            if ow.get().group == Owner.ADMIN and "del_all" not in exclude_mn:
                 backup.addAction(
                     u"Suppression de tout les enregistrements", self.goto_clean_db)
 
@@ -45,8 +46,9 @@ class FMenuBar(QMenuBar, FWidget):
                          u"Gestion Admistration", self)
         admin_.setShortcut("Ctrl+G")
         self.connect(admin_, SIGNAL("triggered()"), self.goto_admin)
-        if Owner.get(Owner.islog==True).group == Owner.ADMIN:
-            admin.addAction(admin_)
+        if ow.exists():
+            if ow.get().group == Owner.ADMIN:
+                admin.addAction(admin_)
 
         if "license" not in exclude_mn:
             license = QAction(QIcon.fromTheme('emblem-system', QIcon('')),

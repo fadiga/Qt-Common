@@ -32,7 +32,6 @@ def device_amount(value, dvs=None):
     from Common.models import Organization
     if dvs:
         return "{} {}".format(formatted_number(value), dvs)
-
     try:
         organ = Organization().get(id=1)
     except Exception as e:

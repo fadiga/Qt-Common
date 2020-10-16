@@ -6,24 +6,26 @@ from __future__ import (
     unicode_literals, absolute_import, division, print_function)
 
 from PyQt4.QtGui import (QHBoxLayout, QGroupBox, QIcon,
-                         QPushButton, QDialog, QComboBox,
+                         QPushButton, QComboBox,
                          QFormLayout)
 
 from PyQt4.QtCore import Qt
 
 from Common.ui.common import (FMainWindow, FormLabel, EnterTabbedLineEdit,
-                              ErrorLabel, LineEdit)
+                              ErrorLabel, LineEdit, FDialog)
 from Common.ui.util import check_is_empty, field_error
 from Common.models import Owner
 from configuration import Config
 
 
-class LoginWidget(QDialog, FMainWindow):
+class LoginWidget(FDialog, FMainWindow):
 
     title_page = u"Identification"
 
-    def __init__(self, hibernate=False):
-        QDialog.__init__(self)
+    # def __init__(self, hibernate=False):
+    def __init__(self, parent=None, hibernate=False, *args, **kwargs):
+        # FDialog.__init__(self)
+        FDialog.__init__(self, parent=parent, *args, **kwargs)
         self.setWindowTitle(self.set_window_title(self.title_page))
         self.hibernate = hibernate
 
