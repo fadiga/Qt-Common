@@ -174,6 +174,22 @@ class FLabel(QLabel):
         self.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
 
 
+class FRLabel(QLabel):
+
+    def __init__(self, *args, **kwargs):
+        super(FRLabel, self).__init__(*args, **kwargs)
+        # self.setFont(QFont("Times New Roman", 50))
+        css = """
+                color: gry;
+              """
+        # self.setStyleSheet(css)
+        font = QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        # self.setFont(font)
+        self.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
+
+
 class FPageTitle(FLabel):
 
     def __init__(self, *args, **kwargs):
