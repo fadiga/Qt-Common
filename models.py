@@ -291,10 +291,12 @@ class Settings(BaseModel):
     DF = "systeme"
     BL = "blue"
     DK = "dark"
+    FAD = "Bnb"
     THEME = {
         DF: "Par defaut",
         DK: "Dark",
         BL: "Blue",
+        FAD: "Bnb",
     }
     slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
     is_login = peewee.BooleanField(default=True)

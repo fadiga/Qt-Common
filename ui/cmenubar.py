@@ -63,7 +63,7 @@ class FMenuBar(QMenuBar, FWidget):
             _theme = preference.addMenu("Theme")
             # styles = dict_style()
             styles = Settings.THEME
-            list_theme = [({"name": k, "icon": '', "admin": False,
+            list_theme = [({"name": k.upper(), "icon": '', "admin": False,
                             "shortcut": "", "theme": k}) for k in styles.keys()]
 
             for m in list_theme:

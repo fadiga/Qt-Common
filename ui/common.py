@@ -180,12 +180,18 @@ class FRLabel(QLabel):
         super(FRLabel, self).__init__(*args, **kwargs)
         # self.setFont(QFont("Times New Roman", 50))
         css = """
-                color: gry;
-              """
-        # self.setStyleSheet(css)
+            border-style: outset;
+            border-width: 2px;
+            border-radius: 10px;
+            border-color: beige;
+            font: bold 30px;
+            max-width: 20em;
+            padding: 6px;
+        """
+        self.setStyleSheet(css)
         font = QFont()
-        font.setBold(True)
-        font.setWeight(75)
+        # font.setBold(True)
+        # font.setWeight(75)
         # self.setFont(font)
         self.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
 
