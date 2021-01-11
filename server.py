@@ -1,46 +1,48 @@
 #!/usr/bin/env python
 
-
 import json
 import requests
-import platform
+import os
 
-from Common.models import License, Organization
+from Common.models import License
 
 from PyQt4.QtCore import QObject
 
-from Common.ui.util import internet_on, date_to_ts, to_timestamp
+from Common.ui.util import internet_on, date_to_ts
 from configuration import Config
-
-base_url = Config.BASE_URL
 
 
 class Network(QObject):
 
-    def __init__(self, parent):
-
-        QObject.__init__(self, parent)
+    # base_url =
+    def __init__(self):
+        QObject.__init__(self)
 
         if not Config.SERV:
-            print("Not Serveur ")
+            # print("Not Serveur ")
             return
 
-    #     self.t = TaskThreadServer(self)
-    #     # QObject.connect(self.t, SIGNAL("rsp_server()"), self.rsp_server)
-    #     self.t.start()
+        # self.check = TaskThreadServerM(self)
+        # QObject.connect(self.check, SIGNAL("download_"), self.download_)
+        # self.check.start()
 
-    # def start(self):
-    #     return self.rsp
+    def submit(self, url, data):
+        # print("submit")
+        if internet_on(Config.BASE_URL):
+            client = requests.session()
+            response = client.get(url, data=json.dumps(data))
+            try:
+                return json.loads(response.content.decode('UTF-8'))
+            except ValueError:
+                return False
+            except Exception as e:
+                print(e)
+        else:
+            pass
 
-
-def desktop_client():
-
-    if not internet_on(Config.BASE_URL):
-        print("pas de connexion")
-        return False
-    else:
-        print("Connexion OK")
-
+    def update_version_checher(self):
+        url_ = Config.BASE_URL + "/client/desktop_client"
+        print("update_version_checher")
         data = {
             "app_info": {
                 "name": Config.APP_NAME,
@@ -48,44 +50,18 @@ def desktop_client():
             }
         }
         lcse_dic = []
-        for lcse in License.select():
-            acttn_date = date_to_ts(lcse.activation_date)
-            lcse_dic.append({
-                # "owner": lcse.owner,
-                "code": lcse.code,
-                "isactivated": lcse.isactivated,
-                "activation_date": acttn_date,
-                "can_expired": lcse.can_expired,
-                "expiration_date": date_to_ts(
-                    lcse.expiration_date) if lcse.can_expired else acttn_date,
-            })
+        if Config.LSE:
+            for lcse in License.select():
+                acttn_date = date_to_ts(lcse.activation_date)
+                lcse_dic.append({
+                    # "owner": lcse.owner,
+                    "code": lcse.code,
+                    "isactivated": lcse.isactivated,
+                    "activation_date": acttn_date,
+                    "can_expired": lcse.can_expired,
+                    "expiration_date": date_to_ts(
+                        lcse.expiration_date) if lcse.can_expired else acttn_date,
+                })
+            data.update({"licenses": lcse_dic})
 
-        data.update({"licenses": lcse_dic})
-
-        host_info = {
-            "platform": platform.platform(),
-            "system": platform.system(),
-            "version": platform.version(),
-            "node": platform.node(),
-            "processor": platform.processor()
-        }
-        data.update({"host_info": host_info})
-        organ = Organization().get(id=1)
-        info_organization = {
-            'name_orga': organ.name_orga,
-            'phone': organ.phone,
-            'bp': organ.bp,
-            'email_org': organ.email_org,
-            'adress_org': organ.adress_org,
-            'devise': organ.devise,
-        }
-        data.update({"organization": info_organization})
-        # license
-        url_ = base_url + "desktop_client"
-        client = requests.session()
-        response = client.get(url_, data=json.dumps(data))
-        print(response)
-        try:
-            return json.loads(response.content.decode('UTF-8'))
-        except ValueError:
-            return False
+        return self.submit(url_, data)

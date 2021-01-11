@@ -15,10 +15,6 @@ blue_css = """/* Theme Blue*/
         background: rgb(17, 133, 209, 255);
         min-height: 50px;
     }
-    pv--view--View, pv--view--Viewport{
-        margin: 0px; border: none;
-        background-color: rgb(255, 255, 255); padding: 0px;
-    }
     QToolButton {
         border: none;
         border-style: flat;
@@ -54,8 +50,7 @@ blue_css = """/* Theme Blue*/
     /* QComboBox gets the "on" state when the popup is open */
     QComboBox:!editable:on, QToolBar > QComboBox::drop-down:editable:on {
      background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #D3D3D3, stop: 0.4 #D8D8D8, stop: 0.5 #DDDDDD, stop: 1.0 #E1E1E1);}
-    QComboBox:on { /* shift the text when the popup opens */
-        padding-top: 3px; padding-left: 4px;}
+    QComboBox:on {padding-top: 3px; padding-left: 4px;}
     QComboBox::drop-down {
      subcontrol-origin: padding;
      subcontrol-position: top right;
@@ -97,20 +92,6 @@ blue_css = """/* Theme Blue*/
         border: 0px;
         padding: 0px;
     }
-    QGroupBox {
-        margin: 0px;
-        background-color: rgb(17, 133, 209,  255);
-        border: 0px;
-        padding: 40px, 10px, 10px, 10px;
-        color: white;
-        font-size: 15px;
-        font-weight: bold;
-    }
-    QGroupBox::title {
-     subcontrol-origin: margin;
-     subcontrol-position: top center;
-     padding: 5 20px;
-    }
     QGroupBox:disabled {
         color: rgb(200, 200, 200, 255);
     }
@@ -133,8 +114,7 @@ blue_css = """/* Theme Blue*/
     QSlider::groove:horizontal {
         border: 1px solid #999999; height: 2px; margin: 0px 0; left: 10px;
         right: 10px; border-radius: 4px;}
-    QSlider::handle:horizontal {
-        border-image:url(:/icons/slider-handle.png); margin-left: -12px;
+    QSlider::handle:horizontal { margin-left: -12px;
         margin-right: -12px; margin-top: -11px; margin-bottom: -11px;
     }
     QSlider::sub-page:horizontal{
@@ -167,14 +147,14 @@ blue_css = """/* Theme Blue*/
         border-top-right-radius: 15px; border-top-left-radius: 15px;
         padding: 15px 50px; background-color: #669cf2;
     }
-    QTableWidget::item:hover {
-        border: 1px solid #FFF;border-radius: 1px;background-color: #78c7f5;}
-        QTableView{border: 3px solid #78879b;gridline-color: #78879b;background-color: #3d8ec9;color: #FFFFFF;}
+    QTableWidget::item {
+        border: 1px solid #FFF;border-radius: 1px;background-color: #669cf2;}
+        QTableView{border: 1px solid #78879b;gridline-color: #78879b;background-color: #3d8ec9;color: #FFFFFF;}
         QTableView, QHeaderView{border-radius: 1px;color: #FFFFFF;}
         QTableView::item:pressed, QListView::item:pressed, QTreeView::item:pressed  {background: #78879b;color: #FFFFFF;}
         QTableView::item:selected:active, QTreeView::item:selected:active, QListView::item:selected:active  {background: #3d8ec9;color: #FFFFFF;}
-        QTableCornerButton::section {background-color: #78c7f5;border: 1px solid #78c7f5;border-radius: 2px;}
-        QTableWidget::item {color: #000;/*border-bottom: 1px solid #78c7f5;background-color: #78c7f5;*/}
+        QTableCornerButton::section {background-color: #669cf2;border: 1px solid #669cf2;border-radius: 2px;}
+        QTableWidget::item {color: #000;/*border-bottom: 1px solid #669cf2;background-color: #669cf2;*/}
         QToolTip{border: 1px solid #FFF;background-color: rgb(90, 102, 117);color: white;padding: 1px;opacity: 200;
     }
     """
