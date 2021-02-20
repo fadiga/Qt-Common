@@ -358,6 +358,16 @@ drak_ccs = """/* Theme Drak */
         font : bold 32px;
     }
     QLineEdit { background-color: #787876; color: #FFF; border-color : 2px solid #FFF}
+
+    palette, QMainWindow, QDialog {border: none; background: qlineargradient(x1: 1, y1: 0, x2: 0, y2: 1,
+        stop: 0 rgb(25, 96, 104),stop: 0.05 rgb(08, 06, 2),
+        stop: 0.5 rgb(95, 100, 104),stop: 0.95 rgb(20, 2, 5),
+        stop: 1 rgb(75, 95, 55)); min-height: 50px;}
+    QToolBar {
+        border: none; background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+        stop: 0.5 rgb(95, 100, 104),stop: 0.95 rgb(20, 2, 5),
+        stop: 1 rgb(1, 1, 1)); min-height: 50px;
+    }
 """
 default = """
     QGroupBox {
