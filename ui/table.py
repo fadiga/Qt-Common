@@ -9,8 +9,7 @@ import datetime
 
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import (QTableWidget, QAbstractItemView, QLabel,
-                         QTableWidgetItem, QWidget,
-                         QPushButton, QFont)
+                         QTableWidgetItem, QWidget, QPushButton, QFont)
 
 from Common.ui.util import formatted_number
 

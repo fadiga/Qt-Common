@@ -20,9 +20,7 @@ base_url = Config.BASE_URL
 class GStatusBar(QStatusBar):
 
     def __init__(self, parent=None):
-
         QStatusBar.__init__(self, parent)
-
         if not Config.SERV:
             # print("Not Serveur ")
             return
@@ -32,7 +30,7 @@ class GStatusBar(QStatusBar):
         icon_label = QLabel()
         name_label = QLabel()
         name_label.setText(
-            'Développer par IBS-Mali | <a href="http://ibsmali.ml/">ibsmali.ml</a>')
+            'Développer par IBS-Mali | <a href="https://ibsmali.ml/">ibsmali.ml</a>')
         name_label.setOpenExternalLinks(True)
         icon_label.setPixmap(QPixmap("{}".format(Config.IBS_LOGO)))
         self.addWidget(icon_label, 0)
@@ -132,6 +130,44 @@ class GStatusBar(QStatusBar):
                         self.progressBar.setValue(done)
         self.info_label.setText("Fin de téléchargement ...")
 
+
+class CheckThread(QThread):
+
+    def __init__(self, parent):
+        QThread.__init__(self, parent)
+        self.parent = parent
+
+    def run(self):
+        # self.parent.download_setup_file()
+        self.emit(SIGNAL("licience"))
+
+    def update_version_checher(self):
+        url_ = Config.BASE_URL + "/desktop_client"
+        print("update_version_checher", url_)
+        data = {
+            "app_info": {
+                "name": Config.APP_NAME,
+                "version": Config.APP_VERSION
+            }
+        }
+        lcse_dic = []
+        if Config.LSE:
+            for lcse in License.select():
+                acttn_date = date_to_ts(lcse.activation_date)
+                lcse_dic.append({
+                    # "owner": lcse.owner,
+                    "code": lcse.code,
+                    "isactivated": lcse.isactivated,
+                    "activation_date": acttn_date,
+                    "can_expired": lcse.can_expired,
+                    "expiration_date": date_to_ts(
+                        lcse.expiration_date) if lcse.can_expired else acttn_date,
+                })
+            data.update({"licenses": lcse_dic})
+        return self.submit(url_, data)
+
+    def demande_activation(self):
+        pass 
 
 class TaskThread(QThread):
 

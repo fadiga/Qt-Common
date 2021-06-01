@@ -33,12 +33,13 @@ class AdminDatabase(object):
             from fixture import FixtInit
             FixtInit().create_all_or_pass()
 
-    def make_migrate(self, db_v=7):
-        print("--check migrate--")
-        from Common.models import migrator
+    def make_migrate(self, db_v=1):
+        # print(db_v)
         version = Version.get(Version.id == 1)
-        print("version ", version.id)
-        if db_v != version.number:
+        print("number ", version.number, "  db_v : ", db_v)
+        if db_v > version.number:
+            print("--check migrate--")
+            from Common.models import migrator
             print("Make migrate", self.LIST_MIGRATE)
             for x, y, z in self.LIST_MIGRATE:
                 try:

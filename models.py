@@ -178,6 +178,7 @@ class Organization(BaseModel):
     is_login = peewee.BooleanField(default=True)
     name_orga = peewee.CharField(verbose_name=(""))
     phone = peewee.IntegerField(null=True, verbose_name=(""))
+    after_cam = peewee.IntegerField(null=True, default=0, verbose_name=(""))
     bp = peewee.CharField(null=True, verbose_name=(""))
     devise = peewee.CharField(choices=DEVISE, default=XOF)
     email_org = peewee.CharField(null=True, verbose_name=(""))

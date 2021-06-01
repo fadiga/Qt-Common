@@ -176,7 +176,7 @@ class FMenuBar(QMenuBar, FWidget):
                                 <li><b>Adresse : </b>Bamako, Boulkassoumbougou Rue : 580 Porte : 388 </li>
                                 <li><b>Tel: </b> +223 76 43 38 90 </li>
                                 <li><b>E-mail : </b> info@ibsmali.ml <br/></li>
-                                <li><a herf="https://ibsmail.ml"/> ibsmail.ml</li>
+                                <li><a herf="https://ibsmali.ml"/> ibsmail.ml</li>
                             </ul>
                             """.format(
                               app_name=Config.APP_NAME,

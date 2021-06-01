@@ -9,7 +9,7 @@ from PyQt4.QtCore import Qt, SIGNAL
 from PyQt4.QtGui import (
     QVBoxLayout, QHBoxLayout, QFont, QGridLayout, QSplitter, QCheckBox,
     QMessageBox, QTextEdit, QFormLayout, QListWidgetItem, QIcon, QPixmap,
-    QListWidget, QComboBox)
+    QListWidget, QComboBox, QDoubleSpinBox)
 
 from Common.ui.user_add_or_edit import NewOrEditUserViewWidget
 from Common.ui.common import (FWidget, FLabel, Button,
@@ -159,7 +159,7 @@ class OrganizationTableWidget(FWidget):
         super(FWidget, self).__init__(parent=parent, *args, **kwargs)
 
         self.organization = Organization().get(id=1)
-        print(self.organization)
+        # print(self.organization)
         self.parent = parent
         vbox = QVBoxLayout()
         # vbox.addWidget(FPageTitle(u"Utilisateur: %s " %
@@ -167,6 +167,8 @@ class OrganizationTableWidget(FWidget):
 
         self.liste_devise = Organization.DEVISE
         # Combobox widget
+        self.box_vilgule = QDoubleSpinBox()
+
         self.box_devise = QComboBox()
         for index, value in enumerate(self.liste_devise):
             self.box_devise.addItem(
@@ -181,6 +183,9 @@ class OrganizationTableWidget(FWidget):
                                 le login continue à utiliser le systeme""")
         self.name_orga = LineEdit(self.organization.name_orga)
         self.phone = IntLineEdit(str(self.organization.phone))
+        self.after_cam = self.box_vilgule.setValue(
+            float(self.organization.after_cam))
+        self.box_vilgule.setMaximum(4)
         self.bp = LineEdit(self.organization.bp)
         self.adress_org = QTextEdit(self.organization.adress_org)
         self.email_org = LineEdit(self.organization.email_org)
@@ -190,6 +195,8 @@ class OrganizationTableWidget(FWidget):
         formbox.addRow(FormLabel(u"Tel:"), self.phone)
         formbox.addRow(FormLabel(u"Activer le login"), self.checked)
         formbox.addRow(FormLabel(u"Devise :"), self.box_devise)
+        formbox.addRow(
+            FormLabel(u"Nombre de chiffre après la vilgule :"), self.box_vilgule)
         formbox.addRow(FormLabel(u"B.P:"), self.bp)
         formbox.addRow(FormLabel(u"E-mail:"), self.email_org)
         formbox.addRow(FormLabel(u"Adresse complete:"), self.adress_org)
@@ -215,6 +222,7 @@ class OrganizationTableWidget(FWidget):
         orga.phone = unicode(self.phone.text())
         orga.is_login = True if self.checked.checkState() == Qt.Checked else False
         orga.devise = str(self.box_devise.currentText().split()[1])
+        orga.after_cam = int(self.box_vilgule.value())
         orga.email_org = unicode(self.email_org.text())
         orga.bp = unicode(self.bp.text())
         orga.adress_org = unicode(self.adress_org.toPlainText())
@@ -276,7 +284,6 @@ class OperationWidget(FWidget):
 
 
 class OwnerTableWidget(QListWidget):
-
     """docstring for OwnerTableWidget"""
 
     def __init__(self, parent, *args, **kwargs):
@@ -344,13 +351,12 @@ class InfoTableWidget(FWidget):
         super(FWidget, self).__init__(parent=parent, *args, **kwargs)
 
         self.parent = parent
-
         self.refresh()
 
         self.details = FLabel()
         self.edit_ow_but = Button(u"Mettre à jour")
-        self.edit_ow_but.setIcon(QIcon.fromTheme('document-new',
-                                                 QIcon(u"{}edit_user.png".format(Config.img_cmedia))))
+        self.edit_ow_but.setIcon(QIcon.fromTheme(
+            'document-new', QIcon(u"{}edit_user.png".format(Config.img_cmedia))))
         self.edit_ow_but.setEnabled(False)
         self.edit_ow_but.clicked.connect(self.edit_owner)
 
@@ -376,13 +382,11 @@ class InfoTableWidget(FWidget):
                 <h4><b>Dernière login:</b> {last_login}</h4>
                 <h4><b>Nombre de connexion:</b> {login_count}</h4>
                 <h4><b>Groupe:</b> {group}</h4>
-            """.format(group=self.owner.group,
-                       login_count=self.owner.login_count,
+            """.format(group=self.owner.group, login_count=self.owner.login_count,
                        last_login=self.owner.last_login.strftime(u"%c"),
-                       phone=self.owner.phone,
-                       isactive=self.owner.isactive,
+                       phone=self.owner.phone, isactive=self.owner.isactive,
                        username=self.owner.username))
 
     def edit_owner(self):
-        self.parent.parent.open_dialog(NewOrEditUserViewWidget, owner=self.owner,
-                                       modal=True, pp=self.parent.table_info)
+        self.parent.parent.open_dialog(
+            NewOrEditUserViewWidget, owner=self.owner, modal=True, pp=self.parent.table_info)

@@ -144,8 +144,11 @@ def raise_success(title, message):
     box.exec_()
 
 
-def formatted_number(number, sep=".", aftergam=3):
+def formatted_number(number, sep=".", aftergam=None):
     """ """
+    from Common.models import Organization
+    if not aftergam:
+        aftergam = int(Organization.select().get().after_cam)
     locale_name, encoding = locale.getlocale()
     locale.setlocale(locale.LC_ALL, 'fra')
     fmt = "%s"
