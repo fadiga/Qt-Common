@@ -38,7 +38,7 @@ def cmain():
     if CConstants.DEBUG:
         print("Debug is True")
         return True
-
+    
     if Owner().select().where(Owner.isactive == True).count() == 0:
         if not NewOrEditUserViewWidget().exec_() == QDialog.Accepted:
             return

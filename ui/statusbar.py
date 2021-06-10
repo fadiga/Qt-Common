@@ -38,9 +38,9 @@ class GStatusBar(QStatusBar):
         self.addWidget(self.info_label, 1)
 
         self.check = TaskThreadServer(self)
-        QObject.connect(self.check, SIGNAL("download_"), self.download_)
         QObject.connect(self.check, SIGNAL(
             "contact_server"), self.contact_server)
+        QObject.connect(self.check, SIGNAL("download_"), self.download_)
         self.check.start()
 
     def contact_server(self):
@@ -55,7 +55,7 @@ class GStatusBar(QStatusBar):
 
         from Common.models import License
         lse = License().get(License.id == 1)
-        msg_aut = ('color:yellow', "Non autorisée")
+        msg_aut = ('color:red', "Non autorisée")
         if lse.isactivated:
             msg_aut = ('color:green', "Autorisée")
         msg = text.format(msg_web[0], msg_web[1], msg_aut[0], msg_aut[1])
@@ -131,7 +131,7 @@ class GStatusBar(QStatusBar):
         self.info_label.setText("Fin de téléchargement ...")
 
 
-class CheckThread(QThread):
+class InitThread(QThread):
 
     def __init__(self, parent):
         QThread.__init__(self, parent)
@@ -139,7 +139,7 @@ class CheckThread(QThread):
 
     def run(self):
         # self.parent.download_setup_file()
-        self.emit(SIGNAL("licience"))
+        self.emit(SIGNAL("inscription"))
 
     def update_version_checher(self):
         url_ = Config.BASE_URL + "/desktop_client"
