@@ -1,32 +1,49 @@
 #!usr/bin/env python
 # -*- coding: utf8 -*-
 # maintainer: Fad
-from __future__ import (
-    unicode_literals, absolute_import, division, print_function)
+from __future__ import unicode_literals, absolute_import, division, print_function
 
 from datetime import datetime
 
 # from PyQt4.QtCore import Qt
-from PyQt4.QtGui import (QVBoxLayout, QGridLayout, QGroupBox,
-                         QDialog, QTextEdit, QFormLayout)
+from PyQt4.QtGui import (
+    QVBoxLayout,
+    QGridLayout,
+    QGroupBox,
+    QDialog,
+    QTextEdit,
+    QFormLayout,
+)
 
 from Common.cstatic import CConstants
 from Common.models import License
 from Common.exports import export_license_as_file
-from Common.ui.util import (clean_mac, make_lcse, get_lcse_file,
-                            check_is_empty, is_valide_codition_field)
-from Common.ui.common import (FWidget, ButtonSave, LineEdit, PyTextViewer,
-                              DeletedBtt, Button, FormLabel)
+from Common.ui.util import (
+    clean_mac,
+    make_lcse,
+    get_lcse_file,
+    check_is_empty,
+    is_valide_codition_field,
+)
+from Common.ui.common import (
+    FWidget,
+    ButtonSave,
+    LineEdit,
+    PyTextViewer,
+    DeletedBtt,
+    Button,
+    FormLabel,
+)
 
 
 class LicenseViewWidget(QDialog, FWidget):
-
     def __init__(self, parent=0, *args, **kwargs):
         QDialog.__init__(self, parent=parent, *args, **kwargs)
         self.parent = parent
 
-        self.intro = FormLabel("<h3>Vous devez activé la license pour pouvoir"
-                               "<i>utiliser.</i></h3>")
+        self.intro = FormLabel(
+            "<h3>Vous devez activé la license pour pouvoir<i>utiliser.</i></h3>"
+        )
         vbox = QVBoxLayout()
         try:
             self.lcse = License.get(License.code == str(make_lcse()))
@@ -60,10 +77,12 @@ class LicenseViewWidget(QDialog, FWidget):
             """.format(
                 name=self.lcse.owner,
                 a_date=self.lcse.activation_date.strftime('%c'),
-                ex_date="néant" if not self.lcse.can_expired else
-                self.lcse.expiration_date.strftime('%c'),
-                v_type="d'evalution" if self.lcse.can_expired else "activée"
-            ))
+                ex_date="néant"
+                if not self.lcse.can_expired
+                else self.lcse.expiration_date.strftime('%c'),
+                v_type="d'evalution" if self.lcse.can_expired else "activée",
+            )
+        )
         self.topLeftGroupBox = QGroupBox(self.tr("Licence"))
         gridbox = QGridLayout()
 
@@ -92,8 +111,10 @@ class LicenseViewWidget(QDialog, FWidget):
         self.cpt = 0
         self.info_field = PyTextViewer(
             u"""Vous avez besoin du code ci desous pour l'activation:
-            <hr> <b>{code}</b><hr> <h4>Contacts:</h4>{contact}"""
-            .format(code=clean_mac(), contact=CConstants.TEL_AUT))
+            <hr> <b>{code}</b><hr> <h4>Contacts:</h4>{contact}""".format(
+                code=clean_mac(), contact=CConstants.TEL_AUT
+            )
+        )
         self.name_field = LineEdit()
         self.license_field = QTextEdit()
 
@@ -131,14 +152,13 @@ class LicenseViewWidget(QDialog, FWidget):
     def active_trial(self):
         try:
             print("active_trial")
-            self.lcse = License(
-                can_expired=True, code=make_lcse(), owner="Demo")
+            self.lcse = License(can_expired=True, code=make_lcse(), owner="Demo")
             self.lcse.get_evaluation()
             self.cancel()
             self.accept()
             self.parent.Notify(
-                "La licence a été bien activée pour 60 jour. Merci.",
-                "warring")
+                "La licence a été bien activée pour 60 jour. Merci.", "warring"
+            )
         except Exception as e:
             print(e)
 
@@ -149,7 +169,8 @@ class LicenseViewWidget(QDialog, FWidget):
             return
         m_lcse = make_lcse()
         if is_valide_codition_field(
-                self.license_field, "Licence invalide", license != m_lcse):
+            self.license_field, "Licence invalide", license != m_lcse
+        ):
             d = datetime.now()
             key = int((d.year - d.day - d.month) / 2)
             self.cpt += 1

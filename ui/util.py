@@ -355,7 +355,7 @@ def clean_mac():
 
 
 def make_lcse(lcse=clean_mac()):
-    print("lcse:", lcse)
+    # print("lcse:", lcse)
     lcse = hashlib.md5(str(lcse).encode('utf-8')).hexdigest()
     return lcse
 
@@ -367,3 +367,14 @@ def get_lcse_of_file():
 def get_lcse_file():
     return os.path.join(os.path.dirname(
         os.path.abspath('__file__')), 'LICENCE')
+    
+def _disk_c(self):
+    drive = unicode(os.getenv("SystemDrive"))
+    freeuser = ctypes.c_int64()
+    total = ctypes.c_int64()
+    free = ctypes.c_int64()
+    ctypes.windll.kernel32.GetDiskFreeSpaceExW(drive, 
+                                    ctypes.byref(freeuser), 
+                                    ctypes.byref(total), 
+                                    ctypes.byref(free))
+    return freeuser.value

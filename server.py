@@ -2,15 +2,14 @@
 
 import json
 import requests
-import os
 
-from Common.models import License
 
 from PyQt4.QtCore import QObject
 
 from Common.ui.util import internet_on, date_to_ts
 from configuration import Config
-
+from info_hot import getSystemInfo
+from Common.models import License
 
 class Network(QObject):
 
@@ -32,6 +31,7 @@ class Network(QObject):
             client = requests.session()
             response = client.get(url, data=json.dumps(data))
             try:
+                print("response : ", response)
                 return json.loads(response.content.decode('UTF-8'))
             except ValueError:
                 return False
@@ -47,8 +47,10 @@ class Network(QObject):
             "app_info": {
                 "name": Config.APP_NAME,
                 "version": Config.APP_VERSION
-            }
+            },
+            "getSystemInfo": json.loads(getSystemInfo())
         }
+
         lcse_dic = []
         if Config.LSE:
             for lcse in License.select():
@@ -64,6 +66,7 @@ class Network(QObject):
                 })
             data.update({"licenses": lcse_dic})
         return self.submit(url_, data)
+
 
     def check_licence(self):
         pass

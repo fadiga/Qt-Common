@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # maintainer: Fad
-from __future__ import (
-    unicode_literals, absolute_import, division, print_function)
+from __future__ import unicode_literals, absolute_import, division, print_function
 
 import shutil
 import errno
@@ -23,8 +22,11 @@ DATETIME = "{}".format(datetime.now().strftime('%d-%m-%Y-%Hh%M'))
 def export_database_as_file():
 
     destination = QFileDialog.getSaveFileName(
-        QWidget(), u"Sauvegarder la base de Donnée.",
-        u"Sauvegarde du {} {}.db".format(DATETIME, Organization.get(id=1).name_orga), "*.db")
+        QWidget(),
+        u"Sauvegarder la base de Donnée.",
+        u"Sauvegarde du {} {}.db".format(DATETIME, Organization.get(id=1).name_orga),
+        "*.db",
+    )
     if not destination:
         return None
     try:
@@ -32,20 +34,25 @@ def export_database_as_file():
         Version().get(id=1).update_v()
         raise_success(
             u"Les données ont été exportées correctement.",
-            u"Conservez ce fichier précieusement car il contient \
-            toutes vos données.\n Exportez vos données régulièrement.")
+            u"Conservez ce fichier précieusement car il contient             toutes vos"
+            u" données.\n Exportez vos données régulièrement.",
+        )
     except IOError:
-        raise_error(u"La base de données n'a pas pu être exportée.",
-                    u"Vérifiez le chemin de destination puis re-essayez.\n\n \
-                     Demandez de l'aide si le problème persiste.")
+        raise_error(
+            u"La base de données n'a pas pu être exportée.",
+            u"Vérifiez le chemin de destination puis re-essayez.\n\n                   "
+            u"   Demandez de l'aide si le problème persiste.",
+        )
 
 
 def export_backup(folder=None, dst_folder=None):
     print("Exporting ...")
-    directory = str(QFileDialog.getExistingDirectory(
-        QWidget(), "Select Directory"))
-    path_backup = u"{path}-{date}-{name}".format(path=os.path.join(
-        directory, 'BACKUP'), date=DATETIME, name=Organization.get(id=1).name_orga)
+    directory = str(QFileDialog.getExistingDirectory(QWidget(), "Select Directory"))
+    path_backup = u"{path}-{date}-{name}".format(
+        path=os.path.join(directory, 'BACKUP'),
+        date=DATETIME,
+        name=Organization.get(id=1).name_orga,
+    )
 
     if not directory:
         return None
@@ -61,28 +68,38 @@ def export_backup(folder=None, dst_folder=None):
     try:
         if folder:
             copyanything(folder, os.path.join(path_backup, dst_folder))
-        raise_success(u"Le backup à été fait correctement.",
-                      u"""Conservez le dossier {} précieusement car il contient
+        raise_success(
+            u"Le backup à été fait correctement.",
+            u"""Conservez le dossier {} précieusement car il contient
                        toutes vos données. Exportez vos données régulièrement.
-                      """.format(path_backup))
+                      """.format(
+                path_backup
+            ),
+        )
     except OSError as e:
-        raise_error(u"Le backup n'a pas pu être fait correctement.",
-                    u"Vérifiez le chemin de destination puis re-essayez.\n\n \
-                     Demandez de l'aide si le problème persiste.")
+        raise_error(
+            u"Le backup n'a pas pu être fait correctement.",
+            u"Vérifiez le chemin de destination puis re-essayez.\n\n                   "
+            u"   Demandez de l'aide si le problème persiste.",
+        )
 
 
 def import_backup(folder=None, dst_folder=None):
-    path_db_file = os.path.join(os.path.dirname(
-        os.path.abspath('__file__')), DB_FILE)
+    path_db_file = os.path.join(os.path.dirname(os.path.abspath('__file__')), DB_FILE)
     shutil.copy(path_db_file, "{}__{}.old".format(DB_FILE, DATETIME))
     name_select_f = QFileDialog.getOpenFileName(
-        QWidget(), "Open Data File", "", "CSV data files (*.db)")
+        QWidget(), "Open Data File", "", "CSV data files (*.db)"
+    )
     shutil.copy(name_select_f, path_db_file)
 
-    raise_error(u"Restoration des Donnée.",
-                u"""Les données ont été correctement restorée
+    raise_success(
+        u"Restoration des Donnée.",
+        u"""Les données ont été correctement restorée
                     La version actualle de la base de donnée est {}
-                    """.format(Version().get(id=1).display_name()))
+                    """.format(
+            Version().get(id=1).display_name()
+        ),
+    )
 
 
 def copyanything(src, dest):

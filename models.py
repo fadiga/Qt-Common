@@ -2,8 +2,7 @@
 # -*- coding: utf8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
-from __future__ import (
-    unicode_literals, absolute_import, division, print_function)
+from __future__ import unicode_literals, absolute_import, division, print_function
 
 import os
 import time
@@ -13,7 +12,12 @@ import peewee
 # from peewee_migrate import Router
 from datetime import timedelta, datetime
 from playhouse.migrate import (
-    SqliteMigrator, migrate, CharField, BooleanField, DateTimeField)
+    SqliteMigrator,
+    migrate,
+    CharField,
+    BooleanField,
+    DateTimeField,
+)
 
 from Common.ui.util import copy_file
 
@@ -21,16 +25,13 @@ DB_FILE = "database.db"
 
 print("Peewee version : " + peewee.__version__)
 
-
 NOW = datetime.now()
-
 
 dbh = peewee.SqliteDatabase(DB_FILE)
 migrator = SqliteMigrator(dbh)
 
 
 class BaseModel(peewee.Model):
-
     class Meta:
         database = dbh
 
@@ -38,19 +39,13 @@ class BaseModel(peewee.Model):
     def all(cls):
         return list(cls.select())
 
-    def get_or_none(self, obj):
-        try:
-            return obj.get()
-        except:
-            return None
-
 
 class FileJoin(BaseModel):
 
     DEST_FILES = "Files"
 
     class Meta:
-        ordering = (('file_name', 'desc'))
+        ordering = ('file_name', 'desc')
         # db_table = 'file_join'
 
     file_name = peewee.CharField(max_length=200, null=True)
@@ -70,15 +65,17 @@ class FileJoin(BaseModel):
     @property
     def get_file(self):
         return os.path.join(
-            os.path.join(os.path.dirname(os.path.abspath('__file__')),
-                         self.DEST_FILES), self.file_slug)
+            os.path.join(os.path.dirname(os.path.abspath('__file__')), self.DEST_FILES),
+            self.file_slug,
+        )
 
     def show_file(self):
         from Common.ui.util import uopen_file
+
         uopen_file(self.get_file)
 
     def remove_file(self):
-        """ Remove doc and file """
+        """Remove doc and file"""
         self.delete_instance()
         try:
             os.remove(self.get_file)
@@ -107,7 +104,7 @@ class FileJoin(BaseModel):
 
     @property
     def get_taille(self):
-        """ La taille du document"""
+        """La taille du document"""
         octe = 1024
         q = octe
         kocte = octe * octe
@@ -124,23 +121,20 @@ class FileJoin(BaseModel):
 
 class Owner(BaseModel):
 
-    """ The web user who is also owner of the Organization
-    """
+    """The web user who is also owner of the Organization"""
 
     class Meta:
-        ordering = (('username', 'desc'))
+        ordering = ('username', 'desc')
         # db_table = 'owner'
 
     USER = u"Utilisateur"
     ADMIN = u"Administrateur"
     ROOT = u"superuser"
 
-    username = peewee.CharField(
-        max_length=30, unique=True, verbose_name=("Identifiant"))
+    username = peewee.CharField(max_length=30, unique=True, verbose_name="Identifiant")
     group = peewee.CharField(default=USER)
     islog = peewee.BooleanField(default=False)
-    phone = peewee.CharField(
-        max_length=30, null=True, verbose_name=("Telephone"))
+    phone = peewee.CharField(max_length=30, null=True, verbose_name="Telephone")
     password = peewee.CharField(max_length=150)
     isactive = peewee.BooleanField(default=True)
     last_login = peewee.DateTimeField(default=NOW)
@@ -151,7 +145,8 @@ class Owner(BaseModel):
 
     def display_name(self):
         return u"{name}/{group}/{login_count}".format(
-            name=self.username, group=self.group, login_count=self.login_count)
+            name=self.username, group=self.group, login_count=self.login_count
+        )
 
     def crypt_password(self, password):
         return hashlib.sha224(str(password).encode("utf-8")).hexdigest()
@@ -169,21 +164,17 @@ class Organization(BaseModel):
     USA = "dollar"
     XOF = "xof"
     EURO = "euro"
-    DEVISE = {
-        USA: "$",
-        XOF: "F",
-        EURO: "€"
-    }
+    DEVISE = {USA: "$", XOF: "F", EURO: "€"}
 
     is_login = peewee.BooleanField(default=True)
-    name_orga = peewee.CharField(verbose_name=(""))
-    phone = peewee.IntegerField(null=True, verbose_name=(""))
-    after_cam = peewee.IntegerField(null=True, default=0, verbose_name=(""))
-    bp = peewee.CharField(null=True, verbose_name=(""))
+    name_orga = peewee.CharField(verbose_name="")
+    phone = peewee.IntegerField(null=True, verbose_name="")
+    after_cam = peewee.IntegerField(null=True, default=0, verbose_name="")
+    bp = peewee.CharField(null=True, verbose_name="")
     devise = peewee.CharField(choices=DEVISE, default=XOF)
-    email_org = peewee.CharField(null=True, verbose_name=(""))
-    adress_org = peewee.TextField(null=True, verbose_name=(""))
-    logo_org = peewee.TextField(null=True, verbose_name=(""))
+    email_org = peewee.CharField(null=True, verbose_name="")
+    adress_org = peewee.TextField(null=True, verbose_name="")
+    logo_org = peewee.TextField(null=True, verbose_name="")
 
     def __str__(self):
         return self.display_name()
@@ -202,6 +193,7 @@ class Organization(BaseModel):
 
 class License(BaseModel):
 
+    # organization = peewee.ForeignKeyField(Organization, backref='organizations')
     code = peewee.CharField(unique=True)
     isactivated = peewee.BooleanField(default=False)
     activation_date = peewee.DateTimeField(default=NOW)
@@ -222,6 +214,7 @@ class License(BaseModel):
 
     def can_use(self):
         from cstatic import CConstants
+
         if not self.isactivated:
             if self.can_expired:
                 return CConstants.OK if not self.is_expired else CConstants.IS_EXPIRED
@@ -241,8 +234,7 @@ class License(BaseModel):
 
     def get_evaluation(self):
         self.can_expired = True
-        self.expiration_date = datetime.now() + timedelta(
-            days=60, milliseconds=4)
+        self.expiration_date = datetime.now() + timedelta(days=60, milliseconds=4)
         self.save()
 
     def remove_activation(self):
@@ -253,8 +245,7 @@ class License(BaseModel):
 
 class Version(BaseModel):
 
-    date = peewee.DateTimeField(
-        default=NOW, verbose_name="Date de Version")
+    date = peewee.DateTimeField(default=NOW, verbose_name="Date de Version")
     number = peewee.IntegerField(default=1, verbose_name="Numéro de Version")
 
     def __str__(self):
@@ -269,6 +260,13 @@ class Version(BaseModel):
         # print(self.number)
         self.save()
 
+    # def get_or_none(self):
+    #     try:
+    #         return Version.get(Version.number == 1)
+    #     except Exception as e:
+    #         # raise e
+    #         return None
+
 
 class History(BaseModel):
 
@@ -282,26 +280,20 @@ class History(BaseModel):
 
 class Settings(BaseModel):
     """docstring for Settings"""
+
     PREV = 0
     CURRENT = 1
     DEFAULT = 2
-    LCONFIG = ((PREV, u"Precedent"),
-               (DEFAULT, u"Par defaut"),
-               (CURRENT, u"Actuel"),)
+    LCONFIG = ((PREV, u"Precedent"), (DEFAULT, u"Par defaut"), (CURRENT, u"Actuel"))
 
     DF = "systeme"
     BL = "blue"
     DK = "dark"
     FAD = "Bnb"
-    THEME = {
-        DF: "Par defaut",
-        DK: "Dark",
-        BL: "Blue",
-        FAD: "Bnb",
-    }
+    THEME = {DF: "Par defaut", DK: "Dark", BL: "Blue", FAD: "Bnb"}
     slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
     is_login = peewee.BooleanField(default=True)
-    url = peewee.CharField(default="https://dnds.ml")
+    url = peewee.CharField(default="https://file_repo.ml")
     theme = peewee.CharField(default=1)
 
     def __str__(self):

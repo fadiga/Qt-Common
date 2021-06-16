@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 # maintainer: fadiga
 
-from PyQt4.QtGui import (QStatusBar, QProgressBar, QPixmap,
-                         QLabel, QPushButton, QIcon)
+from PyQt4.QtGui import QStatusBar, QProgressBar, QPixmap, QLabel, QPushButton, QIcon
 from PyQt4.QtCore import QThread, SIGNAL, QObject
 
 from threading import Event
@@ -18,7 +17,6 @@ base_url = Config.BASE_URL
 
 
 class GStatusBar(QStatusBar):
-
     def __init__(self, parent=None):
         QStatusBar.__init__(self, parent)
         if not Config.SERV:
@@ -30,7 +28,8 @@ class GStatusBar(QStatusBar):
         icon_label = QLabel()
         name_label = QLabel()
         name_label.setText(
-            'Développer par IBS-Mali | <a href="https://ibsmali.ml/">ibsmali.ml</a>')
+            'Développer par IBS-Mali | <a href="https://ibsmali.ml/">ibsmali.ml</a>'
+        )
         name_label.setOpenExternalLinks(True)
         icon_label.setPixmap(QPixmap("{}".format(Config.IBS_LOGO)))
         self.addWidget(icon_label, 0)
@@ -38,10 +37,12 @@ class GStatusBar(QStatusBar):
         self.addWidget(self.info_label, 1)
 
         self.check = TaskThreadServer(self)
-        QObject.connect(self.check, SIGNAL(
-            "contact_server"), self.contact_server)
+        QObject.connect(self.check, SIGNAL("contact_server"), self.contact_server)
         QObject.connect(self.check, SIGNAL("download_"), self.download_)
-        self.check.start()
+        try:
+            self.check.start()
+        except Exception as e:
+            print(e)
 
     def contact_server(self):
         print("check contact")
@@ -54,6 +55,7 @@ class GStatusBar(QStatusBar):
             msg_web = ('color:green', "Connecté")
 
         from Common.models import License
+
         lse = License().get(License.id == 1)
         msg_aut = ('color:red', "Non autorisée")
         if lse.isactivated:
@@ -65,9 +67,16 @@ class GStatusBar(QStatusBar):
     def download_(self):
         # print("download_")
         self.b = QPushButton("")
-        self.b.setIcon(QIcon.fromTheme('', QIcon(
-            u"{img_media}{img}".format(img_media=Config.img_cmedia,
-                                       img='setup.png'))))
+        self.b.setIcon(
+            QIcon.fromTheme(
+                '',
+                QIcon(
+                    u"{img_media}{img}".format(
+                        img_media=Config.img_cmedia, img='setup.png'
+                    )
+                ),
+            )
+        )
         self.b.clicked.connect(self.get_setup)
         self.b.setText(self.check.data.get("message"))
         self.addWidget(self.b)
@@ -77,8 +86,7 @@ class GStatusBar(QStatusBar):
         # self.progressBar.setGeometry(430, 30, 400, 25)
         self.addWidget(self.progressBar, 2)
         self.t = TaskThread(self)
-        QObject.connect(self.t, SIGNAL("download_finish"),
-                        self.download_finish)
+        QObject.connect(self.t, SIGNAL("download_finish"), self.download_finish)
         self.t.start()
 
     def failure(self):
@@ -91,12 +99,20 @@ class GStatusBar(QStatusBar):
         # print('download_finish')
         self.b.hide()
         self.progressBar.close()
-        self.instb = QPushButton("installer la Ver. {}".format(
-            self.check.data.get("version")))
+        self.instb = QPushButton(
+            "installer la Ver. {}".format(self.check.data.get("version"))
+        )
 
-        self.instb.setIcon(QIcon.fromTheme('', QIcon(
-            u"{img_media}{img}".format(img_media=Config.img_cmedia,
-                                       img='setup.png'))))
+        self.instb.setIcon(
+            QIcon.fromTheme(
+                '',
+                QIcon(
+                    u"{img_media}{img}".format(
+                        img_media=Config.img_cmedia, img='setup.png'
+                    )
+                ),
+            )
+        )
         self.instb.clicked.connect(self.start_install)
         # self.progressBar.close()
         self.addWidget(self.instb)
@@ -105,6 +121,7 @@ class GStatusBar(QStatusBar):
         try:
             os.startfile(os.path.basename(self.installer_name))
             import sys
+
             sys.exit()
         except OSError:
             self.failure()
@@ -132,7 +149,6 @@ class GStatusBar(QStatusBar):
 
 
 class InitThread(QThread):
-
     def __init__(self, parent):
         QThread.__init__(self, parent)
         self.parent = parent
@@ -144,33 +160,31 @@ class InitThread(QThread):
     def update_version_checher(self):
         url_ = Config.BASE_URL + "/desktop_client"
         print("update_version_checher", url_)
-        data = {
-            "app_info": {
-                "name": Config.APP_NAME,
-                "version": Config.APP_VERSION
-            }
-        }
+        data = {"app_info": {"name": Config.APP_NAME, "version": Config.APP_VERSION}}
         lcse_dic = []
         if Config.LSE:
             for lcse in License.select():
                 acttn_date = date_to_ts(lcse.activation_date)
-                lcse_dic.append({
-                    # "owner": lcse.owner,
-                    "code": lcse.code,
-                    "isactivated": lcse.isactivated,
-                    "activation_date": acttn_date,
-                    "can_expired": lcse.can_expired,
-                    "expiration_date": date_to_ts(
-                        lcse.expiration_date) if lcse.can_expired else acttn_date,
-                })
+                lcse_dic.append(
+                    {
+                        # "owner": lcse.owner,
+                        "code": lcse.code,
+                        "isactivated": lcse.isactivated,
+                        "activation_date": acttn_date,
+                        "can_expired": lcse.can_expired,
+                        "expiration_date": date_to_ts(lcse.expiration_date)
+                        if lcse.can_expired
+                        else acttn_date,
+                    }
+                )
             data.update({"licenses": lcse_dic})
         return self.submit(url_, data)
 
     def demande_activation(self):
-        pass 
+        pass
+
 
 class TaskThread(QThread):
-
     def __init__(self, parent):
         QThread.__init__(self, parent)
         self.parent = parent
@@ -181,7 +195,6 @@ class TaskThread(QThread):
 
 
 class TaskThreadServer(QThread):
-
     def __init__(self, parent):
         QThread.__init__(self, parent)
         self.parent = parent
