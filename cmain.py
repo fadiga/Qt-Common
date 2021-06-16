@@ -12,7 +12,7 @@ import gettext
 import gettext_windows
 
 from Common.cstatic import CConstants
-from Common.models import Organization, Owner
+from Common.models import Organization, Owner, Settings
 
 from Common.ui.style_qss import theme
 from Common.ui.window import FWindow
@@ -32,7 +32,7 @@ def cmain():
     locale.setlocale(locale.LC_ALL, '')
     gettext.install('main.py', localedir='locale')
     window = MainWindow()
-    window.setStyleSheet(theme)
+    # window.setStyleSheet(theme)
     setattr(FWindow, 'window', window)
 
     if CConstants.DEBUG:
@@ -50,10 +50,7 @@ def cmain():
     if not is_valide_mac() == CConstants.OK:
         if not LicenseViewWidget(parent=None).exec_() == QDialog.Accepted:
             return
-    if (
-        not Organization().get(id=1).is_login
-        or LoginWidget().exec_() == QDialog.Accepted
-    ):
+    if not Settings().get(id=1).is_login or LoginWidget().exec_() == QDialog.Accepted:
         window.showMaximized()
         return True
     return False

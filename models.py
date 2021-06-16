@@ -161,17 +161,12 @@ class Owner(BaseModel):
 
 
 class Organization(BaseModel):
-    USA = "dollar"
-    XOF = "xof"
-    EURO = "euro"
-    DEVISE = {USA: "$", XOF: "F", EURO: "€"}
 
-    is_login = peewee.BooleanField(default=True)
+    # is_login = peewee.BooleanField(default=True)
     name_orga = peewee.CharField(verbose_name="")
     phone = peewee.IntegerField(null=True, verbose_name="")
-    after_cam = peewee.IntegerField(null=True, default=0, verbose_name="")
     bp = peewee.CharField(null=True, verbose_name="")
-    devise = peewee.CharField(choices=DEVISE, default=XOF)
+    # devise = peewee.CharField(choices=DEVISE, default=XOF)
     email_org = peewee.CharField(null=True, verbose_name="")
     adress_org = peewee.TextField(null=True, verbose_name="")
     logo_org = peewee.TextField(null=True, verbose_name="")
@@ -291,10 +286,26 @@ class Settings(BaseModel):
     DK = "dark"
     FAD = "Bnb"
     THEME = {DF: "Par defaut", DK: "Dark", BL: "Blue", FAD: "Bnb"}
+
+    USA = "dollar"
+    XOF = "xof"
+    EURO = "euro"
+    DEVISE = {USA: "$", XOF: "F", EURO: "€"}
+
+    LEFT = "left"
+    RITGH = "right"
+    TOP = "top"
+    BOTTOM = "bottom"
+    POSITION = {LEFT: "Gauche", RITGH: "Droite", TOP: "Haut", BOTTOM: "Bas"}
+
     slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
     is_login = peewee.BooleanField(default=True)
-    url = peewee.CharField(default="https://file_repo.ml")
+    after_cam = peewee.IntegerField(null=True, default=0, verbose_name="")
+    toolbar = peewee.BooleanField(default=True)
+    toolbar_position = peewee.CharField(choices=POSITION, default=LEFT)
+    url = peewee.CharField(default="https://file-repo.ml")
     theme = peewee.CharField(default=1)
+    devise = peewee.CharField(choices=DEVISE, default=XOF)
 
     def __str__(self):
         return self.display_name()

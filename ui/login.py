@@ -2,43 +2,56 @@
 # -*- coding: utf8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
-from __future__ import (
-    unicode_literals, absolute_import, division, print_function)
+from __future__ import unicode_literals, absolute_import, division, print_function
 
-from PyQt4.QtGui import (QHBoxLayout, QGroupBox, QIcon,
-                         QPushButton, QComboBox,
-                         QFormLayout)
+from PyQt4.QtGui import (
+    QHBoxLayout,
+    QGroupBox,
+    QDialog,
+    QIcon,
+    QPushButton,
+    QComboBox,
+    QFormLayout,
+)
 
 from PyQt4.QtCore import Qt
 
-from Common.ui.common import (FMainWindow, FormLabel, EnterTabbedLineEdit,
-                              ErrorLabel, LineEdit, FDialog)
+from Common.ui.common import (
+    FMainWindow,
+    FWidget,
+    FormLabel,
+    EnterTabbedLineEdit,
+    ErrorLabel,
+    LineEdit,
+    FDialog,
+)
 from Common.ui.util import check_is_empty, field_error
 from Common.models import Owner
 from configuration import Config
 
 
-class LoginWidget(FDialog, FMainWindow):
+class LoginWidget(FDialog, FWidget):
 
     title_page = u"Identification"
 
-    # def __init__(self, hibernate=False):
     def __init__(self, parent=None, hibernate=False, *args, **kwargs):
-        # FDialog.__init__(self)
-        FDialog.__init__(self, parent=parent, *args, **kwargs)
-        self.setWindowTitle(self.set_window_title(self.title_page))
+        QDialog.__init__(self, parent=parent, *args, **kwargs)
         self.hibernate = hibernate
 
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.title = FormLabel(
             "<h4>{app_name}</h4><stromg>Ver: {version}</stromg>".format(
-                app_name=Config.APP_NAME, version=Config.APP_VERSION))
+                app_name=Config.APP_NAME, version=Config.APP_VERSION
+            )
+        )
         self.title.setStyleSheet(
             """ background: url({}) #DAF7A6;
                 border-radius: 14px 14px 8px 8px; border: 10px double #128a76 ;
                 width: 100%; height: auto; padding: 1em;
                 font: 8pt 'URW Bookman L';""".format(
-                Config.APP_LOGO))
+                Config.APP_LOGO
+            )
+        )
         vbox = QHBoxLayout()
 
         self.loginUserGroupBox()
@@ -50,7 +63,6 @@ class LoginWidget(FDialog, FMainWindow):
 
     def loginUserGroupBox(self):
         self.topLeftGroupBox = QGroupBox(self.tr("Identification"))
-
         self.liste_username = Owner.select().where(Owner.isactive == True)
         # Combobox widget
         self.box_username = QComboBox()
@@ -65,8 +77,9 @@ class LoginWidget(FDialog, FMainWindow):
         self.password_field.setFocus()
         # login button
         self.login_button = QPushButton(u"&S'identifier")
-        self.login_button.setIcon(QIcon.fromTheme(
-            'save', QIcon(u"{}login.png".format(Config.img_cmedia))))
+        self.login_button.setIcon(
+            QIcon.fromTheme('save', QIcon(u"{}login.png".format(Config.img_cmedia)))
+        )
         self.login_button.clicked.connect(self.login)
 
         self.cancel_button = QPushButton(u"&Quiter")
@@ -103,15 +116,13 @@ class LoginWidget(FDialog, FMainWindow):
             return
 
         username = str(self.liste_username[self.box_username.currentIndex()])
-        password = Owner().crypt_password(
-            str(self.password_field.text()).strip())
+        password = Owner().crypt_password(str(self.password_field.text()).strip())
         # check completeness
         for ow in Owner.select().where(Owner.islog == True):
             ow.islog = False
             ow.save()
         try:
-            owner = Owner.get(
-                Owner.username == username, Owner.password == password)
+            owner = Owner.get(Owner.username == username, Owner.password == password)
             owner.islog = True
             owner.save()
         except Exception as e:

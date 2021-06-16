@@ -2,8 +2,7 @@
 # -*- coding: utf8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
-from __future__ import (
-    unicode_literals, absolute_import, division, print_function)
+from __future__ import unicode_literals, absolute_import, division, print_function
 
 import os
 import sys
@@ -29,11 +28,12 @@ except NameError:
 
 def device_amount(value, dvs=None):
 
-    from Common.models import Organization
+    from Common.models import Settings
+
     if dvs:
         return "{} {}".format(formatted_number(value), dvs)
     try:
-        organ = Organization().get(id=1)
+        organ = Settings().get(id=1)
     except Exception as e:
         print(e)
     d = organ.DEVISE[organ.devise]
@@ -64,8 +64,7 @@ def check_is_empty(field):
 
 
 def field_error(field, msg):
-    field.setStyleSheet(
-        "background-color: #DF8F1F; border : 2px solid red")
+    field.setStyleSheet("background-color: #DF8F1F; border : 2px solid red")
     field.setToolTip("{}".format(msg))
     return False
 
@@ -94,10 +93,12 @@ def uopen_prefix(platform=sys.platform):
     if 'darwin' in platform:
         return 'open'
 
-    if platform in ('cygwin', 'linux') or \
-       platform.startswith('linux') or \
-       platform.startswith('sun') or \
-       'bsd' in platform:
+    if (
+        platform in ('cygwin', 'linux')
+        or platform.startswith('linux')
+        or platform.startswith('sun')
+        or 'bsd' in platform
+    ):
         return 'xdg-open'
 
     return 'xdg-open'
@@ -114,8 +115,9 @@ def uopen_file(filename):
     # print(filename)
     if not os.path.exists(filename):
         raise IOError(u"Fichier %s non valable." % filename)
-    subprocess.call('%(cmd)s %(file)s' %
-                    {'cmd': uopen_prefix(), 'file': filename}, shell=True)
+    subprocess.call(
+        '%(cmd)s %(file)s' % {'cmd': uopen_prefix(), 'file': filename}, shell=True
+    )
 
 
 def get_temp_filename(extension=None):
@@ -128,34 +130,43 @@ def get_temp_filename(extension=None):
 
 
 def raise_error(title, message):
-    box = QtGui.QMessageBox(QtGui.QMessageBox.Critical, title,
-                            message, QtGui.QMessageBox.Ok,
-                            parent=FWindow.window)
+    box = QtGui.QMessageBox(
+        QtGui.QMessageBox.Critical,
+        title,
+        message,
+        QtGui.QMessageBox.Ok,
+        parent=FWindow.window,
+    )
     box.setWindowOpacity(0.9)
 
     box.exec_()
 
 
 def raise_success(title, message):
-    box = QtGui.QMessageBox(QtGui.QMessageBox.Information, title,
-                            message, QtGui.QMessageBox.Ok,
-                            parent=FWindow.window)
+    box = QtGui.QMessageBox(
+        QtGui.QMessageBox.Information,
+        title,
+        message,
+        QtGui.QMessageBox.Ok,
+        parent=FWindow.window,
+    )
     box.setWindowOpacity(0.9)
     box.exec_()
 
 
 def formatted_number(number, sep=".", aftergam=None):
     """ """
-    from Common.models import Organization
+    from Common.models import Settings
+
     if not aftergam:
-        aftergam = int(Organization.select().get().after_cam)
+        aftergam = int(Settings.select().get().after_cam)
     locale_name, encoding = locale.getlocale()
     locale.setlocale(locale.LC_ALL, 'fra')
     fmt = "%s"
-    if (isinstance(number, int)):
+    if isinstance(number, int):
         # print("int ", number)
         fmt = u"%d"
-    elif(isinstance(number, float)):
+    elif isinstance(number, float):
         # print("float, ", number)
         fmt = u"%.{}f".format(aftergam)
 
@@ -169,7 +180,6 @@ def formatted_number(number, sep=".", aftergam=None):
 
 
 class SystemTrayIcon(QtGui.QSystemTrayIcon):
-
     def __init__(self, mss, parent=None):
 
         QtGui.QSystemTrayIcon.__init__(self, parent)
@@ -227,8 +237,7 @@ def format_date(dat):
 
 
 def date_to_ts(date):
-    return mktime(strptime(date.strftime(
-        "%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S"))
+    return mktime(strptime(date.strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S"))
 
 
 def to_jstimestamp(adate):
@@ -245,10 +254,11 @@ def to_timestamp(dt):
 
 
 def copy_file(dest, path_filename):
-    """ Copy the file, rename file in banc and return new name of the doc
-        created folder banc doc if not existe
+    """Copy the file, rename file in banc and return new name of the doc
+    created folder banc doc if not existe
     """
     import shutil
+
     dest = os.path.join(os.path.dirname(os.path.abspath('__file__')), dest)
     filename = os.path.basename(path_filename)
     if not os.path.exists(dest):
@@ -259,10 +269,9 @@ def copy_file(dest, path_filename):
 
 
 def rename_file(path, old_filename, new_filename):
-    """ Rename file in banc docs  params: old_filename, new_filename
-        return newname"""
-    os.rename(get_path(path, old_filename),
-              get_path(path, new_filename))
+    """Rename file in banc docs  params: old_filename, new_filename
+    return newname"""
+    os.rename(get_path(path, old_filename), get_path(path, new_filename))
     return new_filename
 
 
@@ -272,8 +281,8 @@ def get_path(path, filename):
 
 def slug_mane_file(file_name):
     return u"{timestamp}_{fname}".format(
-        fname=file_name.replace(" ", "_"),
-        timestamp=to_jstimestamp(datetime.now()))
+        fname=file_name.replace(" ", "_"), timestamp=to_jstimestamp(datetime.now())
+    )
 
 
 def normalize(s):
@@ -296,8 +305,9 @@ def date_on_or_end(dat, on=True):
         hour, second, micro_second = 0, 0, 0
     else:
         hour, second, micro_second = 23, 59, 59
-    return datetime(int(year), int(month), int(day), int(hour),
-                    int(second), int(micro_second))
+    return datetime(
+        int(year), int(month), int(day), int(hour), int(second), int(micro_second)
+    )
 
 
 def show_date(dat, time=True):
@@ -305,17 +315,22 @@ def show_date(dat, time=True):
         dat = date_to_datetime(dat)
     if not dat:
         return "pas de date"
-    return dat.strftime(
-        u"%Y-%m-%d à %Hh:%Mmn") if time else dat.strftime("%Y-%m-%d")
+    return dat.strftime(u"%Y-%m-%d à %Hh:%Mmn") if time else dat.strftime("%Y-%m-%d")
 
 
 def date_to_datetime(dat):
     "reçoit une date return une datetime"
     day, month, year = str_date_split(dat)
     dt = datetime.now()
-    return datetime(int(year), int(month), int(day),
-                    int(dt.hour), int(dt.minute),
-                    int(dt.second), int(dt.microsecond))
+    return datetime(
+        int(year),
+        int(month),
+        int(day),
+        int(dt.hour),
+        int(dt.minute),
+        int(dt.second),
+        int(dt.microsecond),
+    )
 
 
 def getlog(text):
@@ -324,19 +339,21 @@ def getlog(text):
 
 def internet_on(url):
     from urllib.request import urlopen, URLError
+
     try:
         urlopen(url, timeout=1)
         return True
     except URLError as err:
-        print(err)
+        # print(err)
         return False
     except Exception as e:
         print(e)
 
 
 def is_valide_mac():
-    """ check de license """
+    """check de license"""
     from Common.models import License
+
     lcse = CConstants.IS_EXPIRED
     # print(lcse)
     if License.select(License.can_expired == 0).count() > 0:
@@ -365,16 +382,15 @@ def get_lcse_of_file():
 
 
 def get_lcse_file():
-    return os.path.join(os.path.dirname(
-        os.path.abspath('__file__')), 'LICENCE')
-    
+    return os.path.join(os.path.dirname(os.path.abspath('__file__')), 'LICENCE')
+
+
 def _disk_c(self):
     drive = unicode(os.getenv("SystemDrive"))
     freeuser = ctypes.c_int64()
     total = ctypes.c_int64()
     free = ctypes.c_int64()
-    ctypes.windll.kernel32.GetDiskFreeSpaceExW(drive, 
-                                    ctypes.byref(freeuser), 
-                                    ctypes.byref(total), 
-                                    ctypes.byref(free))
+    ctypes.windll.kernel32.GetDiskFreeSpaceExW(
+        drive, ctypes.byref(freeuser), ctypes.byref(total), ctypes.byref(free)
+    )
     return freeuser.value

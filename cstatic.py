@@ -11,6 +11,7 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath('__file__')))
 class CConstants(object):
 
     """ """
+
     # PERIODS
     W = "week"
     M = "month"
@@ -20,11 +21,11 @@ class CConstants(object):
 
     import logging
 
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S')
+    logging.basicConfig(
+        format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S'
+    )
 
-    file_img = os.path.join(
-        os.path.dirname(os.path.abspath('__file__')), 'cimages/')
+    file_img = os.path.join(os.path.dirname(os.path.abspath('__file__')), 'cimages/')
     # deployment
     if os.path.exists(file_img):
         img_cmedia = file_img

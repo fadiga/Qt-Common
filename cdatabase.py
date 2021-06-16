@@ -35,6 +35,10 @@ class AdminDatabase(object):
         ('License', 'organization', field),
         ('Organization', 'logo_org', CharField(null=True)),
         ('Organization', 'after_cam', IntegerField(default=0)),
+        ('Settings', 'toolbar', BooleanField(default=True)),
+        ('Settings', 'toolbar_position', CharField(default=Settings.LEFT)),
+        ('Settings', 'devise', CharField(null=True)),
+        ('Settings', 'after_cam', IntegerField(default=0)),
     ]
     MIG_VERSION_C = 2
     MIG_VERSION = 1

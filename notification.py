@@ -13,6 +13,7 @@ import time
 global OS
 try:
     from ctypes import windll
+
     OS = 0
 except Exception as e:
     print(e)
@@ -36,34 +37,31 @@ class Notification(QtGui.QWidget):
         else:
             background = "black"
 
-        css = """ color: white; background: {}; """.format(background)
+        css = """ color: white;background: {}; """.format(background)
         self.setStyleSheet(css)
         self.create_notification()
         self.show()
 
     def create_notification(self):
         # print("create_notification")
-        if (OS != 1):
+        if OS != 1:
             user32 = windll.user32
             # Get X coordinate of screen
-            self.x = user32.GetSystemMetrics(0)
-            self.x = user32.GetSystemMetrics(0) / 2
+            # self.x = user32.GetSystemMetrics(0)
+            self.x = user32.GetSystemMetrics(0) / 5
 
         else:
             cp = QtGui.QDesktopWidget().availableGeometry()
             self.x = cp.width()
+        # self.x = 1
         self.y = 1
         # Set the opacity
         self.f = 1.0
-
         # Start Worker
         self.workThread = WorkThread(self)
-        self.connect(
-            self.workThread, QtCore.SIGNAL("update(QString)"), self.animate)
-        # self.connect(
-        # self.workThread, QtCore.SIGNAL("update2(QString)"), self.animate2)
-        self.connect(
-            self.workThread, QtCore.SIGNAL("vanish(QString)"), self.disappear)
+        # self.connect(self.workThread, QtCore.SIGNAL("update(QString)"), self.animate)
+        self.connect(self.workThread, QtCore.SIGNAL("update2(QString)"), self.animate2)
+        self.connect(self.workThread, QtCore.SIGNAL("vanish(QString)"), self.disappear)
         self.connect(self.workThread, QtCore.SIGNAL("finished()"), self.done)
 
         self.workThread.start()
@@ -98,25 +96,25 @@ class Notification(QtGui.QWidget):
         self.y -= 1
         return
 
+
 # The Worker
 
 
 class WorkThread(QtCore.QThread):
-
     def __init__(self, mv):
         super(QtCore.QThread, self).__init__()
 
     def run(self):
         while True:
             # Bring em in :D
-            for i in range(36):
+            for i in range(30):
                 time.sleep(0.001)
                 self.emit(QtCore.SIGNAL('update(QString)'), "ping")
-            for j in range(36):
+            for j in range(30):
                 time.sleep(0.001)
                 self.emit(QtCore.SIGNAL('update2(QString)'), "ping")
             # Hide u bitch :P
-            for j in range(10):
-                time.sleep(0.2)
+            for j in range(5):
+                time.sleep(0.0001)
                 self.emit(QtCore.SIGNAL('vanish(QString)'), "ping")
             return
