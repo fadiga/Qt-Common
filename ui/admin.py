@@ -89,7 +89,7 @@ class AdminViewWidget(FWidget):
             (table_settings, _(u"Paramètre")),
             (table_config, _(u"Gestion de l'organisation")),
             (history_table, _(u"Historique")),
-            (table_login, _(u"Gestion d'Utilisateurs")),
+            (table_login, _(u"Gestion d'utilisateurs")),
         )
 
         vbox = QVBoxLayout()
@@ -202,14 +202,16 @@ class OrganizationTableWidget(FWidget):
         # )
         self.name_orga = LineEdit(self.organization.name_orga)
         self.phone = IntLineEdit(str(self.organization.phone))
+        self.phone.setMaximumWidth(250)
         self.bp = LineEdit(self.organization.bp)
+        self.bp.setMaximumWidth(250)
         self.adress_org = QTextEdit(self.organization.adress_org)
         self.email_org = LineEdit(self.organization.email_org)
+        self.email_org.setMaximumWidth(250)
 
         formbox = QFormLayout()
         formbox.addRow(FormLabel(u"Nom de l'organisation:"), self.name_orga)
         formbox.addRow(FormLabel(u"Tel:"), self.phone)
-        # formbox.addRow(FormLabel(u"Activer le login"), self.checked)
         formbox.addRow(FormLabel(u"B.P:"), self.bp)
         formbox.addRow(FormLabel(u"E-mail:"), self.email_org)
         formbox.addRow(FormLabel(u"Adresse complete:"), self.adress_org)
@@ -249,19 +251,20 @@ class LoginManageWidget(FWidget):
         self.parent = parent
 
         self.table_owner = OwnerTableWidget(parent=self)
+        self.table_owner.setFixedWidth(300)
         self.table_info = InfoTableWidget(parent=self)
         self.operation = OperationWidget(parent=self)
-        # self.operation.
+        self.operation.setFixedHeight(100)
 
-        splitter = QSplitter(Qt.Vertical)
-        _splitter = QSplitter(Qt.Horizontal)
-        _splitter.addWidget(self.table_owner)
-        _splitter.addWidget(self.table_info)
-        splitter.addWidget(_splitter)
-        splitter.addWidget(self.operation)
-        # self.operation.resize(10, 10)
+        splitterH = QSplitter(Qt.Horizontal)
+        splitterH.addWidget(self.table_owner)
+
+        splitterV = QSplitter(Qt.Vertical)
+        splitterV.addWidget(self.operation)
+        splitterV.addWidget(self.table_info)
+        splitterH.addWidget(splitterV)
         vbox = QHBoxLayout(self)
-        vbox.addWidget(splitter)
+        vbox.addWidget(splitterH)
         self.setLayout(vbox)
 
 
@@ -276,16 +279,14 @@ class OperationWidget(FWidget):
         gridbox = QGridLayout()
         self.parent = parent
 
-        self.add_ow_but = Button(_(u"Nouvel utilisateur"))
+        self.add_ow_but = Button(_(u"+ Utilisateur"))
+        self.add_ow_but.setMaximumWidth(250)
+        # self.add_ow_but.setMaximumHeight(90)
         self.add_ow_but.setIcon(
             QIcon.fromTheme('', QIcon(u"{}user_add.png".format(Config.img_cmedia)))
         )
         self.add_ow_but.clicked.connect(self.add_owner)
-
-        gridbox.addWidget(self.add_ow_but, 0, 0)
-
-        gridbox.setColumnStretch(1, 5)
-        vbox.addLayout(gridbox)
+        vbox.addWidget(self.add_ow_but)
         self.setLayout(vbox)
 
     def add_owner(self):
@@ -372,11 +373,12 @@ class InfoTableWidget(FWidget):
             )
         )
         self.edit_ow_but.setEnabled(False)
+        self.edit_ow_but.setMaximumHeight(90)
         self.edit_ow_but.clicked.connect(self.edit_owner)
 
         self.formbox = QGridLayout()
-        self.formbox.addWidget(self.details, 0, 0)
-        self.formbox.addWidget(self.edit_ow_but, 0, 1)
+        self.formbox.addWidget(self.edit_ow_but, 0, 0)
+        self.formbox.addWidget(self.details, 1, 0)
         # self.formbox.ColumnStretch(4, 2)
         # self.formbox.RowStretch(6, 2)
         vbox = QVBoxLayout()
@@ -478,7 +480,7 @@ class SettingsTableWidget(FWidget):
             FormLabel(u"Nombre de chiffre après la vilgule :"), self.box_vilgule
         )
         formbox.addRow(FormLabel(u"Devise :"), self.box_devise)
-        formbox.addRow(FormLabel(u"Position :"), self.box_position)
+        formbox.addRow(FormLabel(u"Position du menu :"), self.box_position)
 
         butt = ButtonSave(u"Enregistrer")
         butt.clicked.connect(self.save_edit)

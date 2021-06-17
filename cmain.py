@@ -32,7 +32,7 @@ def cmain():
     locale.setlocale(locale.LC_ALL, '')
     gettext.install('main.py', localedir='locale')
     window = MainWindow()
-    # window.setStyleSheet(theme)
+    window.setStyleSheet(theme)
     setattr(FWindow, 'window', window)
 
     if CConstants.DEBUG:

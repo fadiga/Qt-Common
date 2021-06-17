@@ -34,14 +34,14 @@ def export_database_as_file():
         Version().get(id=1).update_v()
         raise_success(
             u"Les données ont été exportées correctement.",
-            u"Conservez ce fichier précieusement car il contient             toutes vos"
-            u" données.\n Exportez vos données régulièrement.",
+            u"Conservez ce fichier précieusement car il contient toutes vos données.\n"
+            u"Exportez vos données régulièrement.",
         )
     except IOError:
         raise_error(
             u"La base de données n'a pas pu être exportée.",
             u"Vérifiez le chemin de destination puis re-essayez.\n\n                   "
-            u"   Demandez de l'aide si le problème persiste.",
+            u"Demandez de l'aide si le problème persiste.",
         )
 
 

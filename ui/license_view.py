@@ -72,7 +72,7 @@ class LicenseViewWidget(QDialog, FWidget):
             <h2> Elle est n'est valable que pour cette machine</h2>
             <p><b>proprièteur: </b> {name} </p>
             <p><b>date d'activation:</b> {a_date} </p><hr>
-            <p><b>date d'activation:</b> {ex_date} </p><hr>
+            <p><b>date d'expiration:</b> {ex_date} </p><hr>
              <p><b>Merci.</b></li>
             """.format(
                 name=self.lcse.owner,

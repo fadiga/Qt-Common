@@ -41,21 +41,12 @@ class FMenuBar(QMenuBar, FWidget):
                 )
 
         # Comptes utilisateur
-        admin = self.file_.addMenu(u"Outils")
+        admin = self.file_.addMenu(u"&Outils")
 
-        if "license" not in exclude_mn:
-            license = QAction(
-                QIcon.fromTheme('emblem-system', QIcon('')), u"Activation", self
-            )
-            license.setShortcut("Alt+A")
-            self.connect(license, SIGNAL("triggered()"), self.goto_license)
-            admin.addAction(license)
-
-        preference = self.addMenu(u"Préference")
+        preference = self.addMenu(u"&Préference")
 
         if "theme" not in exclude_mn:
             _theme = preference.addMenu("Theme")
-            # styles = dict_style()
             styles = Settings.THEME
             list_theme = [
                 (
@@ -69,7 +60,6 @@ class FMenuBar(QMenuBar, FWidget):
                 )
                 for k in styles.keys()
             ]
-
             for m in list_theme:
                 icon = ""
                 if m.get('theme') == Settings.get(id=1).theme:
@@ -91,7 +81,7 @@ class FMenuBar(QMenuBar, FWidget):
 
         admin_ = QAction(
             QIcon.fromTheme('', QIcon('{}settings.png'.format(Config.img_cmedia))),
-            u"Gestion Admistration",
+            u"Gestion Administration",
             self,
         )
         admin_.setShortcut("Ctrl+G")
@@ -104,15 +94,28 @@ class FMenuBar(QMenuBar, FWidget):
             QIcon("{}login.png".format(Config.img_cmedia)), "Verrouiller", self
         )
         lock.setShortcut("Ctrl+V")
-        lock.setToolTip(u"Verrouile l'application")
+        lock.setToolTip(u"Verrouiller l'application")
         self.connect(lock, SIGNAL("triggered()"), self.logout)
         self.file_.addAction(lock)
         # R
         log_file = QAction(QIcon(), "Log ", self)
         log_file.setShortcut("Ctrl+l")
-        log_file.setToolTip(u"Verrouile l'application")
+        # log_file.setToolTip(u"Verrouiller l'application")
         self.connect(log_file, SIGNAL("triggered()"), self.open_logo_file)
         admin.addAction(log_file)
+
+        g_license = self.addMenu(u"&Licence")
+        if "license" not in exclude_mn:
+            license = QAction(
+                QIcon.fromTheme(
+                    'emblem-system', QIcon('{}licence.png'.format(Config.img_cmedia))
+                ),
+                u"Activation",
+                self,
+            )
+            license.setShortcut("Alt+A")
+            self.connect(license, SIGNAL("triggered()"), self.goto_license)
+            g_license.addAction(license)
 
         # Exit
         exit_ = QAction(QIcon.fromTheme('application-exit', QIcon('')), "Exit", self)
