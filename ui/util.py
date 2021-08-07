@@ -279,6 +279,12 @@ def get_path(path, filename):
     return os.path.join(path, filename)
 
 
+def get_serv_url(sub_url):
+    from Common.models import Settings
+
+    return "{}/{}".format(Settings.get(id=1).url, sub_url)
+
+
 def slug_mane_file(file_name):
     return u"{timestamp}_{fname}".format(
         fname=file_name.replace(" ", "_"), timestamp=to_jstimestamp(datetime.now())
@@ -340,6 +346,7 @@ def getlog(text):
 def internet_on(url):
     from urllib.request import urlopen, URLError
 
+    print(url)
     try:
         urlopen(url, timeout=1)
         return True
@@ -356,14 +363,14 @@ def is_valide_mac():
 
     lcse = CConstants.IS_EXPIRED
     # print(lcse)
-    if License.select(License.can_expired == 0).count() > 0:
+    if License.select().where(License.can_expired == 0).count() > 0:
         return CConstants.OK
     try:
         lcse = License.get(License.code == str(make_lcse())).can_use()
     except Exception as e:
         print("/!\ invalide license.")
         # print(e)
-
+    # print(lcse)
     return lcse
 
 

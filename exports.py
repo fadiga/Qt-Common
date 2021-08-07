@@ -16,7 +16,8 @@ from Common.models import DB_FILE, Version, Organization
 
 from Common.ui.util import raise_success, raise_error, uopen_file, get_lcse_file
 
-DATETIME = "{}".format(datetime.now().strftime('%d-%m-%Y-%Hh%M'))
+DATETIME = "{}".format(datetime.now().strftime('%m-%d-%Y_%Hh%Mm%Ss'))
+print(DATETIME)
 
 
 def export_database_as_file():
@@ -86,7 +87,7 @@ def export_backup(folder=None, dst_folder=None):
 
 def import_backup(folder=None, dst_folder=None):
     path_db_file = os.path.join(os.path.dirname(os.path.abspath('__file__')), DB_FILE)
-    shutil.copy(path_db_file, "{}__{}.old".format(DB_FILE, DATETIME))
+    shutil.copy(path_db_file, "Avant-{}-{}.db".format(DB_FILE, DATETIME))
     name_select_f = QFileDialog.getOpenFileName(
         QWidget(), "Open Data File", "", "CSV data files (*.db)"
     )
@@ -99,6 +100,21 @@ def import_backup(folder=None, dst_folder=None):
                     """.format(
             Version().get(id=1).display_name()
         ),
+    )
+
+
+def upload_file(folder=None, dst_folder=None, type_f=None):
+    path_db_file = os.path.join(folder, DB_FILE)
+    name_select_f = QFileDialog.getOpenFileName(
+        QWidget(),
+        "Open Data File",
+        "./",
+        "Image Files (*.png *.jpg *.bmp)".format(type_f),
+    )
+    shutil.copy(name_select_f, path_db_file)
+
+    raise_success(
+        u"Importation.", u"Import du fichier '{}' terminé.".format(name_select_f)
     )
 
 

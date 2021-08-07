@@ -200,6 +200,14 @@ class OrganizationTableWidget(FWidget):
         #     u"""Cocher si vous voulez pour deactive
         #                         le login continue à utiliser le systeme"""
         # )
+
+        self.bn_upload = Button(u"logo de l'organisation")
+        self.bn_upload.setIcon(
+            QIcon.fromTheme('', QIcon(u"{}db.png".format(Config.img_cmedia)))
+        )
+        self.bn_upload.clicked.connect(self.upload_logo)
+
+        self.logo_orga = LineEdit(self.organization.logo_orga)
         self.name_orga = LineEdit(self.organization.name_orga)
         self.phone = IntLineEdit(str(self.organization.phone))
         self.phone.setMaximumWidth(250)
@@ -210,6 +218,7 @@ class OrganizationTableWidget(FWidget):
         self.email_org.setMaximumWidth(250)
 
         formbox = QFormLayout()
+        formbox.addRow(self.bn_upload, self.logo_orga)
         formbox.addRow(FormLabel(u"Nom de l'organisation:"), self.name_orga)
         formbox.addRow(FormLabel(u"Tel:"), self.phone)
         formbox.addRow(FormLabel(u"B.P:"), self.bp)
@@ -222,6 +231,12 @@ class OrganizationTableWidget(FWidget):
 
         vbox.addLayout(formbox)
         self.setLayout(vbox)
+
+    def upload_logo(self):
+        from Common.exports import upload_file
+
+        upload_file(folder='C://', dst_folder=Config.ARMOIRE)
+        self.accept()
 
     def save_edit(self):
         '''add operation'''

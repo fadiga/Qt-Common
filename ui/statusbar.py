@@ -11,9 +11,9 @@ import requests
 from server import Network
 from configuration import Config
 
-from Common.ui.util import internet_on
+from Common.ui.util import internet_on, get_serv_url
 
-base_url = Config.BASE_URL
+# base_url = Config.BASE_URL
 
 
 class GStatusBar(QStatusBar):
@@ -46,23 +46,34 @@ class GStatusBar(QStatusBar):
 
     def contact_server(self):
         print("check contact")
-        text = """
-            <strong>Serveur : </strong><span style={}>{} </span> <br>
-            <strong> Synchronisation : </strong><span style={}>{}</span></tr>
-            """
-        msg_web = ('color:red', "Connexion perdue ! ")
+
+        s_style, response_s = "color:red", "Connexion perdue !"
+        lse_style, r_lse = "color:red", "Non autorisée"
+        sy_style, r_sy = "color:red", "Non autorisée"
+
         if internet_on(Config.BASE_URL):
-            msg_web = ('color:green', "Connecté")
+            s_style, response_s = 'color:green', "Connecté"
 
         from Common.models import License
 
         lse = License().get(License.id == 1)
-        msg_aut = ('color:red', "Non autorisée")
         if lse.isactivated:
-            msg_aut = ('color:green', "Autorisée")
-        msg = text.format(msg_web[0], msg_web[1], msg_aut[0], msg_aut[1])
+            lse_style, r_lse = 'color:green', "Autorisée"
 
-        self.info_label.setText(msg)
+        self.info_label.setText(
+            """
+            <strong>Serveur : </strong><span style={s_style}>{response_s} </span> <br>
+            <strong> License : </strong><span style={lse_style}>{r_lse}</span>
+            <strong> Synchronisation : </strong><span style={sy_style}>{r_sy}</span></tr>
+            """.format(
+                s_style=s_style,
+                response_s=response_s,
+                lse_style=lse_style,
+                r_lse=r_lse,
+                sy_style=sy_style,
+                r_sy=r_sy,
+            )
+        )
 
     def download_(self):
         # print("download_")
@@ -114,6 +125,7 @@ class GStatusBar(QStatusBar):
             )
         )
         self.instb.clicked.connect(self.start_install)
+
         # self.progressBar.close()
         self.addWidget(self.instb)
 
@@ -123,7 +135,8 @@ class GStatusBar(QStatusBar):
             import sys
 
             sys.exit()
-        except OSError:
+        except Exception as e:
+            print(e)
             self.failure()
 
     def download_setup_file(self):
@@ -131,7 +144,7 @@ class GStatusBar(QStatusBar):
         self.info_label.setText("Téléchargement en cours ...")
 
         self.installer_name = "{}.exe".format(self.check.data.get("app"))
-        url = "{}/{}".format(base_url, self.check.data.get("setup_file_url"))
+        url = get_serv_url(self.check.data.get("setup_file_url"))
         r = requests.get(url, stream=True)
         if r.status_code == 200:
             total_length = r.headers.get('content-length')
@@ -146,42 +159,6 @@ class GStatusBar(QStatusBar):
                         done = int(100 * dl / int(total_length))
                         self.progressBar.setValue(done)
         self.info_label.setText("Fin de téléchargement ...")
-
-
-class InitThread(QThread):
-    def __init__(self, parent):
-        QThread.__init__(self, parent)
-        self.parent = parent
-
-    def run(self):
-        # self.parent.download_setup_file()
-        self.emit(SIGNAL("inscription"))
-
-    def update_version_checher(self):
-        url_ = Config.BASE_URL + "/desktop_client"
-        print("update_version_checher", url_)
-        data = {"app_info": {"name": Config.APP_NAME, "version": Config.APP_VERSION}}
-        lcse_dic = []
-        if Config.LSE:
-            for lcse in License.select():
-                acttn_date = date_to_ts(lcse.activation_date)
-                lcse_dic.append(
-                    {
-                        # "owner": lcse.owner,
-                        "code": lcse.code,
-                        "isactivated": lcse.isactivated,
-                        "activation_date": acttn_date,
-                        "can_expired": lcse.can_expired,
-                        "expiration_date": date_to_ts(lcse.expiration_date)
-                        if lcse.can_expired
-                        else acttn_date,
-                    }
-                )
-            data.update({"licenses": lcse_dic})
-        return self.submit(url_, data)
-
-    def demande_activation(self):
-        pass
 
 
 class TaskThread(QThread):
@@ -202,12 +179,14 @@ class TaskThreadServer(QThread):
 
     def run(self):
         self.data = Network().update_version_checher()
-        # print(self.data)
+
         p = 1
-        while not self.stopped.wait(10):
+        while not self.stopped.wait(20):
             self.emit(SIGNAL("contact_server"))
             if not self.data:
                 return
+
+            print(self.data)
             if not self.data.get("is_last") and p == 1:
                 p += 1
                 print('download_')

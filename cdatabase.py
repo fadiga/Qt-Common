@@ -33,14 +33,18 @@ class AdminDatabase(object):
     )
     LIST_MIGRATE = [
         ('License', 'organization', field),
-        ('Organization', 'logo_org', CharField(null=True)),
-        ('Organization', 'after_cam', IntegerField(default=0)),
+        ('History', 'is_syncro', BooleanField(default=True)),
+        ('License', 'is_syncro', BooleanField(default=True)),
+        ('Organization', 'logo_orga', CharField(null=True)),
         ('Settings', 'toolbar', BooleanField(default=True)),
+        ('Settings', 'is_syncro', BooleanField(default=True)),
+        ('License', 'evaluation', BooleanField(default=True)),
+        ('License', 'is_syncro', BooleanField(default=True)),
         ('Settings', 'toolbar_position', CharField(default=Settings.LEFT)),
         ('Settings', 'devise', CharField(null=True)),
         ('Settings', 'after_cam', IntegerField(default=0)),
     ]
-    MIG_VERSION_C = 2
+
     MIG_VERSION = 1
 
     def create_all_or_pass(self, drop_tables=False):

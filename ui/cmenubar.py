@@ -29,9 +29,25 @@ class FMenuBar(QMenuBar, FWidget):
         # Export
         backup = self.file_.addMenu(u"&Base de données")
         backup.setIcon(QIcon("{}db.png".format(Config.img_cmedia)))
+        # Sauvegarde
+        savegarder = QAction(
+            QIcon.fromTheme('', QIcon('{}export.png'.format(Config.img_cmedia))),
+            u"Sauvegarder",
+            self,
+        )
+        savegarder.setShortcut("Alt+E")
+        self.connect(savegarder, SIGNAL("triggered()"), self.goto_export_db)
+        backup.addAction(savegarder)
 
-        backup.addAction(u"Sauvegarder", self.goto_export_db)
-        backup.addAction(u"Importer", self.goto_import_backup)
+        # Importer db
+        import_db = QAction(
+            QIcon.fromTheme('', QIcon('{}import_db.png'.format(Config.img_cmedia))),
+            u"Importation db",
+            self,
+        )
+        import_db.setShortcut("Alt+I")
+        self.connect(import_db, SIGNAL("triggered()"), self.goto_import_backup)
+        backup.addAction(import_db)
 
         ow = Owner.select().where(Owner.islog == True)
         if ow.exists():
@@ -79,15 +95,17 @@ class FMenuBar(QMenuBar, FWidget):
                 _theme.addAction(el_menu)
                 _theme.setIcon(QIcon("{}theme.png".format(Config.img_cmedia)))
 
-        admin_ = QAction(
-            QIcon.fromTheme('', QIcon('{}settings.png'.format(Config.img_cmedia))),
-            u"Gestion Administration",
-            self,
-        )
-        admin_.setShortcut("Ctrl+G")
-        self.connect(admin_, SIGNAL("triggered()"), self.goto_admin)
         if ow.exists():
             if ow.get().group == Owner.ADMIN:
+                admin_ = QAction(
+                    QIcon.fromTheme(
+                        '', QIcon('{}settings.png'.format(Config.img_cmedia))
+                    ),
+                    u"Gestion Administration",
+                    self,
+                )
+                admin_.setShortcut("Ctrl+G")
+                self.connect(admin_, SIGNAL("triggered()"), self.goto_admin)
                 preference.addAction(admin_)
         # logout
         lock = QAction(

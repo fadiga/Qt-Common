@@ -120,7 +120,8 @@ class LicenseViewWidget(QDialog, FWidget):
 
         trial_lcse = Button(u"Activée l'evaluation")
         trial_lcse.clicked.connect(self.active_trial)
-        if self.lcse.expiration_date:
+
+        if self.lcse.is_expired and self.lcse.evaluation:
             trial_lcse.setEnabled(False)
 
         self.butt = ButtonSave(u"Enregistrer")

@@ -8,73 +8,50 @@ import json
 # import os
 import requests
 from threading import Event
-from Common.models import License
+from Common.models import Settings
 from Common.ui.util import internet_on
+
+from server import Network
 
 
 class UpdaterInit(QObject):
     def __init__(self):
         QObject.__init__(self)
 
-        from configuration import Config
-
-        self.base_url = Config.BASE_URL
-        if not Config.SERV:
-            return
         # self.status_bar = QStatusBar()
         self.stopFlag = Event()
         self.check = TaskThreadServer(self)
         self.connect(
-            self.check, SIGNAL('UpdaterInit'), self.update_data, Qt.QueuedConnection
+            self.check, SIGNAL('update_data'), self.update_data, Qt.QueuedConnection
         )
         self.check.start()
 
     def update_data(self):
         print("update_data")
+        from configuration import Config
+        from database import Setup
+
+        self.base_url = Config.BASE_URL
+        print("UpdaterInit start")
         if not internet_on(self.base_url):
-            # print("Pas de d'internet !")
+            print("Pas de d'internet !")
+            return
+        else:
+            print("Is connected")
+
+        if Settings().select().count() == 0:
             return
 
-        # if Settings().select().count() == 0:
-        #     return
-        lse = License().select().where(License.id == 1).get()
-        if not lse.isactivated:
-            print("is not activated")
-            return
+        for m in Setup.LIST_CREAT:
+            # print(m)
+            for d in m.select().where(m.is_syncro == False):
+                print("sending :", d.data())
+                resp = Network().submit("update-data", d.data())
+                print("resp : ", resp)
+                if resp.get("save"):
+                    d.updated()
 
-        # office = Settings().select().where(Settings.id == 1).get()
-        # if not office.is_syncro:
-        #     resp = self.sender("add-office", office.data())
-        #     if resp.get("save"):
-        #         office.updated()
-
-        # for model in [
-        #     CooperativeCompanie,
-        #     CooperativeMember,
-        #     CheckList,
-        #     Demande,
-        #     Immatriculation,
-        # ]:
-        #     for m in model.all():
-        #         if not m.is_syncro:
-        #             print("sending :", model)
-        #             resp = self.sender("update-data", m.data())
-        #             # print("resp : ", resp)
-        #             if resp.get("save"):
-        #                 m.updated()
-
-        # self.emit(SIGNAL("UpdaterInit"))
-
-    def sender(self, url, data):
-        client = requests.session()
-        url_ = self.base_url + "/scoop/" + url
-        response = client.get(url_, data=json.dumps(data))
-        try:
-            return json.loads(response.content.decode('UTF-8'))
-        except ValueError as e:
-            return {"save": False, "msg_error": e}
-        except Exception as e:
-            print(e)
+        self.emit(SIGNAL("update_data"))
 
 
 class TaskThreadServer(QThread):
@@ -84,6 +61,6 @@ class TaskThreadServer(QThread):
         self.stopped = parent.stopFlag
 
     def run(self):
-        while not self.stopped.wait(20):
-            print("RUN {}".format(self.stopped))
+        while not self.stopped.wait(5):
+            # print("RUN {}".format(self.stopped))
             self.parent.update_data()

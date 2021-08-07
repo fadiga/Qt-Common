@@ -6,25 +6,20 @@ import requests
 
 from PyQt4.QtCore import QObject
 
-from Common.ui.util import internet_on, date_to_ts
+from Common.ui.util import internet_on, date_to_ts, get_serv_url
 from configuration import Config
 from info_hot import getSystemInfo
 from Common.models import License
 
 
 class Network(QObject):
-
-    # base_url =
     def __init__(self):
         QObject.__init__(self)
 
         if not Config.SERV:
-            # print("Not Serveur ")
+            print("Not Serveur ")
             return
-
-        # self.check = TaskThreadServerM(self)
-        # QObject.connect(self.check, SIGNAL("download_"), self.download_)
-        # self.check.start()
+        print("Connexion serveur ...")
 
     def submit(self, url, data):
         # print("submit", data)
@@ -32,7 +27,7 @@ class Network(QObject):
             client = requests.session()
             response = client.get(url, data=json.dumps(data))
             try:
-                # print("response : ", response)
+                print("response : ", json.loads(response.content.decode('UTF-8')))
                 return json.loads(response.content.decode('UTF-8'))
             except ValueError:
                 return False
@@ -42,8 +37,8 @@ class Network(QObject):
             pass
 
     def update_version_checher(self):
-        url_ = Config.BASE_URL + "/desktop_client"
-        # print("update_version_checher", url_)
+        url_ = get_serv_url("desktop_client")
+        print("update_version_checher", url_)
         data = {
             "app_info": {"name": Config.APP_NAME, "version": Config.APP_VERSION},
             "getSystemInfo": json.loads(getSystemInfo()),
@@ -72,7 +67,7 @@ class Network(QObject):
         pass
 
     def get_licence(self):
-        url_ = Config.BASE_URL + "/license"
+        url_ = get_serv_url("license")
         print("update_license_checher", url_)
         data = {"app_info": {"name": Config.APP_NAME, "version": Config.APP_VERSION}}
         lcse_dic = []
