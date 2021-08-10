@@ -226,6 +226,18 @@ def is_int(val):
         return 0
 
 
+def date_to_str(date):
+    if not date:
+        return None
+    if isinstance(date, str):
+        d, m, y = date.split("/")
+        if len(y) == 4:
+            return "{}-{}-{}".format(y, m, d)
+        else:
+            return date.replace("/", "-")
+    return date.strftime("%Y-%m-%d")
+
+
 def alerte():
     pass
 
@@ -236,7 +248,7 @@ def format_date(dat):
     return '-'.join([year, month, day])
 
 
-def date_to_ts(date):
+def datetime_to_str(date):
     return mktime(strptime(date.strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S"))
 
 
@@ -346,7 +358,6 @@ def getlog(text):
 def internet_on(url):
     from urllib.request import urlopen, URLError
 
-    print(url)
     try:
         urlopen(url, timeout=1)
         return True

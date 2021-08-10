@@ -8,8 +8,8 @@ import json
 # import os
 import requests
 from threading import Event
-from Common.models import Settings
-from Common.ui.util import internet_on
+from Common.models import Settings, Organization, License
+from Common.ui.util import get_serv_url, internet_on
 
 from server import Network
 
@@ -20,47 +20,60 @@ class UpdaterInit(QObject):
 
         # self.status_bar = QStatusBar()
         self.stopFlag = Event()
-        self.check = TaskThreadServer(self)
+        self.check = TaskThreadUpdater(self)
         self.connect(
             self.check, SIGNAL('update_data'), self.update_data, Qt.QueuedConnection
         )
         self.check.start()
 
-    def update_data(self):
-        print("update_data")
+    def update_data(self, orga_slug):
+        # print("update_data")
         from configuration import Config
         from database import Setup
 
         self.base_url = Config.BASE_URL
         print("UpdaterInit start")
-        if not internet_on(self.base_url):
-            print("Pas de d'internet !")
-            return
-        else:
-            print("Is connected")
 
-        if Settings().select().count() == 0:
-            return
-
+        self.emit(SIGNAL("contact_server"))
         for m in Setup.LIST_CREAT:
-            # print(m)
             for d in m.select().where(m.is_syncro == False):
-                print("sending :", d.data())
-                resp = Network().submit("update-data", d.data())
-                print("resp : ", resp)
+                d = d.data()
+                d.update({"slug": orga_slug})
+                # print("sending :", d)
+                resp = Network().submit("update-data", d)
+                # print("resp : ", resp)
                 if resp.get("save"):
                     d.updated()
 
-        self.emit(SIGNAL("update_data"))
 
-
-class TaskThreadServer(QThread):
+class TaskThreadUpdater(QThread):
     def __init__(self, parent):
         QThread.__init__(self, parent)
         self.parent = parent
         self.stopped = parent.stopFlag
 
     def run(self):
-        while not self.stopped.wait(5):
+        # from Common.ui.statusbar import GStatusBar
+
+        w = 5
+        while not self.stopped.wait(w):
+            # GStatusBar().update_data()
+            if not internet_on(get_serv_url('')):
+                print("Pas de d'internet !")
+                return
             # print("RUN {}".format(self.stopped))
-            self.parent.update_data()
+            w = 20
+            self.emit(SIGNAL("contact_server"))
+            if Settings().select().count() == 0:
+                return
+            orga_slug = Organization.get(id=1).slug
+            # print("orga_slug ", orga_slug)
+            if not orga_slug:
+                rep_serv = Network().get_or_inscript_app()
+
+            resp = Network().submit(
+                "check_org", {'orga_slug': orga_slug, "lcse": License.get(id=1).code}
+            )
+            print(resp)
+            if resp.get('is_syncro'):
+                self.parent.update_data(orga_slug)

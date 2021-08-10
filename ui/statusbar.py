@@ -22,7 +22,7 @@ class GStatusBar(QStatusBar):
         if not Config.SERV:
             # print("Not Serveur ")
             return
-
+        print("GStatusBar")
         self.stopFlag = Event()
         self.info_label = QLabel()
         icon_label = QLabel()
@@ -36,11 +36,11 @@ class GStatusBar(QStatusBar):
         self.addWidget(name_label, 1)
         self.addWidget(self.info_label, 1)
 
-        self.check = TaskThreadServer(self)
-        QObject.connect(self.check, SIGNAL("contact_server"), self.contact_server)
-        QObject.connect(self.check, SIGNAL("download_"), self.download_)
+        self.check_serv = TaskThreadServer(self)
+        QObject.connect(self.check_serv, SIGNAL("contact_server"), self.contact_server)
+        QObject.connect(self.check_serv, SIGNAL("download_"), self.download_)
         try:
-            self.check.start()
+            self.check_serv.start()
         except Exception as e:
             print(e)
 
@@ -56,8 +56,8 @@ class GStatusBar(QStatusBar):
 
         from Common.models import License
 
-        lse = License().get(License.id == 1)
-        if lse.isactivated:
+        lse = License().select().where(License.isactivated == True)
+        if lse:
             lse_style, r_lse = 'color:green', "Autorisée"
 
         self.info_label.setText(
@@ -75,6 +75,8 @@ class GStatusBar(QStatusBar):
             )
         )
 
+        self.emit(SIGNAL("contact_server"))
+
     def download_(self):
         # print("download_")
         self.b = QPushButton("")
@@ -89,7 +91,7 @@ class GStatusBar(QStatusBar):
             )
         )
         self.b.clicked.connect(self.get_setup)
-        self.b.setText(self.check.data.get("message"))
+        self.b.setText(self.check_serv.data.get("message"))
         self.addWidget(self.b)
 
     def get_setup(self):
@@ -111,7 +113,7 @@ class GStatusBar(QStatusBar):
         self.b.hide()
         self.progressBar.close()
         self.instb = QPushButton(
-            "installer la Ver. {}".format(self.check.data.get("version"))
+            "installer la Ver. {}".format(self.check_serv.data.get("version"))
         )
 
         self.instb.setIcon(
@@ -143,8 +145,8 @@ class GStatusBar(QStatusBar):
         self.b.setEnabled(False)
         self.info_label.setText("Téléchargement en cours ...")
 
-        self.installer_name = "{}.exe".format(self.check.data.get("app"))
-        url = get_serv_url(self.check.data.get("setup_file_url"))
+        self.installer_name = "{}.exe".format(self.check_serv.data.get("app"))
+        url = get_serv_url(self.check_serv.data.get("setup_file_url"))
         r = requests.get(url, stream=True)
         if r.status_code == 200:
             total_length = r.headers.get('content-length')
@@ -178,17 +180,15 @@ class TaskThreadServer(QThread):
         self.stopped = parent.stopFlag
 
     def run(self):
-        self.data = Network().update_version_checher()
-
         p = 1
-        while not self.stopped.wait(20):
+        w = 5
+        while not self.stopped.wait(w):
+            self.data = Network().update_version_checher()
+            # print("Contact server : ", self.data)
             self.emit(SIGNAL("contact_server"))
+            w = 20
             if not self.data:
                 return
-
-            print(self.data)
             if not self.data.get("is_last") and p == 1:
                 p += 1
-                print('download_')
                 self.emit(SIGNAL("download_"))
-            # self.emit(SIGNAL("update_data"))

@@ -36,6 +36,7 @@ class AdminDatabase(object):
         ('History', 'is_syncro', BooleanField(default=True)),
         ('License', 'is_syncro', BooleanField(default=True)),
         ('Organization', 'logo_orga', CharField(null=True)),
+        ('Organization', 'slug', CharField(null=True)),
         ('Settings', 'toolbar', BooleanField(default=True)),
         ('Settings', 'is_syncro', BooleanField(default=True)),
         ('License', 'evaluation', BooleanField(default=True)),

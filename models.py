@@ -47,7 +47,7 @@ class BaseModel(peewee.Model):
         self.is_syncro = False
         self.save()
 
-    def cdata(self):
+    def data(self):
         return {
             'is_syncro': self.is_syncro,
             'last_update_date': datetime_to_str(self.last_update_date),
@@ -72,13 +72,13 @@ class FileJoin(BaseModel):
 
     def data(self):
 
-        return self.cdata().update(
-            {
-                'file_name': self.file_name,
-                'file_slug': self.file_slug,
-                'on_created': date_to_str(self.on_created),
-            }
-        )
+        return {
+            'file_name': self.file_name,
+            'file_slug': self.file_slug,
+            'on_created': date_to_str(self.on_created),
+            'is_syncro': self.is_syncro,
+            'last_update_date': datetime_to_str(self.last_update_date),
+        }
 
     def __str__(self):
         return "{} {}".format(self.file_name, self.file_slug)
@@ -178,7 +178,7 @@ class Owner(BaseModel):
             'password': self.password,
             'isactive': self.isactive,
             'last_login': datetime_to_str(self.last_login),
-            'login_count': datetime_to_str(self.login_count),
+            'login_count': self.login_count,
         }
 
     def __str__(self):
@@ -209,6 +209,7 @@ class Organization(BaseModel):
     bp = peewee.CharField(null=True, verbose_name="")
     email_org = peewee.CharField(null=True, verbose_name="")
     adress_org = peewee.TextField(null=True, verbose_name="")
+    slug = peewee.CharField(null=True)
 
     def __str__(self):
         return self.display_name()
@@ -226,16 +227,17 @@ class Organization(BaseModel):
 
     def data(self):
 
-        return self.cdata().update(
-            {
-                'logo_orga': self.logo_orga,
-                'name_orga': self.name_orga,
-                'phone': self.phone,
-                'bp': self.bp,
-                'email_org': self.email_org,
-                'adress_org': self.adress_org,
-            }
-        )
+        return {
+            'logo_orga': self.logo_orga,
+            'slug': self.slug,
+            'name_orga': self.name_orga,
+            'phone': self.phone,
+            'bp': self.bp,
+            'email_org': self.email_org,
+            'adress_org': self.adress_org,
+            'is_syncro': self.is_syncro,
+            'last_update_date': datetime_to_str(self.last_update_date),
+        }
 
 
 class License(BaseModel):
@@ -255,18 +257,19 @@ class License(BaseModel):
 
     def data(self):
 
-        return self.cdata().update(
-            {
-                'code': self.code,
-                'isactivated': self.isactivated,
-                'activation_date': datetime_to_str(self.activation_date),
-                'can_expired': datetime_to_str(self.can_expired),
-                'evaluation': self.evaluation,
-                'expiration_date': datetime_to_str(self.expiration_date),
-                'owner': self.owner,
-                'update_date': datetime_to_str(self.update_date),
-            }
-        )
+        return {
+            # 'model': "License",
+            'code': self.code,
+            'isactivated': self.isactivated,
+            'activation_date': datetime_to_str(self.activation_date),
+            'can_expired': self.can_expired,
+            'evaluation': self.evaluation,
+            'expiration_date': datetime_to_str(self.expiration_date),
+            'owner': self.owner,
+            'update_date': datetime_to_str(self.update_date),
+            'is_syncro': self.is_syncro,
+            'last_update_date': datetime_to_str(self.last_update_date),
+        }
 
     def check_key(self):
         return
@@ -316,7 +319,13 @@ class Version(BaseModel):
         return u"{}/{}".format(self.number, self.date)
 
     def data(self):
-        return self.cdata().update({'date': self.date, 'number': self.number})
+        return {
+            "model": "Version",
+            'date': datetime_to_str(self.date),
+            'number': self.number,
+            'is_syncro': self.is_syncro,
+            'last_update_date': datetime_to_str(self.last_update_date),
+        }
 
     def display_name(self):
         return u"db-v{}".format(self.number)
@@ -346,13 +355,13 @@ class History(BaseModel):
 
     def data(self):
 
-        return self.cdata().update(
-            {
-                'date': datetime_to_str(self.date),
-                'data': self.data,
-                'action': self.action,
-            }
-        )
+        return {
+            'date': datetime_to_str(self.date),
+            'data': self.data,
+            'action': self.action,
+            'is_syncro': self.is_syncro,
+            'last_update_date': datetime_to_str(self.last_update_date),
+        }
 
 
 class Settings(BaseModel):
@@ -391,18 +400,18 @@ class Settings(BaseModel):
 
     def data(self):
 
-        return self.cdata().update(
-            {
-                'slug': self.slug,
-                'is_login': self.is_login,
-                'after_cam': self.after_cam,
-                'toolbar': self.toolbar,
-                'toolbar_position': self.toolbar_position,
-                'url': self.url,
-                'theme': self.theme,
-                'devise': self.devise,
-            }
-        )
+        return {
+            'slug': self.slug,
+            'is_login': self.is_login,
+            'after_cam': self.after_cam,
+            'toolbar': self.toolbar,
+            'toolbar_position': self.toolbar_position,
+            'url': self.url,
+            'theme': self.theme,
+            'devise': self.devise,
+            'is_syncro': self.is_syncro,
+            'last_update_date': datetime_to_str(self.last_update_date),
+        }
 
     def __str__(self):
         return self.display_name()
