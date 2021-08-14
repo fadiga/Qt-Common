@@ -47,7 +47,7 @@ def cmain():
     if Organization().select().count() == 0:
         if not NewOrEditOrganizationViewWidget().exec_() == QDialog.Accepted:
             return
-    if not is_valide_mac() == CConstants.OK:
+    if not is_valide_mac()[1] == CConstants.OK:
         if not LicenseViewWidget(parent=None).exec_() == QDialog.Accepted:
             return
     if not Settings().get(id=1).is_login or LoginWidget().exec_() == QDialog.Accepted:

@@ -16,7 +16,7 @@ from PyQt4.QtGui import (
 )
 
 from Common.cstatic import CConstants
-from Common.models import License
+from Common.models import License, Organization
 from Common.exports import export_license_as_file
 from Common.ui.util import (
     clean_mac,
@@ -112,7 +112,7 @@ class LicenseViewWidget(QDialog, FWidget):
         self.info_field = PyTextViewer(
             u"""Vous avez besoin du code ci desous pour l'activation:
             <hr> <b>{code}</b><hr> <h4>Contacts:</h4>{contact}""".format(
-                code=clean_mac(), contact=CConstants.TEL_AUT
+                code=Organization.get(id=1).slug, contact=CConstants.TEL_AUT
             )
         )
         self.name_field = LineEdit()

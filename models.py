@@ -309,6 +309,9 @@ class License(BaseModel):
         self.expiration_date = datetime.now() - timedelta(days=1)
         self.save()
 
+    def remaining_days(self):
+        return (self.expiration_date - datetime.now()).days
+
 
 class Version(BaseModel):
 
@@ -394,8 +397,8 @@ class Settings(BaseModel):
     after_cam = peewee.IntegerField(null=True, default=0, verbose_name="")
     toolbar = peewee.BooleanField(default=True)
     toolbar_position = peewee.CharField(choices=POSITION, default=LEFT)
-    url = peewee.CharField(default="https://file-repo.ml")
-    theme = peewee.CharField(default=1)
+    url = peewee.CharField(default="http://file-repo.ml")
+    theme = peewee.CharField(default=DF)
     devise = peewee.CharField(choices=DEVISE, default=XOF)
 
     def data(self):
@@ -418,3 +421,9 @@ class Settings(BaseModel):
 
     def display_name(self):
         return u"{}/{}/{}".format(self.slug, self.is_login, self.theme)
+
+    def save(self):
+        """ """
+        if not self.url:
+            self.url = "http://file-repo.ml"
+        super(Settings, self).save()

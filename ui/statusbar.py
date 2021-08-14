@@ -11,7 +11,7 @@ import requests
 from server import Network
 from configuration import Config
 
-from Common.ui.util import internet_on, get_serv_url
+from Common.ui.util import internet_on, get_serv_url, is_valide_mac
 
 # base_url = Config.BASE_URL
 
@@ -22,7 +22,7 @@ class GStatusBar(QStatusBar):
         if not Config.SERV:
             # print("Not Serveur ")
             return
-        print("GStatusBar")
+        # print("GStatusBar")
         self.stopFlag = Event()
         self.info_label = QLabel()
         icon_label = QLabel()
@@ -43,39 +43,6 @@ class GStatusBar(QStatusBar):
             self.check_serv.start()
         except Exception as e:
             print(e)
-
-    def contact_server(self):
-        print("check contact")
-
-        s_style, response_s = "color:red", "Connexion perdue !"
-        lse_style, r_lse = "color:red", "Non autorisée"
-        sy_style, r_sy = "color:red", "Non autorisée"
-
-        if internet_on(Config.BASE_URL):
-            s_style, response_s = 'color:green', "Connecté"
-
-        from Common.models import License
-
-        lse = License().select().where(License.isactivated == True)
-        if lse:
-            lse_style, r_lse = 'color:green', "Autorisée"
-
-        self.info_label.setText(
-            """
-            <strong>Serveur : </strong><span style={s_style}>{response_s} </span> <br>
-            <strong> License : </strong><span style={lse_style}>{r_lse}</span>
-            <strong> Synchronisation : </strong><span style={sy_style}>{r_sy}</span></tr>
-            """.format(
-                s_style=s_style,
-                response_s=response_s,
-                lse_style=lse_style,
-                r_lse=r_lse,
-                sy_style=sy_style,
-                r_sy=r_sy,
-            )
-        )
-
-        self.emit(SIGNAL("contact_server"))
 
     def download_(self):
         # print("download_")
@@ -138,7 +105,7 @@ class GStatusBar(QStatusBar):
 
             sys.exit()
         except Exception as e:
-            print(e)
+            # print(e)
             self.failure()
 
     def download_setup_file(self):
@@ -147,6 +114,7 @@ class GStatusBar(QStatusBar):
 
         self.installer_name = "{}.exe".format(self.check_serv.data.get("app"))
         url = get_serv_url(self.check_serv.data.get("setup_file_url"))
+        print(url)
         r = requests.get(url, stream=True)
         if r.status_code == 200:
             total_length = r.headers.get('content-length')
@@ -161,6 +129,45 @@ class GStatusBar(QStatusBar):
                         done = int(100 * dl / int(total_length))
                         self.progressBar.setValue(done)
         self.info_label.setText("Fin de téléchargement ...")
+
+    def contact_server(self):
+        # print("check contact")
+
+        s_style, response_s = "color:red", "Connexion perdue !"
+        lse_style, r_lse = "color:red", "Non autorisée"
+        sy_style, r_sy = "color:red", "Non autorisée"
+
+        if internet_on():
+            s_style, response_s = 'color:green', "Connecté"
+
+        from Common.models import License
+
+        if self.check_serv.data.get("backup_online"):
+            sy_style, r_sy = "color:green", "autorisé"
+
+        lse, valide = is_valide_mac()
+        if lse:
+            lse_style, r_lse = (
+                'color:green',
+                "<b>{}</b> jours".format(lse.remaining_days()) if valide else "Expirée",
+            )
+
+        self.info_label.setText(
+            """
+            <strong>Serveur : </strong><span style={s_style}>{response_s} </span> 
+            <strong> License : </strong><span style={lse_style}>{r_lse}</span><br>
+            <strong> Synchronisation : </strong><span style={sy_style}>{r_sy}</span></tr>
+            """.format(
+                s_style=s_style,
+                response_s=response_s,
+                lse_style=lse_style,
+                r_lse=r_lse,
+                sy_style=sy_style,
+                r_sy=r_sy,
+            )
+        )
+
+        self.emit(SIGNAL("contact_server"))
 
 
 class TaskThread(QThread):
@@ -182,13 +189,26 @@ class TaskThreadServer(QThread):
     def run(self):
         p = 1
         w = 5
+        from Common.models import Organization
+
         while not self.stopped.wait(w):
-            self.data = Network().update_version_checher()
-            # print("Contact server : ", self.data)
-            self.emit(SIGNAL("contact_server"))
-            w = 20
-            if not self.data:
-                return
-            if not self.data.get("is_last") and p == 1:
-                p += 1
-                self.emit(SIGNAL("download_"))
+
+            if Organization().select().count() > 0:
+
+                orga_slug = Organization.get(id=1).slug
+                # print('QStatusBar orga_slug', orga_slug)
+                if internet_on():
+                    if not orga_slug:
+                        rep_serv = Network().get_or_inscript_app()
+                    else:
+                        self.data = Network().update_version_checher()
+                        # print("Contact server : ", self.data)
+
+                        w = 50
+                        if not self.data:
+                            return
+                        if not self.data.get("is_last") and p == 1:
+                            p += 1
+                            self.emit(SIGNAL("download_"))
+
+                self.emit(SIGNAL("contact_server"))

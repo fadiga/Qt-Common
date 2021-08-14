@@ -36,7 +36,7 @@ class CConstants(object):
     # ------------------------- Autor --------------------------#
     AUTOR = u"Fadiga Ibrahima"
     EMAIL_AUT = u"ibfadiga@gmail.com"
-    TEL_AUT = u"(+223)76 43 38 90 \n (+223)63 34 14 24"
+    TEL_AUT = u"(+223)76 43 38 90"
     ADRESS_AUT = u"Boulkassoumbougou Bamako"
     ORG_AUT = u"Copyright © 2012 xxxx"
     # ------------------------- Application --------------------------#
@@ -58,4 +58,4 @@ class CConstants(object):
     APP_LOGO_ICO = os.path.join(img_cmedia, "logo.ico")
     ExportFolders = []
     ExportFiles = []
-    BASE_URL = "http://file-repo.ml"
+    BASE_URL = "//file-repo.ml"

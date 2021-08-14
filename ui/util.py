@@ -247,10 +247,8 @@ def format_date(dat):
     day, month, year = dat.split('/')
     return '-'.join([year, month, day])
 
-
 def datetime_to_str(date):
     return mktime(strptime(date.strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S"))
-
 
 def to_jstimestamp(adate):
     if not adate:
@@ -355,11 +353,11 @@ def getlog(text):
     return "Log-{}".format(text)
 
 
-def internet_on(url):
+def internet_on():
     from urllib.request import urlopen, URLError
 
     try:
-        urlopen(url, timeout=1)
+        urlopen(get_serv_url(''), timeout=1)
         return True
     except URLError as err:
         # print(err)
@@ -372,17 +370,12 @@ def is_valide_mac():
     """check de license"""
     from Common.models import License
 
-    lcse = CConstants.IS_EXPIRED
-    # print(lcse)
-    if License.select().where(License.can_expired == 0).count() > 0:
-        return CConstants.OK
     try:
-        lcse = License.get(License.code == str(make_lcse())).can_use()
+        lcse = License.get(License.code == str(make_lcse()))
+        return lcse, lcse.can_use()
     except Exception as e:
         print("/!\ invalide license.")
-        # print(e)
-    # print(lcse)
-    return lcse
+        return None, CConstants.IS_EXPIRED
 
 
 def clean_mac():

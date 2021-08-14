@@ -51,7 +51,7 @@ class RestorationViewWidget(QDialog, FWidget):
 
         # ==== Box of restor online ====
         self.onlineRestorBoxBtt = QGroupBox(self.tr("Restoration de données en line"))
-        self.bn_resto_onligne = Button(u"En ligne")
+        self.bn_resto_onligne = Button(u"Connexion")
         self.bn_resto_onligne.setIcon(
             QIcon.fromTheme('', QIcon(u"{}cloud.png".format(Config.img_cmedia)))
         )
@@ -63,7 +63,10 @@ class RestorationViewWidget(QDialog, FWidget):
         )
         self.bn_resto_l.clicked.connect(self.resto_local_db)
 
-        self.bn_ignore = Button(u"Nouvelle création")
+        self.bn_ignore = Button(u"Première installation")
+        self.bn_ignore.setIcon(
+            QIcon.fromTheme('', QIcon(u"{}go-next.png".format(Config.img_cmedia)))
+        )
         self.bn_ignore.clicked.connect(self.ignore_resto)
 
         self.mail_field = LineEdit()
@@ -73,7 +76,7 @@ class RestorationViewWidget(QDialog, FWidget):
 
         formbox = QFormLayout()
 
-        formbox.addRow(FormLabel("<i>les données sauvegardé en ligne</i>"))
+        # formbox.addRow(FormLabel("<i>les données sauvegardé en ligne</i>"))
         formbox.addRow(FormLabel("E-mail"), self.mail_field)
         formbox.addRow(FormLabel("Mot de passe"), self.password_field)
         formbox.addRow(FormLabel(""), self.bn_resto_onligne)
@@ -86,15 +89,13 @@ class RestorationViewWidget(QDialog, FWidget):
         )
 
         l_formbox = QFormLayout()
-        l_formbox.addRow(FormLabel("<i>Une copie de la base de données exportée.</i>"))
+        # l_formbox.addRow(FormLabel("<i>Une copie de la base de données exportée.</i>"))
         l_formbox.addRow(FormLabel(""), self.bn_resto_l)
         self.onLocaleRestorBoxBtt.setLayout(l_formbox)
         vbox.addWidget(self.onLocaleRestorBoxBtt)
 
         i_formbox = QFormLayout()
-        i_formbox.addRow(
-            FLabel("<i>Une copie de la base de données exportée.</i>"), self.bn_ignore
-        )
+        i_formbox.addRow(FLabel("<h2></h2>"), self.bn_ignore)
         vbox.addLayout(i_formbox)
         self.setLayout(vbox)
 

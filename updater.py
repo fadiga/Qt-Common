@@ -5,11 +5,12 @@
 from PyQt4.QtCore import QThread, SIGNAL, QObject, Qt
 import json
 
-# import os
 import requests
+from datetime import datetime
 from threading import Event
 from Common.models import Settings, Organization, License
-from Common.ui.util import get_serv_url, internet_on
+from Common.ui.util import get_serv_url, internet_on, is_valide_mac
+from Common.cstatic import CConstants
 
 from server import Network
 
@@ -31,15 +32,14 @@ class UpdaterInit(QObject):
         from configuration import Config
         from database import Setup
 
-        self.base_url = Config.BASE_URL
+        # self.base_url = Config.BASE_URL
         print("UpdaterInit start")
-
         self.emit(SIGNAL("contact_server"))
         for m in Setup.LIST_CREAT:
+            # print("m ", m)
             for d in m.select().where(m.is_syncro == False):
                 d = d.data()
                 d.update({"slug": orga_slug})
-                # print("sending :", d)
                 resp = Network().submit("update-data", d)
                 # print("resp : ", resp)
                 if resp.get("save"):
@@ -57,23 +57,34 @@ class TaskThreadUpdater(QThread):
 
         w = 5
         while not self.stopped.wait(w):
-            # GStatusBar().update_data()
-            if not internet_on(get_serv_url('')):
-                print("Pas de d'internet !")
-                return
-            # print("RUN {}".format(self.stopped))
-            w = 20
-            self.emit(SIGNAL("contact_server"))
-            if Settings().select().count() == 0:
-                return
-            orga_slug = Organization.get(id=1).slug
-            # print("orga_slug ", orga_slug)
-            if not orga_slug:
-                rep_serv = Network().get_or_inscript_app()
+            w = 50
+            if internet_on():
+                if Organization().select().count() == 0:
+                    return
+                orga_slug = Organization.get(id=1).slug
+                if not orga_slug or orga_slug == "-":
+                    rep_serv = Network().get_or_inscript_app()
+                else:
+                    lcse = is_valide_mac()[0]
+                    resp = Network().submit(
+                        "check_org", {'orga_slug': orga_slug, "lcse": lcse.code}
+                    )
+                    # print(resp)
+                    if (
+                        not resp.get('force_kill')
+                        or resp.get('can_use') != CConstants.IS_EXPIRED
+                    ):
+                        # print("resp expiration_date :: ", resp)
+                        lcse.expiration_date = datetime.fromtimestamp(
+                            resp.get('expiration_date')
+                        )
+                        lcse.save()
+                    else:
+                        # print("remove_activation")
+                        lcse.remove_activation()
 
-            resp = Network().submit(
-                "check_org", {'orga_slug': orga_slug, "lcse": License.get(id=1).code}
-            )
-            print(resp)
-            if resp.get('is_syncro'):
-                self.parent.update_data(orga_slug)
+                    if resp.get('is_syncro'):
+                        self.parent.update_data(orga_slug)
+
+            else:
+                print("Pas de d'internet !")

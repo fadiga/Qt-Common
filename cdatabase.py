@@ -5,6 +5,8 @@
 
 from __future__ import unicode_literals, absolute_import, division, print_function
 
+
+from datetime import datetime
 from Common.models import (
     Owner,
     Organization,
@@ -21,6 +23,7 @@ from playhouse.migrate import (
     BooleanField,
     ForeignKeyField,
     IntegerField,
+    DateTimeField,
 )
 
 
@@ -33,17 +36,27 @@ class AdminDatabase(object):
     )
     LIST_MIGRATE = [
         ('License', 'organization', field),
-        ('History', 'is_syncro', BooleanField(default=True)),
         ('License', 'is_syncro', BooleanField(default=True)),
+        ('License', 'evaluation', BooleanField(default=True)),
+        ('License', 'last_update_date', DateTimeField(default=datetime.now)),
+        ('History', 'last_update_date', DateTimeField(default=datetime.now)),
+        ('History', 'is_syncro', BooleanField(default=True)),
         ('Organization', 'logo_orga', CharField(null=True)),
         ('Organization', 'slug', CharField(null=True)),
+        ('Organization', 'last_update_date', DateTimeField(default=datetime.now)),
+        ('Organization', 'is_syncro', BooleanField(default=True)),
+        ('Version', 'is_syncro', BooleanField(default=True)),
+        ('Version', 'last_update_date', DateTimeField(default=datetime.now)),
+        ('Owner', 'is_syncro', BooleanField(default=True)),
+        ('Owner', 'last_update_date', DateTimeField(default=datetime.now)),
         ('Settings', 'toolbar', BooleanField(default=True)),
+        ('Settings', 'last_update_date', DateTimeField(default=datetime.now)),
         ('Settings', 'is_syncro', BooleanField(default=True)),
-        ('License', 'evaluation', BooleanField(default=True)),
-        ('License', 'is_syncro', BooleanField(default=True)),
         ('Settings', 'toolbar_position', CharField(default=Settings.LEFT)),
         ('Settings', 'devise', CharField(null=True)),
         ('Settings', 'after_cam', IntegerField(default=0)),
+        ('FileJoin', 'last_update_date', DateTimeField(default=datetime.now)),
+        ('FileJoin', 'is_syncro', BooleanField(default=True)),
     ]
 
     MIG_VERSION = 1
@@ -63,16 +76,14 @@ class AdminDatabase(object):
             from fixture import FixtInit
 
             FixtInit().create_all_or_pass()
+        self.make_migrate()
 
-        self.make_migrate(mig_v=self.MIG_VERSION)
-
-    def make_migrate(self, mig_v=1):
+    def make_migrate(self):
         version = Version.get_or_none(Version.id == 1)
         if version:
-            print("number ", version.number, "  mig_v : ", mig_v)
-
+            count_list = len(self.LIST_MIGRATE)
             print("--check migrate--")
-            if mig_v > version.number:
+            if count_list != version.number:
                 from Common.models import migrator
 
                 print("Make migrate", self.LIST_MIGRATE)
@@ -83,6 +94,5 @@ class AdminDatabase(object):
                     except Exception as e:
                         print(e)
                         pass
-                version.number = mig_v
+                version.number = count_list
                 version.save()
-                print("After save")
