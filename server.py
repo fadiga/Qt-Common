@@ -19,7 +19,7 @@ class Network(QObject):
         print("Connexion serveur ...")
 
     def submit(self, url, data):
-        print("submit", 'data', " url ", url)
+        # print("submit", 'data', " url ", url)
         if internet_on():
             client = requests.session()
             response = client.get(get_serv_url(url), data=json.dumps(data))

@@ -139,11 +139,11 @@ class GStatusBar(QStatusBar):
 
         if internet_on():
             s_style, response_s = 'color:green', "Connecté"
+            if self.check_serv.data.get("backup_online"):
+                sy_style, r_sy = "color:green", "autorisé"
 
         from Common.models import License
 
-        if self.check_serv.data.get("backup_online"):
-            sy_style, r_sy = "color:green", "autorisé"
 
         lse, valide = is_valide_mac()
         if lse:
