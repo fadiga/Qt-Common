@@ -2,17 +2,23 @@
 # -*- coding: utf8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
-from __future__ import (
-    unicode_literals, absolute_import, division, print_function)
+from __future__ import unicode_literals, absolute_import, division, print_function
 
 import datetime
 
 from PyQt5.QtCore import Qt
 
-from PyQt5.QtWidgets import (QTableWidget, QAbstractItemView, QLabel,
-                             QHeaderView, QTableWidgetItem, QWidget,
-                             QPushButton)
+from PyQt5.QtWidgets import (
+    QTableWidget,
+    QAbstractItemView,
+    QLabel,
+    QHeaderView,
+    QTableWidgetItem,
+    QWidget,
+    QPushButton,
+)
 from PyQt5.QtGui import QFont
+
 
 from Common.ui.util import formatted_number
 
@@ -48,7 +54,7 @@ class FTableWidget(QTableWidget):
 
         self._display_total = False
         self._column_totals = {}
-        self._total_label = u"TOTAL"
+        self._total_label = "TOTAL"
 
         self.stretch_columns = []
         self.display_hheaders = True
@@ -76,23 +82,23 @@ class FTableWidget(QTableWidget):
         e.accept()
 
     def _display_fixed():
-
         def fget(self):
             return self._display_fixed
 
         def fset(self, value):
             self._display_fixed = value
+
         return locals()
 
     display_fixed = property(**_display_fixed())
 
     def _live_refresh():
-
         def fget(self):
             return self._live_refresh
 
         def fset(self, value):
             self._live_refresh = value
+
         return locals()
 
     live_refresh = property(**_live_refresh())
@@ -100,11 +106,12 @@ class FTableWidget(QTableWidget):
     def _sorter():
         def fset(self, value):
             self.setSortingEnabled(value)
+
         return locals()
+
     sorter = property(**_sorter())
 
     def display_hheaders():
-
         def fget(self):
             return self._display_hheaders
 
@@ -113,11 +120,12 @@ class FTableWidget(QTableWidget):
 
         def fdel(self):
             del self._display_hheaders
+
         return locals()
+
     display_hheaders = property(**display_hheaders())
 
     def display_vheaders():
-
         def fget(self):
             return self._display_vheaders
 
@@ -126,11 +134,12 @@ class FTableWidget(QTableWidget):
 
         def fdel(self):
             del self._display_vheaders
+
         return locals()
+
     display_vheaders = property(**display_vheaders())
 
     def stretch_columns():
-
         def fget(self):
             return self._stretch_columns
 
@@ -139,11 +148,12 @@ class FTableWidget(QTableWidget):
 
         def fdel(self):
             del self._stretch_columns
+
         return locals()
+
     stretch_columns = property(**stretch_columns())
 
     def data():
-
         def fget(self):
             return self._data
 
@@ -152,11 +162,12 @@ class FTableWidget(QTableWidget):
 
         def fdel(self):
             del self._data
+
         return locals()
+
     data = property(**data())
 
     def align_map():
-
         def fget(self):
             return self._align_map
 
@@ -165,6 +176,7 @@ class FTableWidget(QTableWidget):
 
         def fdel(self):
             del self._align_map
+
         return locals()
 
     align_map = property(**align_map())
@@ -193,12 +205,10 @@ class FTableWidget(QTableWidget):
         self.setColumnCount(len(self.hheaders))
         # self.setHorizontalHeaderLabels(self.hheaders)
         for col in range(len(self.hheaders)):
-            self.setHorizontalHeaderItem(
-                col, QTableWidgetItem(self.hheaders[col]))
+            self.setHorizontalHeaderItem(col, QTableWidgetItem(self.hheaders[col]))
         # self.setVerticalHeaderLabels(self.vheaders)
         for row in range(len(self.vheaders)):
-            self.setVerticalHeaderItem(
-                row, QTableWidgetItem(self.vheaders[row]))
+            self.setVerticalHeaderItem(row, QTableWidgetItem(self.vheaders[row]))
 
         rowid = 0
         for row in self.data:
@@ -221,8 +231,13 @@ class FTableWidget(QTableWidget):
                         self.setCellWidget(rowid, colid, ui_item)
                     # something failed, let's build a QTableWidgetItem
                     else:
-                        self.setItem(rowid, colid,
-                                     QTableWidgetItem(u"%s" % ui_item, ))
+                        self.setItem(
+                            rowid,
+                            colid,
+                            QTableWidgetItem(
+                                "%s" % ui_item,
+                            ),
+                        )
                 colid += 1
             rowid += 1
 
@@ -277,7 +292,8 @@ class FTableWidget(QTableWidget):
 
             for colnum in to_stretch:
                 self.horizontalHeader().resizeSection(
-                    colnum, self.horizontalHeader().sectionSize(colnum) + indiv_extra)
+                    colnum, self.horizontalHeader().sectionSize(colnum) + indiv_extra
+                )
 
         self.horizontalHeader().update()
         self.update()
@@ -287,19 +303,22 @@ class FTableWidget(QTableWidget):
             for colid in range(0, len(self.data[rowid])):
                 # if not isinstance(self.item(rowid, colid), QTableWidgetItem)
                 # and not rowid in rows_with_widgets:
-                if isinstance(self.item(rowid, colid), (QPushButton, None.__class__)) and not rowid in rows_with_widgets:
+                if (
+                    isinstance(self.item(rowid, colid), (QPushButton, None.__class__))
+                    and not rowid in rows_with_widgets
+                ):
                     rows_with_widgets.append(rowid)
 
     def extend_rows(self):
-        """ called after cells have been created/refresh.
+        """called after cells have been created/refresh.
 
-            Use for adding/editing cells """
+        Use for adding/editing cells"""
         pass
 
     def upd(self):
-        """ called after cells have been created/refresh.
+        """called after cells have been created/refresh.
 
-            Use for adding/editing cells """
+        Use for adding/editing cells"""
         pass
 
     def data():
@@ -311,7 +330,9 @@ class FTableWidget(QTableWidget):
 
         def fdel(self):
             del self._data
+
         return locals()
+
     data = property(**data())
 
     def _item_for_data(self, row, column, data, context=None):
@@ -326,19 +347,19 @@ class FTableWidget(QTableWidget):
             return QTableWidgetItem(self._format_for_table(data))
 
     def _item_for_data_(self, row, column, data, context=None):
-        ''' returns QTableWidgetItem or QWidget to add to a cell '''
+        """returns QTableWidgetItem or QWidget to add to a cell"""
         return QTableWidgetItem(self._format_for_table(data))
 
     def widget_from_align(self, align):
-        if align.lower() == 'l':
+        if align.lower() == "l":
             return FlexibleReadOnlyWidgetAL
-        elif align.lower() == 'r':
+        elif align.lower() == "r":
             return FlexibleReadOnlyWidgetAR
         else:
             return FlexibleReadOnlyWidget
 
     def _display_total_row(self, row_num=None):
-        ''' adds the total row at end of table '''
+        """adds the total row at end of table"""
 
         # display total row at end of table
         if self._display_total:
@@ -348,7 +369,7 @@ class FTableWidget(QTableWidget):
 
             # spans columns up to first data one
             # add label inside
-            label_item = QTableWidgetItem(u"%s" % self._total_label)
+            label_item = QTableWidgetItem("%s" % self._total_label)
             label_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             self.setItem(row_num, 0, label_item)
             self.setSpan(row_num, 0, 1, self._column_totals.keys()[0])
@@ -379,9 +400,9 @@ class FTableWidget(QTableWidget):
             self._total_label = label
 
     def _format_for_table(self, value):
-        ''' formats input value for string in table widget
+        """formats input value for string in table widget
 
-            override it to add more formats'''
+        override it to add more formats"""
         if isinstance(value, basestring):
             return value
         if isinstance(value, (int, float, long)):
@@ -392,31 +413,27 @@ class FTableWidget(QTableWidget):
             return value.strftime("%A %d/%m/%Y")
 
         if value == None:
-            return ''
+            return ""
 
-        return u"%s" % value
+        return "%s" % value
 
     def click_item(self, row, column, *args):
         pass
 
 
 class FlexibleWidget(QTableWidgetItem):
-
     def __init__(self, *args, **kwargs):
         super(FlexibleWidget, self).__init__(*args, **kwargs)
 
         self.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
 
-        self.setFlags(Qt.ItemIsEnabled |
-                      Qt.ItemIsSelectable |
-                      Qt.ItemIsEditable)
+        self.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable)
 
     def live_refresh(self):
         pass
 
 
 class TotalsWidget(QTableWidgetItem):
-
     def __init__(self, *args, **kwargs):
         super(TotalsWidget, self).__init__(*args, **kwargs)
 
@@ -427,15 +444,13 @@ class TotalsWidget(QTableWidgetItem):
         # font.setWeight(90)
         self.setFont(font)
 
-        self.setFlags(Qt.ItemIsEnabled |
-                      Qt.ItemIsSelectable | Qt.ItemIsEditable)
+        self.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable)
 
     def live_refresh(self):
         pass
 
 
 class FlexibleReadOnlyWidget(FlexibleWidget):
-
     def __init__(self, *args, **kwargs):
         super(FlexibleReadOnlyWidget, self).__init__(*args, **kwargs)
 
@@ -448,21 +463,18 @@ class FlexibleReadOnlyWidget(FlexibleWidget):
 
 
 class FlexibleReadOnlyWidgetAL(FlexibleReadOnlyWidget):
-
     def __init__(self, *args, **kwargs):
         super(FlexibleReadOnlyWidgetAL, self).__init__(*args, **kwargs)
         self.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
 
 class FlexibleReadOnlyWidgetAR(FlexibleReadOnlyWidget):
-
     def __init__(self, *args, **kwargs):
         super(FlexibleReadOnlyWidgetAR, self).__init__(*args, **kwargs)
         self.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
 
 class EnterDoesTab(QWidget):
-
     def keyReleaseEvent(self, event):
         super(EnterDoesTab, self).keyReleaseEvent(event)
         if event.key() == Qt.Key_Return:

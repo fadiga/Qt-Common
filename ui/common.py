@@ -1,25 +1,45 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # maintainer: Fad
-from __future__ import (
-    unicode_literals, absolute_import, division, print_function)
+from __future__ import unicode_literals, absolute_import, division, print_function
 
 from datetime import date
 
-from PyQt5.QtCore import (
-    Qt, QSize, QSortFilterProxyModel, QStringListModel)
-from PyQt5.QtWidgets import (QMainWindow, QTextEdit, QLabel, QLineEdit, QCompleter,
-                             QDateTimeEdit,  QWidget, QTabBar, QToolButton,
-                             QCommandLinkButton, QPushButton, QComboBox)
-from PyQt5.QtGui import (QRadialGradient, QPainter, QBrush,
-                         QPainterPath, QPen,
-                         QIcon, QPalette, QFont, QColor, QIntValidator, QDoubleValidator,)
+
+from PyQt5.QtCore import Qt, QSize, QSortFilterProxyModel, QStringListModel
+from PyQt5.QtWidgets import (
+    QMainWindow,
+    QTextEdit,
+    QLabel,
+    QLineEdit,
+    QCompleter,
+    QDateTimeEdit,
+    QWidget,
+    QTabBar,
+    QToolButton,
+    QCommandLinkButton,
+    QPushButton,
+    QComboBox,
+)
+from PyQt5.QtGui import (
+    QRadialGradient,
+    QPainter,
+    QBrush,
+    QPainterPath,
+    QPen,
+    QIcon,
+    QPalette,
+    QFont,
+    QColor,
+    QIntValidator,
+    QDoubleValidator,
+)
+
 # from PyQt5.QtWebKit import QWebView
 
 from Common.ui.statusbar import GStatusBar
 from configuration import Config
 from Common.periods import Period
-
 
 try:
     unicode
@@ -28,13 +48,13 @@ except:
 
 
 class FMainWindow(QMainWindow):
-
     def __init__(self, parent=0, *args, **kwargs):
         QMainWindow.__init__(self)
         print("FMainWindow")
         # self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
-        self.setWindowIcon(QIcon.fromTheme(
-            'logo', QIcon(u"{}logo.png".format(Config.img_media))))
+        self.setWindowIcon(
+            QIcon.fromTheme("logo", QIcon("{}logo.png".format(Config.img_media)))
+        )
 
         self.statusbar = GStatusBar(self)
         self.setStatusBar(self.statusbar)
@@ -64,7 +84,7 @@ class FMainWindow(QMainWindow):
         # attach context to window
         self.setCentralWidget(self.view_widget)
 
-    def open_dialog(self, dialog, modal=False, opacity=0.90, *args, **kwargs):
+    def open_dialog(self, dialog, modal=False, opacity=1, *args, **kwargs):
         d = dialog(parent=self, *args, **kwargs)
         d.setModal(modal)
         # d.setWindowFlags(Qt.FramelessWindowHint)
@@ -72,29 +92,33 @@ class FMainWindow(QMainWindow):
         d.exec_()
 
     def logout(self):
-        from Common.models import Owner, Organization
+        from Common.models import Owner, Settings
+
         # print("logout")
-        if Organization.get(id=1).is_login:
+        if Settings.get(id=1).is_login:
             for ur in Owner.select().where(Owner.islog == True):
                 ur.islog = False
                 ur.save()
 
     def Notify(self, mssg, type_mssg):
         from Common.notification import Notification
+
         self.notify = Notification(mssg=mssg, type_mssg=type_mssg)
 
 
 class FWidget(QWidget):
-
     def __init__(self, parent=0, *args, **kwargs):
 
         QWidget.__init__(self, parent=parent, *args, **kwargs)
         self.pp = parent
+
+    def page_names(self, app_name, txt):
+        self.parentWidget().setWindowTitle("{} | {}".format(app_name, txt.upper()))
         # self.wc = self.pp.wc - 100
         # self.hc = self.pp.hc
         # self.css = """
         #     QWidget{
-        # /* background: QLinearGradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #4984C7, stop: 1 #ccf);*/
+        #      background: #fff;
         #     }
         #     """
         # self.setStyleSheet(self.css)
@@ -108,6 +132,15 @@ class FWidget(QWidget):
 
     def open_dialog(self, dialog, modal=False, *args, **kwargs):
         return self.parentWidget().open_dialog(dialog, modal=modal, *args, **kwargs)
+
+
+class FDialog(QDialog, FWidget):
+    def __init__(self, parent=0, *args, **kwargs):
+
+        QDialog.__init__(self, parent=parent, *args, **kwargs)
+
+    def page_names(self, app_name, txt):
+        self.setWindowTitle("{} | {}".format(app_name, txt.upper()))
 
 
 # class FWebView(QWebView):
@@ -131,7 +164,6 @@ class PyTextViewer(QTextEdit):
 
 
 class TabPane(QTabBar):
-
     def __init__(self, parent=None):
         super(TabPane, self).__init__(parent)
 
@@ -149,7 +181,6 @@ class TabPane(QTabBar):
 
 
 class FLabel(QLabel):
-
     def __init__(self, *args, **kwargs):
         super(FLabel, self).__init__(*args, **kwargs)
         # self.setFont(QFont("Times New Roman", 50))
@@ -164,8 +195,28 @@ class FLabel(QLabel):
         self.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
 
 
-class FPageTitle(FLabel):
+class FRLabel(QLabel):
+    def __init__(self, *args, **kwargs):
+        super(FRLabel, self).__init__(*args, **kwargs)
+        # self.setFont(QFont("Times New Roman", 50))
+        css = """
+            border-style: outset;
+            border-width: 2px;
+            border-radius: 10px;
+            border-color: beige;
+            font: bold 30px;
+            max-width: 20em;
+            padding: 6px;
+        """
+        self.setStyleSheet(css)
+        font = QFont()
+        # font.setBold(True)
+        # font.setWeight(75)
+        # self.setFont(font)
+        self.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
 
+
+class FPageTitle(FLabel):
     def __init__(self, *args, **kwargs):
         super(FPageTitle, self).__init__(*args, **kwargs)
         # self.setFont(QFont("Times New Roman", 50))
@@ -179,7 +230,6 @@ class FPageTitle(FLabel):
 
 
 class FBoxTitle(FLabel):
-
     def __init__(self, *args, **kwargs):
         super(FBoxTitle, self).__init__(*args, **kwargs)
         self.setFont(QFont("Times New Roman", 12, QFont.Bold, True))
@@ -187,7 +237,6 @@ class FBoxTitle(FLabel):
 
 
 class ErrorLabel(FLabel):
-
     def __init__(self, text, parent=None):
         FLabel.__init__(self, text, parent)
         font = QFont()
@@ -200,7 +249,6 @@ class ErrorLabel(FLabel):
 
 
 class FormLabel(FLabel):
-
     def __init__(self, text, parent=None):
         FLabel.__init__(self, text, parent)
         font = QFont()
@@ -209,8 +257,7 @@ class FormLabel(FLabel):
         self.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
 
-class QBadgeButton (QPushButton):
-
+class QBadgeButton(QPushButton):
     def __init__(self, icon=None, text=None, parent=None):
         if icon:
             QPushButton.__init__(self, icon, text, parent)
@@ -223,10 +270,11 @@ class QBadgeButton (QPushButton):
         self.badge_size = 25
 
         self.redGradient = QRadialGradient(
-            0.0, 0.0, 17.0, self.badge_size - 3, self.badge_size - 3)
-        self.redGradient.setColorAt(0.0, QColor(0xe0, 0x84, 0x9b))
-        self.redGradient.setColorAt(0.5, QColor(0xe9, 0x34, 0x43))
-        self.redGradient.setColorAt(1.0, QColor(0xdc, 0x0c, 0x00))
+            0.0, 0.0, 17.0, self.badge_size - 3, self.badge_size - 3
+        )
+        self.redGradient.setColorAt(0.0, QColor(0xE0, 0x84, 0x9B))
+        self.redGradient.setColorAt(0.5, QColor(0xE9, 0x34, 0x43))
+        self.redGradient.setColorAt(1.0, QColor(0xDC, 0x0C, 0x00))
 
     def setSize(self, size):
         self.badge_size = size
@@ -243,8 +291,14 @@ class QBadgeButton (QPushButton):
 
         if self.badge_counter > 0:
             point = self.rect().topRight()
-            self.drawBadge(p, point.x() - self.badge_size - 1, point.y() + 1,
-                           self.badge_size, str(self.badge_counter), QBrush(self.redGradient))
+            self.drawBadge(
+                p,
+                point.x() - self.badge_size - 1,
+                point.y() + 1,
+                self.badge_size,
+                str(self.badge_counter),
+                QBrush(self.redGradient),
+            )
 
     def fillEllipse(self, painter, x, y, size, brush):
         path = QPainterPath()
@@ -254,11 +308,12 @@ class QBadgeButton (QPushButton):
     def drawBadge(self, painter, x, y, size, text, brush):
         painter.setFont(QFont(painter.font().family(), 11, QFont.Bold))
 
-        while ((size - painter.fontMetrics().width(text)) < 10):
+        while (size - painter.fontMetrics().width(text)) < 10:
             pointSize = painter.font().pointSize() - 1
             weight = QFont.Normal if (pointSize < 8) else QFont.Bold
             painter.setFont(
-                QFont(painter.font().family(), painter.font().pointSize() - 1, weight))
+                QFont(painter.font().family(), painter.font().pointSize() - 1, weight)
+            )
 
         shadowColor = QColor(0, 0, 0, size)
         self.fillEllipse(painter, x + 1, y, size, shadowColor)
@@ -274,8 +329,7 @@ class QBadgeButton (QPushButton):
         painter.drawText(x, y, size - 2, size - 2, Qt.AlignCenter, text)
 
 
-class QToolBadgeButton (QToolButton):
-
+class QToolBadgeButton(QToolButton):
     def __init__(self, parent=None):
         QToolButton.__init__(self, parent)
 
@@ -283,10 +337,11 @@ class QToolBadgeButton (QToolButton):
         self.badge_size = 5
 
         self.redGradient = QRadialGradient(
-            0.0, 0.0, 17.0, self.badge_size - 3, self.badge_size - 3)
-        self.redGradient.setColorAt(0.0, QColor(0xe0, 0x84, 0x9b))
-        self.redGradient.setColorAt(0.5, QColor(0xe9, 0x34, 0x43))
-        self.redGradient.setColorAt(1.0, QColor(0xdc, 0x0c, 0x00))
+            0.0, 0.0, 17.0, self.badge_size - 3, self.badge_size - 3
+        )
+        self.redGradient.setColorAt(0.0, QColor(0xE0, 0x84, 0x9B))
+        self.redGradient.setColorAt(0.5, QColor(0xE9, 0x34, 0x43))
+        self.redGradient.setColorAt(1.0, QColor(0xDC, 0x0C, 0x00))
 
     def setSize(self, size):
         self.badge_size = size
@@ -301,8 +356,14 @@ class QToolBadgeButton (QToolButton):
         p.setRenderHint(QPainter.Antialiasing)
         if self.badge_counter > 0:
             point = self.rect().topRight()
-            self.drawBadge(p, point.x() - self.badge_size, point.y(),
-                           self.badge_size, str(self.badge_counter), QBrush(self.redGradient))
+            self.drawBadge(
+                p,
+                point.x() - self.badge_size,
+                point.y(),
+                self.badge_size,
+                str(self.badge_counter),
+                QBrush(self.redGradient),
+            )
 
     def fillEllipse(self, painter, x, y, size, brush):
         path = QPainterPath()
@@ -312,11 +373,12 @@ class QToolBadgeButton (QToolButton):
     def drawBadge(self, painter, x, y, size, text, brush):
         painter.setFont(QFont(painter.font().family(), 11, QFont.Bold))
 
-        while ((size - painter.fontMetrics().width(text)) < 10):
+        while (size - painter.fontMetrics().width(text)) < 10:
             pointSize = painter.font().pointSize() - 1
             weight = QFont.Normal if (pointSize < 8) else QFont.Bold
             painter.setFont(
-                QFont(painter.font().family(), painter.font().pointSize() - 1, weight))
+                QFont(painter.font().family(), painter.font().pointSize() - 1, weight)
+            )
 
         shadowColor = QColor(0, 0, 0, size)
         self.fillEllipse(painter, x + 1, y, size, shadowColor)
@@ -333,21 +395,45 @@ class QToolBadgeButton (QToolButton):
 
 
 class Button(QCommandLinkButton):
-
     def __init__(self, *args, **kwargs):
         super(Button, self).__init__(*args, **kwargs)
         self.setAutoDefault(True)
-        self.setIcon(QIcon.fromTheme('', QIcon('')))
+        self.setIcon(QIcon.fromTheme("", QIcon("")))
         self.setCursor(Qt.PointingHandCursor)
         # self.setCursor(Qt.ForbiddenCursor)
         # self.setFixedSize(100, 40)
 
 
-class BttRond(Button):
-
+class MenuBtt(Button):
     def __init__(self, *args, **kwargs):
-        super(Button_rond, self).__init__(*args, **kwargs)
-        self.setIcon(QIcon.fromTheme('', QIcon('')))
+        super(MenuBtt, self).__init__(*args, **kwargs)
+        self.setIcon(QIcon.fromTheme("", QIcon("")))
+
+        css = """
+            QCommandLinkButton {
+                max-width:4em;
+                border: 1px solid #0D00FF;
+                font-size: 30px;
+                border-top-left-radius: 5px;
+                border-top-left-radius: 5px;
+                border-bottom-left-radius: 5px;
+                border-bottom-right-radius: 5px;
+                background-color: #fff;
+                color: #000;
+                padding: 35px 30px 15px 32px;
+                }
+            QCommandLinkButton:hover {
+                    background-color: #0095ff;
+                    color: #FFF;
+            }
+            """
+        self.setStyleSheet(css)
+
+
+class BttRond(Button):
+    def __init__(self, *args, **kwargs):
+        super(BttRond, self).__init__(*args, **kwargs)
+        self.setIcon(QIcon.fromTheme("", QIcon("")))
         css = """
                 border-radius:9px;
                 border:1px solid #4b8f29;
@@ -358,14 +444,13 @@ class BttRond(Button):
                 padding:6px 12px;
 
         """
-        # self.setStyleSheet(css)
+        self.setStyleSheet(css)
 
 
-class Deleted_btt(Button):
-
+class DeletedBtt(Button):
     def __init__(self, *args, **kwargs):
-        super(Deleted_btt, self).__init__(*args, **kwargs)
-        self.setIcon(QIcon.fromTheme('edit-delete', QIcon('')))
+        super(DeletedBtt, self).__init__(*args, **kwargs)
+        self.setIcon(QIcon.fromTheme("edit-delete", QIcon("")))
         css = """
                 background-color:#fc8d83;
                 border-radius:6px;
@@ -380,13 +465,19 @@ class Deleted_btt(Button):
         self.setStyleSheet(css)
 
 
-class Warning_btt(Button):
-
+class WarningBtt(Button):
     def __init__(self, *args, **kwargs):
-        super(Warning_btt, self).__init__(*args, **kwargs)
-        self.setIcon(QIcon.fromTheme('save', QIcon(
-            u"{img_media}{img}".format(img_media=Config.img_media,
-                                       img='warning.png'))))
+        super(WarningBtt, self).__init__(*args, **kwargs)
+        self.setIcon(
+            QIcon.fromTheme(
+                "save",
+                QIcon(
+                    "{img_media}{img}".format(
+                        img_media=Config.img_media, img="warning.png"
+                    )
+                ),
+            )
+        )
         css = """
                     background-color:#ffec64;
                     border-radius:6px;
@@ -401,14 +492,20 @@ class Warning_btt(Button):
         self.setStyleSheet(css)
 
 
-class Button_save(Button):
-
+class ButtonSave(Button):
     def __init__(self, *args, **kwargs):
-        super(Button_save, self).__init__(*args, **kwargs)
+        super(ButtonSave, self).__init__(*args, **kwargs)
 
-        self.setIcon(QIcon.fromTheme('', QIcon(
-            u"{img_media}{img}".format(img_media=Config.img_media,
-                                       img='save.png'))))
+        self.setIcon(
+            QIcon.fromTheme(
+                "",
+                QIcon(
+                    "{img_media}{img}".format(
+                        img_media=Config.img_media, img="save.png"
+                    )
+                ),
+            )
+        )
         css = """
         background-color:#dbe6c4;
         border-radius:6px;
@@ -427,7 +524,6 @@ class Button_save(Button):
 
 
 class Button_menu(Button):
-
     def __init__(self, *args, **kwargs):
         super(Button_menu, self).__init__(*args, **kwargs)
 
@@ -446,7 +542,6 @@ class Button_menu(Button):
 
 
 class BttSmall(Button):
-
     def __init__(self, *args, **kwargs):
         super(BttSmall, self).__init__(*args, **kwargs)
         chart_count = len(self.text())
@@ -456,13 +551,14 @@ class BttSmall(Button):
 
 
 class BttExport(Button):
-
     def __init__(self, img, parent=None):
         super(BttExport, self).__init__()
 
         self.pixmap = QPixmap(
-            u"{img_media}{img}".format(
-                img_media=Config.img_cmedia, img="{}.png".format(img)))
+            "{img_media}{img}".format(
+                img_media=Config.img_cmedia, img="{}.png".format(img)
+            )
+        )
         self.setFixedHeight(85)
         self.setFixedWidth(85)
 
@@ -475,13 +571,11 @@ class BttExport(Button):
 
 
 class BttExportXLSX(BttExport):
-
     def __init__(self, arg):
         super(BttExportXLSX, self).__init__("xlsx")
 
 
 class BttExportPDF(BttExport):
-
     def __init__(self, arg):
         super(BttExportPDF, self).__init__("pdf")
 
@@ -512,7 +606,7 @@ class BttExportPDF(BttExport):
 
 class LineEdit(QLineEdit):
 
-    """Accepter que des nombre positive """
+    """Accepter que des nombre positive"""
 
     def __init__(self, parent=None):
         QLineEdit.__init__(self, parent)
@@ -520,7 +614,7 @@ class LineEdit(QLineEdit):
 
 class IntLineEdit(LineEdit):
 
-    """Accepter que des nombre positive """
+    """Accepter que des nombre positive"""
 
     def __init__(self, parent=None):
         LineEdit.__init__(self, parent)
@@ -531,7 +625,7 @@ class IntLineEdit(LineEdit):
 
 class FloatLineEdit(LineEdit):
 
-    """Accepter que des nombre positive """
+    """Accepter que des nombre positive"""
 
     def __init__(self, parent=None):
         LineEdit.__init__(self, parent)
@@ -540,11 +634,11 @@ class FloatLineEdit(LineEdit):
 
 
 class FPeriodHolder(object):
-
     def __init__(self, main_date=date.today(), *args, **kwargs):
         self.duration = "week"
         self.main_date = Period(
-            main_date.year, self.duration, main_date.isocalendar()[1])
+            main_date.year, self.duration, main_date.isocalendar()[1]
+        )
         self.periods_bar = self.gen_bar_for(self.main_date)
 
     def gen_bar_for(self, main_date):
@@ -563,21 +657,19 @@ class FPeriodHolder(object):
 
 
 class FormatDate(QDateTimeEdit):
-
     def __init__(self, *args, **kwargs):
         super(FormatDate, self).__init__(*args, **kwargs)
-        self.setDisplayFormat(u"dd/MM/yyyy")
+        self.setDisplayFormat("dd/MM/yyyy")
         self.setCalendarPopup(True)
 
 
 class FPeriodTabBar(TabPane):
-
     def __init__(self, parent, main_date, *args, **kwargs):
 
         super(FPeriodTabBar, self).__init__(*args, **kwargs)
 
         for i in range(0, 3):
-            self.addTab(u"{}".format(i))
+            self.addTab("{}".format(i))
         self.set_data_from(main_date)
         self.build_tab_list()
 
@@ -585,16 +677,18 @@ class FPeriodTabBar(TabPane):
 
     def set_data_from(self, period):
 
-        self.main_period = Period(
-            period.year, period.duration, period.duration_number)
-        self.periods = [self.main_period.previous,
-                        self.main_period.current, self.main_period.next]
+        self.main_period = Period(period.year, period.duration, period.duration_number)
+        self.periods = [
+            self.main_period.previous,
+            self.main_period.current,
+            self.main_period.next,
+        ]
 
     def build_tab_list(self):
         for index, period in enumerate(self.periods):
             self.setTabText(index, str(period.display_name()))
             self.setTabToolTip(index, str(period))
-        self.setTabTextColor(1, QColor('SeaGreen'))
+        self.setTabTextColor(1, QColor("SeaGreen"))
         self.setCurrentIndex(1)
 
     def changed_period(self, index):
@@ -609,7 +703,6 @@ class FPeriodTabBar(TabPane):
 
 
 class EnterDoesTab(QWidget):
-
     def keyReleaseEvent(self, event):
         super(EnterDoesTab, self).keyReleaseEvent(event)
         if event.key() == Qt.Key_Return:
@@ -621,7 +714,6 @@ class EnterTabbedLineEdit(LineEdit, EnterDoesTab):
 
 
 class ExtendedComboBox(QComboBox):
-
     def __init__(self, parent=None):
         super(ExtendedComboBox, self).__init__(parent)
 
@@ -640,8 +732,10 @@ class ExtendedComboBox(QComboBox):
         self.setCompleter(self.completer)
         # connect pyqtSignals
         self.lineEdit().textEdited[unicode].connect(
-            self.pFilterModel.setFilterFixedString)
+            self.pFilterModel.setFilterFixedString
+        )
         self.completer.activated.connect(self.on_completer_activated)
+
     # on selection of an item from the completer, select the corresponding
     # item from combobox
 
@@ -665,7 +759,6 @@ class ExtendedComboBox(QComboBox):
 
 
 class WigglyWidget(QWidget):
-
     def __init__(self, test, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
@@ -682,8 +775,24 @@ class WigglyWidget(QWidget):
         self.timer.start(60, self)
 
     def paintEvent(self, event):
-        sineTable = [0, 38, 71, 92, 100, 92, 71, 38,
-                     0, -38, -71, -92, -100, -92, -71, -38]
+        sineTable = [
+            0,
+            38,
+            71,
+            92,
+            100,
+            92,
+            71,
+            38,
+            0,
+            -38,
+            -71,
+            -92,
+            -100,
+            -92,
+            -71,
+            -38,
+        ]
 
         metrics = QtGui.QFontMetrics(self.font())
         x = (self.width() - metrics.width(self.text)) / 2
@@ -697,14 +806,17 @@ class WigglyWidget(QWidget):
             color.setHsv((15 - index) * 16, 255, 191)
             painter.setPen(color)
             painter.drawText(
-                x, y - ((sineTable[index] * metrics.height()) / 400), QtCore.QString(self.text[i]))
+                x,
+                y - ((sineTable[index] * metrics.height()) / 400),
+                QtCore.QString(self.text[i]),
+            )
             x += metrics.width(self.text[i])
 
     def setText(self, newText):
         self.text = QtCore.QString(newText)
 
     def timerEvent(self, event):
-        if (event.timerId() == self.timer.timerId()):
+        if event.timerId() == self.timer.timerId():
             self.step = self.step + 1
             self.update()
         else:
