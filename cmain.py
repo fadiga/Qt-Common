@@ -19,6 +19,7 @@ from Common.ui.window import FWindow
 from Common.ui.util import is_valide_mac
 from Common.ui.login import LoginWidget
 from Common.ui.license_view import LicenseViewWidget
+
 from Common.ui.user_add_or_edit import NewOrEditUserViewWidget
 from Common.ui.restoration_view import RestorationViewWidget
 from Common.ui.organization_add_or_edit import NewOrEditOrganizationViewWidget

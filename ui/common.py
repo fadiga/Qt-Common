@@ -53,7 +53,7 @@ class FMainWindow(QMainWindow):
         print("FMainWindow")
         # self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setWindowIcon(
-            QIcon.fromTheme('logo', QIcon(u"{}logo.png".format(Config.img_media)))
+            QIcon.fromTheme("logo", QIcon("{}logo.png".format(Config.img_media)))
         )
 
         self.statusbar = GStatusBar(self)
@@ -100,7 +100,7 @@ class FMainWindow(QMainWindow):
                 ur.islog = False
                 ur.save()
 
-    def Notify(self, mssg, type_mssg):
+    def Notify(self, mssg="Hi", type_mssg="warring"):
         from Common.notification import Notification
 
         self.notify = Notification(mssg=mssg, type_mssg=type_mssg)
@@ -398,7 +398,7 @@ class Button(QCommandLinkButton):
     def __init__(self, *args, **kwargs):
         super(Button, self).__init__(*args, **kwargs)
         self.setAutoDefault(True)
-        self.setIcon(QIcon.fromTheme('', QIcon('')))
+        self.setIcon(QIcon.fromTheme("", QIcon("")))
         self.setCursor(Qt.PointingHandCursor)
         # self.setCursor(Qt.ForbiddenCursor)
         # self.setFixedSize(100, 40)
@@ -407,7 +407,7 @@ class Button(QCommandLinkButton):
 class MenuBtt(Button):
     def __init__(self, *args, **kwargs):
         super(MenuBtt, self).__init__(*args, **kwargs)
-        self.setIcon(QIcon.fromTheme('', QIcon('')))
+        self.setIcon(QIcon.fromTheme("", QIcon("")))
 
         css = """
             QCommandLinkButton {
@@ -433,7 +433,7 @@ class MenuBtt(Button):
 class BttRond(Button):
     def __init__(self, *args, **kwargs):
         super(BttRond, self).__init__(*args, **kwargs)
-        self.setIcon(QIcon.fromTheme('', QIcon('')))
+        self.setIcon(QIcon.fromTheme("", QIcon("")))
         css = """
                 border-radius:9px;
                 border:1px solid #4b8f29;
@@ -450,7 +450,7 @@ class BttRond(Button):
 class DeletedBtt(Button):
     def __init__(self, *args, **kwargs):
         super(DeletedBtt, self).__init__(*args, **kwargs)
-        self.setIcon(QIcon.fromTheme('edit-delete', QIcon('')))
+        self.setIcon(QIcon.fromTheme("edit-delete", QIcon("")))
         css = """
                 background-color:#fc8d83;
                 border-radius:6px;
@@ -470,10 +470,10 @@ class WarningBtt(Button):
         super(WarningBtt, self).__init__(*args, **kwargs)
         self.setIcon(
             QIcon.fromTheme(
-                'save',
+                "save",
                 QIcon(
-                    u"{img_media}{img}".format(
-                        img_media=Config.img_media, img='warning.png'
+                    "{img_media}{img}".format(
+                        img_media=Config.img_media, img="warning.png"
                     )
                 ),
             )
@@ -498,10 +498,10 @@ class ButtonSave(Button):
 
         self.setIcon(
             QIcon.fromTheme(
-                '',
+                "",
                 QIcon(
-                    u"{img_media}{img}".format(
-                        img_media=Config.img_media, img='save.png'
+                    "{img_media}{img}".format(
+                        img_media=Config.img_media, img="save.png"
                     )
                 ),
             )
@@ -555,7 +555,7 @@ class BttExport(Button):
         super(BttExport, self).__init__()
 
         self.pixmap = QPixmap(
-            u"{img_media}{img}".format(
+            "{img_media}{img}".format(
                 img_media=Config.img_cmedia, img="{}.png".format(img)
             )
         )
@@ -659,7 +659,7 @@ class FPeriodHolder(object):
 class FormatDate(QDateTimeEdit):
     def __init__(self, *args, **kwargs):
         super(FormatDate, self).__init__(*args, **kwargs)
-        self.setDisplayFormat(u"dd/MM/yyyy")
+        self.setDisplayFormat("dd/MM/yyyy")
         self.setCalendarPopup(True)
 
 
@@ -669,7 +669,7 @@ class FPeriodTabBar(TabPane):
         super(FPeriodTabBar, self).__init__(*args, **kwargs)
 
         for i in range(0, 3):
-            self.addTab(u"{}".format(i))
+            self.addTab("{}".format(i))
         self.set_data_from(main_date)
         self.build_tab_list()
 
@@ -688,7 +688,7 @@ class FPeriodTabBar(TabPane):
         for index, period in enumerate(self.periods):
             self.setTabText(index, str(period.display_name()))
             self.setTabToolTip(index, str(period))
-        self.setTabTextColor(1, QColor('SeaGreen'))
+        self.setTabTextColor(1, QColor("SeaGreen"))
         self.setCurrentIndex(1)
 
     def changed_period(self, index):

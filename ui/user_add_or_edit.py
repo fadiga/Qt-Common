@@ -1,18 +1,15 @@
 #!usr/bin/env python
 # -*- coding: utf8 -*-
 # maintainer: Fad
-from __future__ import (
-    unicode_literals, absolute_import, division, print_function)
+from __future__ import unicode_literals, absolute_import, division, print_function
 
 from PyQt4.QtCore import Qt
-from PyQt4.QtGui import (QComboBox, QVBoxLayout, QCheckBox,
-                         QFormLayout, QDialog)
+from PyQt4.QtGui import QComboBox, QVBoxLayout, QCheckBox, QFormLayout, QDialog
 from peewee import IntegrityError
 from Common.ui.util import check_is_empty, field_error, is_valide_codition_field
 from Common.models import Owner
 
-from Common.ui.common import (
-    IntLineEdit, FWidget, ButtonSave, LineEdit, Button, FLabel)
+from Common.ui.common import IntLineEdit, FWidget, ButtonSave, LineEdit, Button, FLabel
 
 try:
     unicode
@@ -21,7 +18,6 @@ except:
 
 
 class NewOrEditUserViewWidget(QDialog, FWidget):
-
     def __init__(self, pp=None, owner=None, parent=None, *args, **kwargs):
         QDialog.__init__(self, parent, *args, **kwargs)
 
@@ -36,8 +32,7 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
         self.error_mssg = ""
         if self.owner:
             self.new = False
-            self.title = u"Modification de l'utilisateur {}".format(
-                self.owner.username)
+            self.title = u"Modification de l'utilisateur {}".format(self.owner.username)
             self.succes_msg = u"L'utilisateur a été bien mise à jour"
             if self.owner.isactive:
                 self.checked.setCheckState(Qt.Checked)
@@ -56,8 +51,7 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
         self.password_field.setEchoMode(LineEdit.PasswordEchoOnEdit)
         self.password_field_v = LineEdit()
         self.password_field_v.setEchoMode(LineEdit.PasswordEchoOnEdit)
-        self.password_field_v.textChanged.connect(
-            self.check_password_is_valide)
+        self.password_field_v.textChanged.connect(self.check_password_is_valide)
         self.phone_field = IntLineEdit(self.owner.phone)
 
         self.liste_group = [Owner.ADMIN, Owner.USER]
@@ -75,7 +69,8 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
         formbox.addRow(FLabel(u"Mot de passe"), self.password_field)
         if self.new:
             formbox.addRow(
-                FLabel(u"Verification du Mot de passe"), self.password_field_v)
+                FLabel(u"Verification du Mot de passe"), self.password_field_v
+            )
         formbox.addRow(FLabel(u"Numero de Téléphone"), self.phone_field)
         formbox.addRow(FLabel(u"Groupe"), self.box_group)
         formbox.addRow(cancel_but, butt)
@@ -88,24 +83,29 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
 
     def is_valide(self):
         # print("isactive")
-        if (check_is_empty(self.username_field)):
+        if check_is_empty(self.username_field):
             return False
-        if (check_is_empty(self.password_field)):
+        if check_is_empty(self.password_field):
             return False
-        if (self.new and check_is_empty(self.password_field_v)):
+        if self.new and check_is_empty(self.password_field_v):
             return False
-        if (not self.check_password_is_valide()):
+        if not self.check_password_is_valide():
             return False
         return True
 
     def check_password_is_valide(self):
         self.password = str(self.password_field.text())
-        self.password_v = str(
-            self.password_field_v.text()) if self.new else self.owner.password
+        self.password_v = (
+            str(self.password_field_v.text()) if self.new else self.owner.password
+        )
 
         if is_valide_codition_field(
-                self.password_field_v, "Les mots de passe sont differents" if self.new else "Mot de passe incorrect",
-                self.password != self.password_v):
+            self.password_field_v,
+            "Les mots de passe sont differents"
+            if self.new
+            else "Mot de passe incorrect",
+            self.password != self.password_v,
+        ):
             return
         return True
 
@@ -125,8 +125,7 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
 
         ow = self.owner
         ow.username = username
-        ow.password = Owner().crypt_password(
-            password) if self.new else password
+        ow.password = Owner().crypt_password(password) if self.new else password
 
         ow.phone = phone
         ow.group = group
@@ -137,11 +136,14 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
             self.accept()
             if self.pp:
                 self.pp.refresh_()
-                self.parent.Notify("L'identifiant %s a été enregistré" %
-                                   ow.username, "success")
+                self.parent.Notify(
+                    "L'identifiant %s a été enregistré" % ow.username, "success"
+                )
         except IntegrityError as e:
             field_error(
-                self.name_field, u"L'utilisateurs %s existe déjà dans la base de donnée" % ow.username)
+                self.name_field,
+                u"L'utilisateurs %s existe déjà dans la base de donnée" % ow.username,
+            )
         # else:
         #     self.parent.Notify(
         #         "<h3>Formulaire non valide</h3> " + self.error_mssg, u"error")
