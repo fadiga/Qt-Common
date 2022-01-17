@@ -9,10 +9,10 @@ from datetime import date
 from PyQt5.QtCore import (
     Qt, QSize, QSortFilterProxyModel, QStringListModel)
 from PyQt5.QtWidgets import (QMainWindow, QTextEdit, QLabel, QLineEdit, QCompleter,
-                             QDateTimeEdit,  QWidget, QTabBar, QToolButton,
+                             QDateTimeEdit, QWidget, QTabBar, QToolButton,
                              QCommandLinkButton, QPushButton, QComboBox)
 from PyQt5.QtGui import (QRadialGradient, QPainter, QBrush,
-                         QPainterPath, QPen,
+                         QPainterPath, QPen, QPixmap,
                          QIcon, QPalette, QFont, QColor, QIntValidator, QDoubleValidator,)
 # from PyQt5.QtWebKit import QWebView
 
@@ -692,7 +692,7 @@ class WigglyWidget(QWidget):
 
         painter = QtGui.QPainter(self)
 
-        for i in xrange(self.text.size()):
+        for i in range(self.text.size()):
             index = (self.step + i) % 16
             color.setHsv((15 - index) * 16, 255, 191)
             painter.setPen(color)

@@ -149,7 +149,7 @@ def raise_success(title, message):
 def formatted_number(number, sep=".", aftergam=3):
     """ """
     locale_name, encoding = locale.getlocale()
-    locale.setlocale(locale.LC_ALL, 'fra')
+    # locale.setlocale(locale.LC_ALL, 'fra')
     # print(number)
     fmt = "%s"
     if (isinstance(number, int)):

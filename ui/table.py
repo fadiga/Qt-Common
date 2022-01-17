@@ -26,9 +26,9 @@ try:
 except NameError:
     long = int
 try:
-    xrange
+    range
 except:
-    xrange = range
+    range = range
 
 
 class FlexibleTable(QTableWidget):

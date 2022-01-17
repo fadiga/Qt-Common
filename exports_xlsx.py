@@ -5,7 +5,7 @@
 from __future__ import (
     unicode_literals, absolute_import, division, print_function)
 
-import xlsxwriter
+# import xlsxwriter
 import os
 
 from datetime import datetime

@@ -8,6 +8,7 @@
 ###############################
 
 import sys
+
 from PyQt5.QtWidgets import QWidget, QDesktopWidget, QLabel, QVBoxLayout
 from PyQt5.QtCore import pyqtSignal, Qt, QThread
 import time
@@ -42,7 +43,7 @@ class Notification(QWidget):
         self.create_notification()
         self.show()
 
-    def createNotification(self):
+    def create_notification(self):
         # print("createNotification")
         global OS
         if (OS != 1):
@@ -116,9 +117,9 @@ class WorkThread(QThread):
             # Bring em in :D
             for i in range(336):
                 time.sleep(0.0001)
-                self.emit(QtCore.SIGNAL('update(QString)'), "ping")
+                # self.emit(SIGNAL('update(QString)'), "ping")
             # Hide u bitch :P
             for j in range(50):
                 time.sleep(0.1)
-                self.emit(QtCore.SIGNAL('vanish(QString)'), "ping")
+                # self.emit(SIGNAL('vanish(QString)'), "ping")
             return

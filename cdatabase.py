@@ -26,5 +26,5 @@ class AdminDatabase(object):
 
         if did_create:
             print(u"---- database -----")
-            from fixture import FixtInit
-            FixtInit().create_all_or_pass()
+            # from fixture import FixtInit
+            # FixtInit().create_all_or_pass()
