@@ -4,7 +4,6 @@
 # Maintainer: Fad
 
 import os
-# from Common.models import Organization, Version
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath('__file__')))
 
@@ -12,6 +11,7 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath('__file__')))
 class CConstants(object):
 
     """ """
+
     # PERIODS
     W = "week"
     M = "month"
@@ -21,20 +21,22 @@ class CConstants(object):
 
     import logging
 
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S')
+    logging.basicConfig(
+        format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S'
+    )
 
-    file_img = os.path.join(
-        os.path.dirname(os.path.abspath('__file__')), 'cimages/')
+    file_img = os.path.join(os.path.dirname(os.path.abspath('__file__')), 'cimages/')
     # deployment
     if os.path.exists(file_img):
         img_cmedia = file_img
     else:
         img_cmedia = os.path.join(ROOT_DIR, "Common", "cimages/")
+
+    IBS_LOGO = os.path.join(img_cmedia, "ibs.jpg")
     # ------------------------- Autor --------------------------#
     AUTOR = u"Fadiga Ibrahima"
     EMAIL_AUT = u"ibfadiga@gmail.com"
-    TEL_AUT = u"(+223)76 43 38 90 \n (+223)63 34 14 24"
+    TEL_AUT = u"(+223)76 43 38 90"
     ADRESS_AUT = u"Boulkassoumbougou Bamako"
     ORG_AUT = u"Copyright © 2012 xxxx"
     # ------------------------- Application --------------------------#
@@ -45,15 +47,15 @@ class CConstants(object):
     APP_DATE = u"02/2013"
     APP_VERSION = "1.7"
     DEBUG = False
-    # DEBUG = True
 
+    des_image_record = ROOT_DIR
+    EXCLUDE_MENU_ADMIN = []
+    LSE = True
+    ORG = False
     SERV = None
     list_models = []
     APP_LOGO = os.path.join(img_cmedia, "logo.png")
     APP_LOGO_ICO = os.path.join(img_cmedia, "logo.ico")
     ExportFolders = []
     ExportFiles = []
-    # BASE_URL = "http://192.168.1.31:9001/"
-    # BASE_URL = "http://192.168.5.51:9001/"
-    # BASE_URL = "http://172.20.10.3:9001/"
-    BASE_URL = "http://fadcorp.ml/"
+    BASE_URL = "//file-repo.ml"

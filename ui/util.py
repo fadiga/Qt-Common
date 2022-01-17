@@ -2,8 +2,7 @@
 # -*- coding: utf8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
-from __future__ import (
-    unicode_literals, absolute_import, division, print_function)
+from __future__ import unicode_literals, absolute_import, division, print_function
 
 import os
 import sys
@@ -31,12 +30,12 @@ except NameError:
 
 def device_amount(value, dvs=None):
 
-    from Common.models import Organization
+    from Common.models import Settings
+
     if dvs:
         return "{} {}".format(formatted_number(value), dvs)
-
     try:
-        organ = Organization().get(id=1)
+        organ = Settings().get(id=1)
     except Exception as e:
         print(e)
     d = organ.DEVISE[organ.devise]
@@ -60,15 +59,15 @@ def check_is_empty(field):
 
     if len(containt) == 0:
         field.setToolTip("Champs requis")
-        stylerreur = "background-color: #fff79a;"
+        stylerreur = "background-color: #fff79a; border : 2px solid red"
         flag = True
     field.setStyleSheet(stylerreur)
     return flag
 
 
 def field_error(field, msg):
-    field.setStyleSheet("background-color: #fff79a;")
-    field.setToolTip("%s" % msg)
+    field.setStyleSheet("background-color: #DF8F1F; border : 2px solid red")
+    field.setToolTip("{}".format(msg))
     return False
 
 
@@ -90,23 +89,25 @@ def is_valide_codition_field(field, msg, condition):
 
 def uopen_prefix(platform=sys.platform):
 
-    if platform in ('win32', 'win64'):
-        return 'cmd /c start'
+    if platform in ("win32", "win64"):
+        return "cmd /c start"
 
-    if 'darwin' in platform:
-        return 'open'
+    if "darwin" in platform:
+        return "open"
 
-    if platform in ('cygwin', 'linux') or \
-       platform.startswith('linux') or \
-       platform.startswith('sun') or \
-       'bsd' in platform:
-        return 'xdg-open'
+    if (
+        platform in ("cygwin", "linux")
+        or platform.startswith("linux")
+        or platform.startswith("sun")
+        or "bsd" in platform
+    ):
+        return "xdg-open"
 
-    return 'xdg-open'
+    return "xdg-open"
 
 
 def openFile(file):
-    if sys.platform == 'linux2':
+    if sys.platform == "linux2":
         subprocess.call(["xdg-open", file])
     else:
         os.startfile(file)
@@ -115,49 +116,59 @@ def openFile(file):
 def uopen_file(filename):
     # print(filename)
     if not os.path.exists(filename):
-        raise IOError(u"Fichier %s non valable." % filename)
-    subprocess.call('%(cmd)s %(file)s' %
-                    {'cmd': uopen_prefix(), 'file': filename}, shell=True)
+        raise IOError("Fichier %s non valable." % filename)
+    subprocess.call(
+        "%(cmd)s %(file)s" % {"cmd": uopen_prefix(), "file": filename}, shell=True
+    )
 
 
 def get_temp_filename(extension=None):
     f = tempfile.NamedTemporaryFile(delete=False)
     if extension:
-        fname = '%s.%s' % (f.name, extension)
+        fname = "%s.%s" % (f.name, extension)
     else:
         fname = f.name
     return fname
 
 
 def raise_error(title, message):
-    box = QMessageBox(QMessageBox.Critical, title,
-                      message, QMessageBox.Ok,
-                      parent=FWindow.window)
+
+    box = QMessageBox(
+        QMessageBox.Critical, title, message, QMessageBox.Ok, parent=FWindow.window
+    )
+
     box.setWindowOpacity(0.9)
 
     box.exec_()
 
 
 def raise_success(title, message):
-    box = QMessageBox(QMessageBox.Information, title,
-                      message, QMessageBox.Ok,
-                      parent=FWindow.window)
+
+    box = QMessageBox(
+        QMessageBox.Information, title, message, QMessageBox.Ok, parent=FWindow.window
+    )
+
     box.setWindowOpacity(0.9)
     box.exec_()
 
 
-def formatted_number(number, sep=".", aftergam=3):
+def formatted_number(number, sep=".", aftergam=None):
     """ """
+    from Common.models import Settings
+
+    if not aftergam:
+        aftergam = int(Settings.select().get().after_cam)
     locale_name, encoding = locale.getlocale()
-    # locale.setlocale(locale.LC_ALL, 'fra')
+
+    locale.setlocale(locale.LC_ALL, "fra")
     # print(number)
     fmt = "%s"
-    if (isinstance(number, int)):
+    if isinstance(number, int):
         # print("int ", number)
-        fmt = u"%d"
-    elif(isinstance(number, float)):
+        fmt = "%d"
+    elif isinstance(number, float):
         # print("float, ", number)
-        fmt = u"%.{}f".format(aftergam)
+        fmt = "%.{}f".format(aftergam)
 
     try:
         return locale.format(fmt, number, grouping=True).decode(encoding)
@@ -196,7 +207,7 @@ def formatted_number(number, sep=".", aftergam=3):
 
 def is_float(val):
     try:
-        val = val.replace(',', '.').replace(' ', '').replace('\xa0', '')
+        val = val.replace(",", ".").replace(" ", "").replace("\xa0", "")
         return float(val)
     except Exception as e:
         # print("is_float", e)
@@ -207,7 +218,7 @@ def is_int(val):
 
     try:
         val = str(val).split()
-        v = ''
+        v = ""
         for i in val:
             v += i
         return int(v)
@@ -216,19 +227,30 @@ def is_int(val):
         return 0
 
 
+def date_to_str(date):
+    if not date:
+        return None
+    if isinstance(date, str):
+        d, m, y = date.split("/")
+        if len(y) == 4:
+            return "{}-{}-{}".format(y, m, d)
+        else:
+            return date.replace("/", "-")
+    return date.strftime("%Y-%m-%d")
+
+
 def alerte():
     pass
 
 
 def format_date(dat):
     dat = str(dat)
-    day, month, year = dat.split('/')
-    return '-'.join([year, month, day])
+    day, month, year = dat.split("/")
+    return "-".join([year, month, day])
 
 
-def date_to_ts(date):
-    return mktime(strptime(date.strftime(
-        "%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S"))
+def datetime_to_str(date):
+    return mktime(strptime(date.strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S"))
 
 
 def to_jstimestamp(adate):
@@ -245,11 +267,12 @@ def to_timestamp(dt):
 
 
 def copy_file(dest, path_filename):
-    """ Copy the file, rename file in banc and return new name of the doc
-        created folder banc doc if not existe
+    """Copy the file, rename file in banc and return new name of the doc
+    created folder banc doc if not existe
     """
     import shutil
-    dest = os.path.join(os.path.dirname(os.path.abspath('__file__')), dest)
+
+    dest = os.path.join(os.path.dirname(os.path.abspath("__file__")), dest)
     filename = os.path.basename(path_filename)
     if not os.path.exists(dest):
         os.makedirs(dest)
@@ -259,10 +282,9 @@ def copy_file(dest, path_filename):
 
 
 def rename_file(path, old_filename, new_filename):
-    """ Rename file in banc docs  params: old_filename, new_filename
-        return newname"""
-    os.rename(get_path(path, old_filename),
-              get_path(path, new_filename))
+    """Rename file in banc docs  params: old_filename, new_filename
+    return newname"""
+    os.rename(get_path(path, old_filename), get_path(path, new_filename))
     return new_filename
 
 
@@ -270,22 +292,28 @@ def get_path(path, filename):
     return os.path.join(path, filename)
 
 
+def get_serv_url(sub_url):
+    from Common.models import Settings
+
+    return "{}/{}".format(Settings.get(id=1).url, sub_url)
+
+
 def slug_mane_file(file_name):
-    return u"{timestamp}_{fname}".format(
-        fname=file_name.replace(" ", "_"),
-        timestamp=to_jstimestamp(datetime.now()))
+    return "{timestamp}_{fname}".format(
+        fname=file_name.replace(" ", "_"), timestamp=to_jstimestamp(datetime.now())
+    )
 
 
 def normalize(s):
     if type(s) == unicode:
-        return s.encode('utf8', 'ignore')
+        return s.encode("utf8", "ignore")
     else:
         return str(s)
 
 
 def str_date_split(date):
     try:
-        return date.split('/')
+        return date.split("/")
     except AttributeError:
         return date.day, date.month, date.year
 
@@ -296,8 +324,9 @@ def date_on_or_end(dat, on=True):
         hour, second, micro_second = 0, 0, 0
     else:
         hour, second, micro_second = 23, 59, 59
-    return datetime(int(year), int(month), int(day), int(hour),
-                    int(second), int(micro_second))
+    return datetime(
+        int(year), int(month), int(day), int(hour), int(second), int(micro_second)
+    )
 
 
 def show_date(dat, time=True):
@@ -305,49 +334,51 @@ def show_date(dat, time=True):
         dat = date_to_datetime(dat)
     if not dat:
         return "pas de date"
-    return dat.strftime(
-        u"%d %b %Y à %Hh:%Mmn") if time else dat.strftime("%d %b %Y")
+    return dat.strftime("%Y-%m-%d à %Hh:%Mmn") if time else dat.strftime("%Y-%m-%d")
 
 
 def date_to_datetime(dat):
     "reçoit une date return une datetime"
     day, month, year = str_date_split(dat)
     dt = datetime.now()
-    return datetime(int(year), int(month), int(day),
-                    int(dt.hour), int(dt.minute),
-                    int(dt.second), int(dt.microsecond))
+    return datetime(
+        int(year),
+        int(month),
+        int(day),
+        int(dt.hour),
+        int(dt.minute),
+        int(dt.second),
+        int(dt.microsecond),
+    )
 
 
 def getlog(text):
     return "Log-{}".format(text)
 
 
-def internet_on(url):
+def internet_on():
     from urllib.request import urlopen, URLError
+
     try:
-        urlopen(url, timeout=1)
+        urlopen(get_serv_url(""), timeout=1)
         return True
     except URLError as err:
-        print(err)
+        # print(err)
         return False
     except Exception as e:
         print(e)
 
 
 def is_valide_mac():
-    """ check de license """
+    """check de license"""
     from Common.models import License
-    lcse = CConstants.IS_EXPIRED
-    # print(lcse)
-    if License.select(License.can_expired == 0).count() > 0:
-        return CConstants.OK
+
     try:
-        lcse = License.get(License.code == str(make_lcse())).can_use()
+        lcse = License.get(License.code == str(make_lcse()))
+        return lcse, lcse.can_use()
     except Exception as e:
         print("/!\ invalide license.")
-        # print(e)
-
-    return lcse
+        return None, CConstants.IS_EXPIRED
 
 
 def clean_mac():
@@ -356,14 +387,24 @@ def clean_mac():
 
 def make_lcse(lcse=clean_mac()):
     # print("lcse:", lcse)
-    lcse = hashlib.md5(str(lcse).encode('utf-8')).hexdigest()
+    lcse = hashlib.md5(str(lcse).encode("utf-8")).hexdigest()
     return lcse
 
 
 def get_lcse_of_file():
-    return open("{}".format(get_lcse_file()), 'r').read()
+    return open("{}".format(get_lcse_file()), "r").read()
 
 
 def get_lcse_file():
-    return os.path.join(os.path.dirname(
-        os.path.abspath('__file__')), 'LICENCE')
+    return os.path.join(os.path.dirname(os.path.abspath("__file__")), "LICENCE")
+
+
+def _disk_c(self):
+    drive = unicode(os.getenv("SystemDrive"))
+    freeuser = ctypes.c_int64()
+    total = ctypes.c_int64()
+    free = ctypes.c_int64()
+    ctypes.windll.kernel32.GetDiskFreeSpaceExW(
+        drive, ctypes.byref(freeuser), ctypes.byref(total), ctypes.byref(free)
+    )
+    return freeuser.value

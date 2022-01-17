@@ -12,7 +12,7 @@ from Common.ui.util import check_is_empty, field_error, is_valide_codition_field
 from Common.models import Owner
 
 from Common.ui.common import (
-    IntLineEdit, FWidget, Button_save, LineEdit, Button, FLabel)
+    IntLineEdit, FWidget, ButtonSave, LineEdit, Button, FLabel)
 
 try:
     unicode
@@ -66,7 +66,7 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
         for index in self.liste_group:
             self.box_group.addItem(u'%(group)s' % {'group': index})
 
-        butt = Button_save(u"Enregistrer")
+        butt = ButtonSave(u"Enregistrer")
         butt.clicked.connect(self.add_or_edit_user)
         cancel_but = Button(u"Annuler")
         cancel_but.clicked.connect(self.cancel)

@@ -1,7 +1,7 @@
 from database import Setup
 
-# from Common.server import Network
+from updater import UpdaterInit
 
 Setup().create_all_or_pass()
 
-# setup()
+UpdaterInit()

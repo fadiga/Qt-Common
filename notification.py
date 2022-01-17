@@ -16,6 +16,7 @@ import time
 global OS
 try:
     from ctypes import windll
+
     OS = 0
 except Exception as e:
     print(e)
@@ -23,7 +24,6 @@ except Exception as e:
 
 
 class Notification(QWidget):
-
     def __init__(self, mssg, parent=None, type_mssg="", *args, **kwargs):
         super(Notification, self).__init__(parent=parent, *args, **kwargs)
 
@@ -38,7 +38,7 @@ class Notification(QWidget):
         else:
             background = "black"
 
-        css = """ color: white; background: {}; """.format(background)
+        css = """ color: white;background: {}; """.format(background)
         self.setStyleSheet(css)
         self.create_notification()
         self.show()
@@ -46,19 +46,19 @@ class Notification(QWidget):
     def create_notification(self):
         # print("createNotification")
         global OS
-        if (OS != 1):
+        if OS != 1:
             user32 = windll.user32
             # Get X coordinate of screen
-            self.x = user32.GetSystemMetrics(0)
-            self.x = user32.GetSystemMetrics(0) / 2
+            # self.x = user32.GetSystemMetrics(0)
+            self.x = user32.GetSystemMetrics(0) / 5
 
         else:
             cp = QDesktopWidget().availableGeometry()
             self.x = cp.width()
+        # self.x = 1
         self.y = 1
         # Set the opacity
         self.f = 1.0
-
         # Start Worker
         self.workThread = WorkThread(self)
 
@@ -92,7 +92,7 @@ class Notification(QWidget):
         self.setWindowOpacity(self.f)
         return
 
-    #Move in animation
+    # Move in animation
     def animate(self):
         self.move(self.x, self.y)
         self.y += 1
@@ -102,6 +102,7 @@ class Notification(QWidget):
         self.move(self.x, self.y)
         self.y -= 1
         return
+
 
 # The Worker
 
@@ -117,9 +118,10 @@ class WorkThread(QThread):
             # Bring em in :D
             for i in range(336):
                 time.sleep(0.0001)
-                # self.emit(SIGNAL('update(QString)'), "ping")
+                self.emit(QtCore.SIGNAL("update(QString)"), "ping")
             # Hide u bitch :P
             for j in range(50):
                 time.sleep(0.1)
-                # self.emit(SIGNAL('vanish(QString)'), "ping")
+                self.emit(QtCore.SIGNAL("vanish(QString)"), "ping")
+
             return
