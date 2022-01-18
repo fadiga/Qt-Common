@@ -3,20 +3,19 @@
 # maintainer: Fad
 from __future__ import unicode_literals, absolute_import, division, print_function
 
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import (
+# from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
     QVBoxLayout,
-    QGridLayout,
     QGroupBox,
     QDialog,
-    QTextEdit,
     QFormLayout,
-    QIcon,
+    QFormLayout,
+    QDialog,
 )
-from PyQt4.QtGui import QComboBox, QVBoxLayout, QCheckBox, QFormLayout, QDialog
-from peewee import IntegrityError
-from Common.ui.util import check_is_empty, field_error, is_valide_codition_field
-from Common.models import Owner
+from PyQt5.QtGui import QIcon
+
+# from Common.ui.util import check_is_empty, field_error, is_valide_codition_field
+# from Common.models import Owner
 
 from Common.exports import import_backup
 from Common.ui.common import (
@@ -40,7 +39,7 @@ class RestorationViewWidget(QDialog, FWidget):
     def __init__(self, pp=None, owner=None, parent=None, *args, **kwargs):
         QDialog.__init__(self, parent, *args, **kwargs)
 
-        self.setWindowTitle(u"Restoration de Données")
+        self.setWindowTitle("Restoration de Données")
         vbox = QVBoxLayout()
         # self.online_resto_box()
         self.label = FLabel()
@@ -51,21 +50,21 @@ class RestorationViewWidget(QDialog, FWidget):
 
         # ==== Box of restor online ====
         self.onlineRestorBoxBtt = QGroupBox(self.tr("Restoration de données en line"))
-        self.bn_resto_onligne = Button(u"Connexion")
+        self.bn_resto_onligne = Button("Connexion")
         self.bn_resto_onligne.setIcon(
-            QIcon.fromTheme('', QIcon(u"{}cloud.png".format(Config.img_cmedia)))
+            QIcon.fromTheme("", QIcon("{}cloud.png".format(Config.img_cmedia)))
         )
         self.bn_resto_onligne.clicked.connect(self.resto_onligne)
 
-        self.bn_resto_l = Button(u"Import de sauvegarde locale")
+        self.bn_resto_l = Button("Import de sauvegarde locale")
         self.bn_resto_l.setIcon(
-            QIcon.fromTheme('', QIcon(u"{}db.png".format(Config.img_cmedia)))
+            QIcon.fromTheme("", QIcon("{}db.png".format(Config.img_cmedia)))
         )
         self.bn_resto_l.clicked.connect(self.resto_local_db)
 
-        self.bn_ignore = Button(u"Première installation")
+        self.bn_ignore = Button("Première installation")
         self.bn_ignore.setIcon(
-            QIcon.fromTheme('', QIcon(u"{}go-next.png".format(Config.img_cmedia)))
+            QIcon.fromTheme("", QIcon("{}go-next.png".format(Config.img_cmedia)))
         )
         self.bn_ignore.clicked.connect(self.ignore_resto)
 
@@ -109,5 +108,5 @@ class RestorationViewWidget(QDialog, FWidget):
         self.accept()
 
     def resto_local_db(self):
-        import_backup(folder='C://', dst_folder=Config.ARMOIRE)
+        import_backup(folder="C://", dst_folder=Config.ARMOIRE)
         self.accept()

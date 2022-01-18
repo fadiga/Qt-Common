@@ -4,33 +4,26 @@
 # maintainer: Fad
 
 from __future__ import unicode_literals, absolute_import, division, print_function
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QPushButton,
     QHBoxLayout,
-    QGridLayout,
     QGroupBox,
     QDialog,
-    QLabel,
     QComboBox,
-    QTextEdit,
     QFormLayout,
 )
 
 from PyQt5.QtCore import Qt
 
-from Common.cstatic import CConstants
+# from Common.cstatic import CConstants
 from Common.ui.common import (
-    FMainWindow,
-    FPageTitle,
     FormLabel,
-    PyTextViewer,
     EnterTabbedLineEdit,
     ErrorLabel,
-    FLabel,
-    Button_save,
     LineEdit,
-    Button,
+    FDialog,
+    FWidget,
 )
 
 from Common.ui.util import check_is_empty, field_error

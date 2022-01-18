@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # maintainer: fadiga
-
-from PyQt5.QtWidgets import QStatusBar, QProgressBar, QLabel, QCommandLinkButton
+from PyQt5.QtGui import QPixmap, QIcon
+from PyQt5.QtWidgets import QStatusBar, QProgressBar, QLabel, QPushButton
 from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
 
 from threading import Event
@@ -37,8 +37,9 @@ class GStatusBar(QStatusBar):
         self.addWidget(self.info_label, 1)
 
         self.check_serv = TaskThreadServer(self)
-        QObject.connect(self.check_serv, SIGNAL("contact_server"), self.contact_server)
-        QObject.connect(self.check_serv, SIGNAL("download_"), self.download_)
+        # self.check_serv.triggered.connect(self.contact_server)
+        # QObject.connect(self.check_serv, SIGNAL("contact_server"), self.contact_server)
+        # QObject.connect(self.check_serv, SIGNAL("download_"), self.download_)
         try:
             self.check_serv.start()
         except Exception as e:

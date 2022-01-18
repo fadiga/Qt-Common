@@ -7,7 +7,8 @@ from __future__ import unicode_literals, absolute_import, division, print_functi
 
 from PyQt5.QtWidgets import QMessageBox, QMenuBar, QAction, qApp
 from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
+
+# from PyQt5.QtCore import pyqtSignal, pyqtSlot
 
 
 from configuration import Config
@@ -39,7 +40,7 @@ class FMenuBar(QMenuBar, FWidget):
             self,
         )
         savegarder.setShortcut("Alt+E")
-        self.connect(savegarder, SIGNAL("triggered()"), self.goto_export_db)
+        # self.connect(savegarder, SIGNAL("triggered()"), self.goto_export_db)
         backup.addAction(savegarder)
 
         # Importer db
@@ -49,7 +50,7 @@ class FMenuBar(QMenuBar, FWidget):
             self,
         )
         import_db.setShortcut("Alt+I")
-        self.connect(import_db, SIGNAL("triggered()"), self.goto_import_backup)
+        # self.connect(import_db, SIGNAL("triggered()"), self.goto_import_backup)
         backup.addAction(import_db)
 
         ow = Owner.select().where(Owner.islog == True)

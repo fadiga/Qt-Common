@@ -4,8 +4,9 @@
 
 from __future__ import unicode_literals, absolute_import, division, print_function
 
-from PyQt4.QtGui import QIcon, QToolBar, QCursor
-from PyQt4.QtCore import Qt, QSize
+from PyQt5.QtGui import QIcon, QCursor
+from PyQt5.QtWidgets import QToolBar
+from PyQt5.QtCore import Qt, QSize
 
 from Common.ui.common import FMainWindow
 
@@ -36,7 +37,7 @@ class FMenuToolBar(QToolBar, FMainWindow):
         # self.setAutoFillBackground(True)
         # self.addSeparator()
         self.addAction(
-            QIcon(u"{}exit.png".format(Config.img_cmedia)), u"Quiter", self.goto_exit
+            QIcon("{}exit.png".format(Config.img_cmedia)), "Quiter", self.goto_exit
         )
 
         menu = []

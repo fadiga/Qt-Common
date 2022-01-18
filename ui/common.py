@@ -20,6 +20,7 @@ from PyQt5.QtWidgets import (
     QCommandLinkButton,
     QPushButton,
     QComboBox,
+    QDialog,
 )
 from PyQt5.QtGui import (
     QRadialGradient,
@@ -392,6 +393,16 @@ class QToolBadgeButton(QToolButton):
 
         painter.setPen(QPen(Qt.white, 1))
         painter.drawText(x, y, size - 2, size - 2, Qt.AlignCenter, text)
+
+
+class Button_save(QCommandLinkButton):
+    def __init__(self, *args, **kwargs):
+        super(Button, self).__init__(*args, **kwargs)
+        self.setAutoDefault(True)
+        self.setIcon(QIcon.fromTheme("", QIcon("")))
+        self.setCursor(Qt.PointingHandCursor)
+        # self.setCursor(Qt.ForbiddenCursor)
+        # self.setFixedSize(100, 40)
 
 
 class Button(QCommandLinkButton):
