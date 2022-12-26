@@ -71,7 +71,6 @@ class TaskThreadUpdater(QThread):
                     resp = Network().submit(
                         "check_org", {"orga_slug": orga_slug, "lcse": lcse.code}
                     )
-
                     if (
                         not resp.get("force_kill")
                         or resp.get("can_use") != CConstants.IS_EXPIRED
