@@ -6,8 +6,8 @@ import requests
 
 from PyQt4.QtCore import QObject
 
-from Common.ui.util import internet_on, datetime_to_str, get_serv_url, is_valide_mac
-
+from Common.ui.util import acces_server, datetime_to_str, get_serv_url, is_valide_mac
+from Common.cstatic import logger
 from info_hot import getSystemInfo
 from Common.models import License, Organization, Settings, Owner, Version
 
@@ -16,25 +16,30 @@ class Network(QObject):
     def __init__(self):
         QObject.__init__(self)
 
-        print("Connexion serveur ...")
+        logger.info("Connexion serveur ...")
 
     def submit(self, url, data):
-        # print("submit", 'data', " url ", url)
-        if internet_on():
+        logger.debug("submit", "data", " url ", url)
+        resp_dict = {"response": {"message": "-"}}
+        if acces_server():
             client = requests.session()
-            response = client.get(get_serv_url(url), data=json.dumps(data))
-            if response.status_code == 200:
-                # print(response.status_code)
-                try:
-                    return json.loads(response.content.decode('UTF-8'))
-                except Exception as e:
-                    return {"response": e}
+            try:
+                response = client.get(get_serv_url(url), data=json.dumps(data))
+                logger.info(response)
+                if response.status_code == 200:
+                    # logger.debug(response.status_code)
+                    try:
+                        return json.loads(response.content.decode("UTF-8"))
+                    except Exception as e:
+                        return {"response": e}
+            except:
+                return resp_dict.update({"response": "Serveur non disponible"})
         else:
-            return {"response": "Pas d'internet"}
+            return resp_dict.update({"response": "Pas d'internet"})
 
     def update_version_checher(self):
 
-        # print("update_version_checher")
+        # logger.debug("update_version_checher")
 
         from configuration import Config
 
@@ -74,13 +79,15 @@ class Network(QObject):
         data = {
             "app_info": {"name": Config.APP_NAME, "version": Config.APP_VERSION},
             "getSystemInfo": json.loads(getSystemInfo()),
-            "organization": {'slug': orga.slug, 'data': orga.data()},
+            "organization": {"slug": orga.slug, "data": orga.data()},
             "licenses": [i.data() for i in License.all()],
         }
 
         rep = self.submit("inscription_client", data)
-
-        if rep.get('is_create'):
-            orga.slug = rep.get('org_slug')
+        if not rep:
+            logger.debug("No response")
+            return
+        if rep.get("is_create"):
+            orga.slug = rep.get("org_slug")
             orga.save()
         return rep

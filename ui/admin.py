@@ -506,8 +506,8 @@ class SettingsTableWidget(FWidget):
 
     def save_edit(self):
         '''add operation'''
-        if check_is_empty(self.url_field):
-            return
+        # if check_is_empty(self.url_field):
+        #     return
 
         self.settings.url = str(self.url_field.text())
         self.settings.is_login = (

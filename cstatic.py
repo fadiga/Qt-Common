@@ -4,8 +4,17 @@
 # Maintainer: Fad
 
 import os
+import logging
 
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath('__file__')))
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath("__file__")))
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s", datefmt="%m/%d/%Y %I:%M:%S"
+)
+
+
+# logger.setLevel(logging.DEBUG)
 
 
 class CConstants(object):
@@ -15,17 +24,11 @@ class CConstants(object):
     # PERIODS
     W = "week"
     M = "month"
-    OK = 'ok'
+    OK = "ok"
     IS_NOT_ACTIVATED = "is_not_activated"
     IS_EXPIRED = "is_expired"
 
-    import logging
-
-    logging.basicConfig(
-        format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S'
-    )
-
-    file_img = os.path.join(os.path.dirname(os.path.abspath('__file__')), 'cimages/')
+    file_img = os.path.join(os.path.dirname(os.path.abspath("__file__")), "cimages/")
     # deployment
     if os.path.exists(file_img):
         img_cmedia = file_img
@@ -34,17 +37,17 @@ class CConstants(object):
 
     IBS_LOGO = os.path.join(img_cmedia, "ibs.jpg")
     # ------------------------- Autor --------------------------#
-    AUTOR = u"Fadiga Ibrahima"
-    EMAIL_AUT = u"ibfadiga@gmail.com"
-    TEL_AUT = u"(+223)76 43 38 90"
-    ADRESS_AUT = u"Boulkassoumbougou Bamako"
-    ORG_AUT = u"Copyright © 2012 xxxx"
+    AUTOR = "Fadiga Ibrahima"
+    EMAIL_AUT = "ibfadiga@gmail.com"
+    TEL_AUT = "(+223)76 43 38 90"
+    ADRESS_AUT = "Boulkassoumbougou Bamako"
+    ORG_AUT = "Copyright © 2012 xxxx"
     # ------------------------- Application --------------------------#
     inco_exit = ""
     inco_dashboard = ""
     EMAIL_ORGA = ""
-    APP_NAME = u"Projet en dev"
-    APP_DATE = u"02/2013"
+    APP_NAME = "Projet en dev"
+    APP_DATE = "02/2013"
     APP_VERSION = "1.7"
     DEBUG = False
 
@@ -52,10 +55,10 @@ class CConstants(object):
     EXCLUDE_MENU_ADMIN = []
     LSE = True
     ORG = False
-    SERV = None
+    SERV = False
     list_models = []
     APP_LOGO = os.path.join(img_cmedia, "logo.png")
     APP_LOGO_ICO = os.path.join(img_cmedia, "logo.ico")
     ExportFolders = []
     ExportFiles = []
-    BASE_URL = "//file-repo.ml"
+    BASE_URL = "https://file-repo.ml"

@@ -9,8 +9,8 @@ import requests
 from datetime import datetime
 from threading import Event
 from Common.models import Settings, Organization, License
-from Common.ui.util import get_serv_url, internet_on, is_valide_mac
-from Common.cstatic import CConstants
+from Common.ui.util import get_serv_url, acces_server, is_valide_mac
+from Common.cstatic import CConstants, logger
 
 from server import Network
 
@@ -23,25 +23,28 @@ class UpdaterInit(QObject):
         self.stopFlag = Event()
         self.check = TaskThreadUpdater(self)
         self.connect(
-            self.check, SIGNAL('update_data'), self.update_data, Qt.QueuedConnection
+            self.check, SIGNAL("update_data"), self.update_data, Qt.QueuedConnection
         )
-        self.check.start()
+        try:
+            self.check.start()
+        except Exception as exc:
+            logger.warning("Exc :", exc)
 
     def update_data(self, orga_slug):
-        # print("update_data")
+        logger.info("update data")
         from configuration import Config
         from database import Setup
 
         # self.base_url = Config.BASE_URL
-        print("UpdaterInit start")
+        logger.info("UpdaterInit start")
         self.emit(SIGNAL("contact_server"))
         for m in Setup.LIST_CREAT:
-            # print("m ", m)
-            for d in m.select().where(m.is_syncro == False):
-                d = d.data()
-                d.update({"slug": orga_slug})
-                resp = Network().submit("update-data", d)
-                # print("resp : ", resp)
+            for d in m.select().where(m.is_syncro == True):
+                # logger.info(type(d).__name__)
+                resp = Network().submit(
+                    "update-data",
+                    {"slug": orga_slug, "model": type(d).__name__, "data": d.data()},
+                )
                 if resp.get("save"):
                     d.updated()
 
@@ -54,11 +57,10 @@ class TaskThreadUpdater(QThread):
 
     def run(self):
         # from Common.ui.statusbar import GStatusBar
-
         w = 5
         while not self.stopped.wait(w):
             w = 50
-            if internet_on():
+            if acces_server():
                 if Organization().select().count() == 0:
                     return
                 orga_slug = Organization.get(id=1).slug
@@ -67,24 +69,21 @@ class TaskThreadUpdater(QThread):
                 else:
                     lcse = is_valide_mac()[0]
                     resp = Network().submit(
-                        "check_org", {'orga_slug': orga_slug, "lcse": lcse.code}
+                        "check_org", {"orga_slug": orga_slug, "lcse": lcse.code}
                     )
-                    # print(resp)
+
                     if (
-                        not resp.get('force_kill')
-                        or resp.get('can_use') != CConstants.IS_EXPIRED
+                        not resp.get("force_kill")
+                        or resp.get("can_use") != CConstants.IS_EXPIRED
                     ):
-                        # print("resp expiration_date :: ", resp)
+                        # logger.info("resp expiration_date :: ", resp)
                         lcse.expiration_date = datetime.fromtimestamp(
-                            resp.get('expiration_date')
+                            resp.get("expiration_date")
                         )
                         lcse.save()
                     else:
-                        # print("remove_activation")
+                        # logger.info("remove_activation")
                         lcse.remove_activation()
 
-                    if resp.get('is_syncro'):
+                    if resp.get("is_syncro"):
                         self.parent.update_data(orga_slug)
-
-            else:
-                print("Pas de d'internet !")

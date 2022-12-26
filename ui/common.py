@@ -100,7 +100,7 @@ class FMainWindow(QMainWindow):
                 ur.islog = False
                 ur.save()
 
-    def Notify(self, mssg, type_mssg):
+    def Notify(self, mssg="Hi", type_mssg="warring"):
         from Common.notification import Notification
 
         self.notify = Notification(mssg=mssg, type_mssg=type_mssg)

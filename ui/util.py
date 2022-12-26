@@ -12,18 +12,47 @@ import subprocess
 import hashlib
 from time import mktime, strptime
 
+from urllib.request import urlopen, URLError
 from uuid import getnode
 
 from datetime import datetime
 
 from PyQt4 import QtGui, QtCore
 from Common.ui.window import FWindow
-from Common.cstatic import CConstants
+from Common.cstatic import CConstants, logger
 
 try:
     unicode
 except NameError:
     unicode = str
+
+
+def internet_on():
+    try:
+        urlopen("https://google.com", timeout=1)
+        return True
+    except URLError as err:
+        logger.debug("URLError {}".format(err))
+        return False
+    except Exception as exc:
+        logger.debug(exc)
+
+
+def acces_server():
+
+    if not CConstants.SERV:
+        logger.debug("Not server mode")
+        return False
+
+    if not internet_on():
+        return
+    try:
+        urlopen(get_serv_url(""), timeout=1)
+        return True
+    except URLError as err:
+        return False
+    except Exception as e:
+        logger.debug(e)
 
 
 def device_amount(value, dvs=None):
@@ -87,25 +116,25 @@ def is_valide_codition_field(field, msg, condition):
 
 def uopen_prefix(platform=sys.platform):
 
-    if platform in ('win32', 'win64'):
-        return 'cmd /c start'
+    if platform in ("win32", "win64"):
+        return "cmd /c start"
 
-    if 'darwin' in platform:
-        return 'open'
+    if "darwin" in platform:
+        return "open"
 
     if (
-        platform in ('cygwin', 'linux')
-        or platform.startswith('linux')
-        or platform.startswith('sun')
-        or 'bsd' in platform
+        platform in ("cygwin", "linux")
+        or platform.startswith("linux")
+        or platform.startswith("sun")
+        or "bsd" in platform
     ):
-        return 'xdg-open'
+        return "xdg-open"
 
-    return 'xdg-open'
+    return "xdg-open"
 
 
 def openFile(file):
-    if sys.platform == 'linux2':
+    if sys.platform == "linux2":
         subprocess.call(["xdg-open", file])
     else:
         os.startfile(file)
@@ -114,16 +143,16 @@ def openFile(file):
 def uopen_file(filename):
     # print(filename)
     if not os.path.exists(filename):
-        raise IOError(u"Fichier %s non valable." % filename)
+        raise IOError("Fichier %s non valable." % filename)
     subprocess.call(
-        '%(cmd)s %(file)s' % {'cmd': uopen_prefix(), 'file': filename}, shell=True
+        "%(cmd)s %(file)s" % {"cmd": uopen_prefix(), "file": filename}, shell=True
     )
 
 
 def get_temp_filename(extension=None):
     f = tempfile.NamedTemporaryFile(delete=False)
     if extension:
-        fname = '%s.%s' % (f.name, extension)
+        fname = "%s.%s" % (f.name, extension)
     else:
         fname = f.name
     return fname
@@ -161,21 +190,21 @@ def formatted_number(number, sep=".", aftergam=None):
     if not aftergam:
         aftergam = int(Settings.select().get().after_cam)
     locale_name, encoding = locale.getlocale()
-    locale.setlocale(locale.LC_ALL, 'fra')
+    locale.setlocale(locale.LC_ALL, "fra")
     fmt = "%s"
     if isinstance(number, int):
         # print("int ", number)
-        fmt = u"%d"
+        fmt = "%d"
     elif isinstance(number, float):
         # print("float, ", number)
-        fmt = u"%.{}f".format(aftergam)
+        fmt = "%.{}f".format(aftergam)
 
     try:
         return locale.format(fmt, number, grouping=True).decode(encoding)
     except AttributeError:
         return locale.format(fmt, number, grouping=True)
     except Exception as e:
-        print("formatted_number : ", e)
+        logger.debug("formatted_number : ", e)
         return "%s" % number
 
 
@@ -206,10 +235,11 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
 
 def is_float(val):
     try:
-        val = val.replace(',', '.').replace(' ', '').replace('\xa0', '')
+        val = val.replace(",", ".").replace(" ", "").replace("\xa0", "")
         return float(val)
     except Exception as e:
         # print("is_float", e)
+        logger.debug("is_float ", e)
         return 0
 
 
@@ -217,12 +247,13 @@ def is_int(val):
 
     try:
         val = str(val).split()
-        v = ''
+        v = ""
         for i in val:
             v += i
         return int(v)
     except Exception as e:
         # print("is_int", e)
+        logger.debug("is_int ", e)
         return 0
 
 
@@ -244,11 +275,13 @@ def alerte():
 
 def format_date(dat):
     dat = str(dat)
-    day, month, year = dat.split('/')
-    return '-'.join([year, month, day])
+    day, month, year = dat.split("/")
+    return "-".join([year, month, day])
+
 
 def datetime_to_str(date):
     return mktime(strptime(date.strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S"))
+
 
 def to_jstimestamp(adate):
     if not adate:
@@ -269,7 +302,7 @@ def copy_file(dest, path_filename):
     """
     import shutil
 
-    dest = os.path.join(os.path.dirname(os.path.abspath('__file__')), dest)
+    dest = os.path.join(os.path.dirname(os.path.abspath("__file__")), dest)
     filename = os.path.basename(path_filename)
     if not os.path.exists(dest):
         os.makedirs(dest)
@@ -296,21 +329,21 @@ def get_serv_url(sub_url):
 
 
 def slug_mane_file(file_name):
-    return u"{timestamp}_{fname}".format(
+    return "{timestamp}_{fname}".format(
         fname=file_name.replace(" ", "_"), timestamp=to_jstimestamp(datetime.now())
     )
 
 
 def normalize(s):
     if type(s) == unicode:
-        return s.encode('utf8', 'ignore')
+        return s.encode("utf8", "ignore")
     else:
         return str(s)
 
 
 def str_date_split(date):
     try:
-        return date.split('/')
+        return date.split("/")
     except AttributeError:
         return date.day, date.month, date.year
 
@@ -331,7 +364,7 @@ def show_date(dat, time=True):
         dat = date_to_datetime(dat)
     if not dat:
         return "pas de date"
-    return dat.strftime(u"%Y-%m-%d à %Hh:%Mmn") if time else dat.strftime("%Y-%m-%d")
+    return dat.strftime("%Y-%m-%d à %Hh:%Mmn") if time else dat.strftime("%Y-%m-%d")
 
 
 def date_to_datetime(dat):
@@ -353,19 +386,6 @@ def getlog(text):
     return "Log-{}".format(text)
 
 
-def internet_on():
-    from urllib.request import urlopen, URLError
-
-    try:
-        urlopen(get_serv_url(''), timeout=1)
-        return True
-    except URLError as err:
-        # print(err)
-        return False
-    except Exception as e:
-        print(e)
-
-
 def is_valide_mac():
     """check de license"""
     from Common.models import License
@@ -374,7 +394,7 @@ def is_valide_mac():
         lcse = License.get(License.code == str(make_lcse()))
         return lcse, lcse.can_use()
     except Exception as e:
-        print("/!\ invalide license.")
+        logger.debug("/!\ invalide license.")
         return None, CConstants.IS_EXPIRED
 
 
@@ -384,16 +404,16 @@ def clean_mac():
 
 def make_lcse(lcse=clean_mac()):
     # print("lcse:", lcse)
-    lcse = hashlib.md5(str(lcse).encode('utf-8')).hexdigest()
+    lcse = hashlib.md5(str(lcse).encode("utf-8")).hexdigest()
     return lcse
 
 
 def get_lcse_of_file():
-    return open("{}".format(get_lcse_file()), 'r').read()
+    return open("{}".format(get_lcse_file()), "r").read()
 
 
 def get_lcse_file():
-    return os.path.join(os.path.dirname(os.path.abspath('__file__')), 'LICENCE')
+    return os.path.join(os.path.dirname(os.path.abspath("__file__")), "LICENCE")
 
 
 def _disk_c(self):

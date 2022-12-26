@@ -49,8 +49,8 @@ class BaseModel(peewee.Model):
 
     def data(self):
         return {
-            'is_syncro': self.is_syncro,
-            'last_update_date': datetime_to_str(self.last_update_date),
+            "is_syncro": self.is_syncro,
+            "last_update_date": datetime_to_str(self.last_update_date),
         }
 
     @classmethod
@@ -63,7 +63,7 @@ class FileJoin(BaseModel):
     DEST_FILES = "Files"
 
     class Meta:
-        ordering = ('file_name', 'desc')
+        ordering = ("file_name", "desc")
         # db_table = 'file_join'
 
     file_name = peewee.CharField(max_length=200, null=True)
@@ -73,11 +73,11 @@ class FileJoin(BaseModel):
     def data(self):
 
         return {
-            'file_name': self.file_name,
-            'file_slug': self.file_slug,
-            'on_created': date_to_str(self.on_created),
-            'is_syncro': self.is_syncro,
-            'last_update_date': datetime_to_str(self.last_update_date),
+            "file_name": self.file_name,
+            "file_slug": self.file_slug,
+            "on_created": date_to_str(self.on_created),
+            "is_syncro": self.is_syncro,
+            "last_update_date": datetime_to_str(self.last_update_date),
         }
 
     def __str__(self):
@@ -88,12 +88,12 @@ class FileJoin(BaseModel):
         super(FileJoin, self).save()
 
     def display_name(self):
-        return u"{}".format(self.file_name)
+        return "{}".format(self.file_name)
 
     @property
     def get_file(self):
         return os.path.join(
-            os.path.join(os.path.dirname(os.path.abspath('__file__')), self.DEST_FILES),
+            os.path.join(os.path.dirname(os.path.abspath("__file__")), self.DEST_FILES),
             self.file_slug,
         )
 
@@ -152,12 +152,12 @@ class Owner(BaseModel):
     """The web user who is also owner of the Organization"""
 
     class Meta:
-        ordering = ('username', 'desc')
+        ordering = ("username", "desc")
         # db_table = 'owner'
 
-    USER = u"Utilisateur"
-    ADMIN = u"Administrateur"
-    ROOT = u"superuser"
+    USER = "Utilisateur"
+    ADMIN = "Administrateur"
+    ROOT = "superuser"
 
     username = peewee.CharField(max_length=30, unique=True, verbose_name="Identifiant")
     group = peewee.CharField(default=USER)
@@ -171,26 +171,28 @@ class Owner(BaseModel):
     def data(self):
 
         return {
-            'username': self.username,
-            'group': self.group,
-            'islog': self.islog,
-            'phone': self.phone,
-            'password': self.password,
-            'isactive': self.isactive,
-            'last_login': datetime_to_str(self.last_login),
-            'login_count': self.login_count,
+            "username": self.username,
+            "group": self.group,
+            "islog": self.islog,
+            "phone": self.phone,
+            "password": self.password,
+            "isactive": self.isactive,
+            "last_login": datetime_to_str(self.last_login),
+            "login_count": self.login_count,
         }
 
     def __str__(self):
-        return u"{}".format(self.username)
+        return "{}".format(self.username)
 
     def display_name(self):
-        return u"{name}/{group}/{login_count}".format(
+        return "{name}/{group}/{login_count}".format(
             name=self.username, group=self.group, login_count=self.login_count
         )
 
     def crypt_password(self, password):
-        return hashlib.sha224(str(password).encode("utf-8")).hexdigest()
+        pw = hashlib.sha224(str(password).encode("utf-8")).hexdigest()
+        print(pw)
+        return pw
 
     def save(self):
         if self.islog:
@@ -215,7 +217,7 @@ class Organization(BaseModel):
         return self.display_name()
 
     def display_name(self):
-        return u"{}/{}/{}".format(self.name_orga, self.phone, self.email_org)
+        return "{}/{}/{}".format(self.name_orga, self.phone, self.email_org)
 
     @classmethod
     def get_or_create(cls, name_orga, typ):
@@ -228,15 +230,15 @@ class Organization(BaseModel):
     def data(self):
 
         return {
-            'logo_orga': self.logo_orga,
-            'slug': self.slug,
-            'name_orga': self.name_orga,
-            'phone': self.phone,
-            'bp': self.bp,
-            'email_org': self.email_org,
-            'adress_org': self.adress_org,
-            'is_syncro': self.is_syncro,
-            'last_update_date': datetime_to_str(self.last_update_date),
+            "logo_orga": self.logo_orga,
+            "slug": self.slug,
+            "name_orga": self.name_orga,
+            "phone": self.phone,
+            "bp": self.bp,
+            "email_org": self.email_org,
+            "adress_org": self.adress_org,
+            "is_syncro": self.is_syncro,
+            "last_update_date": datetime_to_str(self.last_update_date),
         }
 
 
@@ -259,16 +261,16 @@ class License(BaseModel):
 
         return {
             # 'model': "License",
-            'code': self.code,
-            'isactivated': self.isactivated,
-            'activation_date': datetime_to_str(self.activation_date),
-            'can_expired': self.can_expired,
-            'evaluation': self.evaluation,
-            'expiration_date': datetime_to_str(self.expiration_date),
-            'owner': self.owner,
-            'update_date': datetime_to_str(self.update_date),
-            'is_syncro': self.is_syncro,
-            'last_update_date': datetime_to_str(self.last_update_date),
+            "code": self.code,
+            "isactivated": self.isactivated,
+            "activation_date": datetime_to_str(self.activation_date),
+            "can_expired": self.can_expired,
+            "evaluation": self.evaluation,
+            "expiration_date": datetime_to_str(self.expiration_date),
+            "owner": self.owner,
+            "update_date": datetime_to_str(self.update_date),
+            "is_syncro": self.is_syncro,
+            "last_update_date": datetime_to_str(self.last_update_date),
         }
 
     def check_key(self):
@@ -310,7 +312,11 @@ class License(BaseModel):
         self.save()
 
     def remaining_days(self):
-        return (self.expiration_date - datetime.now()).days
+        return (
+            "{} jours".format(self.expiration_date - datetime.now().days)
+            if self.can_expired
+            else "illimité"
+        )
 
 
 class Version(BaseModel):
@@ -319,19 +325,19 @@ class Version(BaseModel):
     number = peewee.IntegerField(default=1, verbose_name="Numéro de Version")
 
     def __str__(self):
-        return u"{}/{}".format(self.number, self.date)
+        return "{}/{}".format(self.number, self.date)
 
     def data(self):
         return {
             "model": "Version",
-            'date': datetime_to_str(self.date),
-            'number': self.number,
-            'is_syncro': self.is_syncro,
-            'last_update_date': datetime_to_str(self.last_update_date),
+            "date": datetime_to_str(self.date),
+            "number": self.number,
+            "is_syncro": self.is_syncro,
+            "last_update_date": datetime_to_str(self.last_update_date),
         }
 
     def display_name(self):
-        return u"db-v{}".format(self.number)
+        return "db-v{}".format(self.number)
 
     def update_v(self):
         self.number += 1
@@ -339,12 +345,13 @@ class Version(BaseModel):
         # print(self.number)
         self.save()
 
-    # def get_or_none(self):
-    #     try:
-    #         return Version.get(Version.number == 1)
-    #     except Exception as e:
-    #         # raise e
-    #         return None
+    @classmethod
+    def get_or_create(cls, number):
+        try:
+            ctct = cls.get(number=number)
+        except cls.DoesNotExist:
+            ctct = cls.create(number=number, date=NOW)
+        return ctct
 
 
 class History(BaseModel):
@@ -359,11 +366,11 @@ class History(BaseModel):
     def data(self):
 
         return {
-            'date': datetime_to_str(self.date),
-            'data': self.data,
-            'action': self.action,
-            'is_syncro': self.is_syncro,
-            'last_update_date': datetime_to_str(self.last_update_date),
+            "date": datetime_to_str(self.date),
+            "data": self.data,
+            "action": self.action,
+            "is_syncro": self.is_syncro,
+            "last_update_date": datetime_to_str(self.last_update_date),
         }
 
 
@@ -373,7 +380,7 @@ class Settings(BaseModel):
     PREV = 0
     CURRENT = 1
     DEFAULT = 2
-    LCONFIG = ((PREV, u"Precedent"), (DEFAULT, u"Par defaut"), (CURRENT, u"Actuel"))
+    LCONFIG = ((PREV, "Precedent"), (DEFAULT, "Par defaut"), (CURRENT, "Actuel"))
 
     DF = "systeme"
     BL = "blue"
@@ -404,23 +411,23 @@ class Settings(BaseModel):
     def data(self):
 
         return {
-            'slug': self.slug,
-            'is_login': self.is_login,
-            'after_cam': self.after_cam,
-            'toolbar': self.toolbar,
-            'toolbar_position': self.toolbar_position,
-            'url': self.url,
-            'theme': self.theme,
-            'devise': self.devise,
-            'is_syncro': self.is_syncro,
-            'last_update_date': datetime_to_str(self.last_update_date),
+            "slug": self.slug,
+            "is_login": self.is_login,
+            "after_cam": self.after_cam,
+            "toolbar": self.toolbar,
+            "toolbar_position": self.toolbar_position,
+            "url": self.url,
+            "theme": self.theme,
+            "devise": self.devise,
+            "is_syncro": self.is_syncro,
+            "last_update_date": datetime_to_str(self.last_update_date),
         }
 
     def __str__(self):
         return self.display_name()
 
     def display_name(self):
-        return u"{}/{}/{}".format(self.slug, self.is_login, self.theme)
+        return "{}/{}/{}".format(self.slug, self.is_login, self.theme)
 
     def save(self):
         """ """
