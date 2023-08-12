@@ -6,19 +6,20 @@ import os
 from threading import Event
 
 import requests
-from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
-from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtWidgets import QLabel, QProgressBar, QPushButton, QStatusBar
+from configuration import Config
+from PyQt5.QtCore import SIGNAL, QObject, QThread
+from PyQt5.QtWidgets import (
+    QIcon,
+    QLabel,
+    QPixmap,
+    QProgressBar,
+    QPushButton,
+    QStatusBar,
+)
 from server import Network
 from ui.util import internet_on
 
-try:
-    from configuration import Config
-
-    base_url = Config.BASE_URL
-
-except Exception as exc:
-    print(exc)
+base_url = Config.BASE_URL
 
 
 class GStatusBar(QStatusBar):

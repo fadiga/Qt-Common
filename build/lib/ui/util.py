@@ -15,7 +15,7 @@ from time import mktime, strptime
 from uuid import getnode
 
 from cstatic import CConstants
-from PyQt5 import QtCore, QtWidgets
+from PyQt4 import QtCore, QtGui
 from ui.window import FWindow
 
 try:
@@ -47,7 +47,7 @@ def check_is_empty(field):
     containt = ""
     # if isinstance(field, )
     field.setToolTip("")
-    if isinstance(field, QtWidgets.QTextEdit):
+    if isinstance(field, QtGui.QTextEdit):
         containt = field.toPlainText()
     else:
         containt = field.text()
@@ -126,11 +126,11 @@ def get_temp_filename(extension=None):
 
 
 def raise_error(title, message):
-    box = QtWidgets.QMessageBox(
-        QtWidgets.QMessageBox.Critical,
+    box = QtGui.QMessageBox(
+        QtGui.QMessageBox.Critical,
         title,
         message,
-        QtWidgets.QMessageBox.Ok,
+        QtGui.QMessageBox.Ok,
         parent=FWindow.window,
     )
     box.setWindowOpacity(0.9)
@@ -139,11 +139,11 @@ def raise_error(title, message):
 
 
 def raise_success(title, message):
-    box = QtWidgets.QMessageBox(
-        QtWidgets.QMessageBox.Information,
+    box = QtGui.QMessageBox(
+        QtGui.QMessageBox.Information,
         title,
         message,
-        QtWidgets.QMessageBox.Ok,
+        QtGui.QMessageBox.Ok,
         parent=FWindow.window,
     )
     box.setWindowOpacity(0.9)
@@ -175,11 +175,11 @@ def formatted_number(number, sep=".", aftergam=None):
         return "%s" % number
 
 
-class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
+class SystemTrayIcon(QtGui.QSystemTrayIcon):
     def __init__(self, mss, parent=None):
-        QtWidgets.QSystemTrayIcon.__init__(self, parent)
+        QtGui.QSystemTrayIcon.__init__(self, parent)
 
-        self.setIcon(QtWidgets.QIcon.fromTheme("document-save"))
+        self.setIcon(QtGui.QIcon.fromTheme("document-save"))
 
         self.activated.connect(self.click_trap)
         # self.mss = ("Confirmation", "Mali rapou!!!!")
@@ -188,14 +188,14 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
     def click_trap(self, value):
         # left click!
         if value == self.Trigger:
-            self.left_menu.exec_(QtWidgets.QCursor.pos())
+            self.left_menu.exec_(QtGui.QCursor.pos())
 
     def welcome(self):
         self.showMessage(self.mss[0], self.mss[1])
 
     def show(self, mss):
         self.mss = mss
-        QtWidgets.QSystemTrayIcon.show(self)
+        QtGui.QSystemTrayIcon.show(self)
         QtCore.QTimer.singleShot(1000, self.welcome)
 
 

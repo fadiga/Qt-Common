@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 
 import json
-import requests
 import os
 
-from Common.models import License
+import requests
+from models import License
+from PyQt5.QtCore import QObject
+from ui.util import date_to_ts, internet_on
 
-from PyQt4.QtCore import QObject
-
-from Common.ui.util import internet_on, date_to_ts
-from configuration import Config
+try:
+    from configuration import Config
+except Exception as exc:
+    print(exc)
 
 
 class Network(QObject):
-
     # base_url =
     def __init__(self):
         QObject.__init__(self)
@@ -32,7 +33,7 @@ class Network(QObject):
             client = requests.session()
             response = client.get(url, data=json.dumps(data))
             try:
-                return json.loads(response.content.decode('UTF-8'))
+                return json.loads(response.content.decode("UTF-8"))
             except ValueError:
                 return False
             except Exception as e:
@@ -43,25 +44,23 @@ class Network(QObject):
     def update_version_checher(self):
         url_ = Config.BASE_URL + "/desktop_client"
         print("update_version_checher", url_)
-        data = {
-            "app_info": {
-                "name": Config.APP_NAME,
-                "version": Config.APP_VERSION
-            }
-        }
+        data = {"app_info": {"name": Config.APP_NAME, "version": Config.APP_VERSION}}
         lcse_dic = []
         if Config.LSE:
             for lcse in License.select():
                 acttn_date = date_to_ts(lcse.activation_date)
-                lcse_dic.append({
-                    # "owner": lcse.owner,
-                    "code": lcse.code,
-                    "isactivated": lcse.isactivated,
-                    "activation_date": acttn_date,
-                    "can_expired": lcse.can_expired,
-                    "expiration_date": date_to_ts(
-                        lcse.expiration_date) if lcse.can_expired else acttn_date,
-                })
+                lcse_dic.append(
+                    {
+                        # "owner": lcse.owner,
+                        "code": lcse.code,
+                        "isactivated": lcse.isactivated,
+                        "activation_date": acttn_date,
+                        "can_expired": lcse.can_expired,
+                        "expiration_date": date_to_ts(lcse.expiration_date)
+                        if lcse.can_expired
+                        else acttn_date,
+                    }
+                )
             data.update({"licenses": lcse_dic})
         return self.submit(url_, data)
 
@@ -71,23 +70,21 @@ class Network(QObject):
     def get_licence(self):
         url_ = Config.BASE_URL + "/license"
         print("update_license_checher", url_)
-        data = {
-            "app_info": {
-                "name": Config.APP_NAME,
-                "version": Config.APP_VERSION
-            }
-        }
+        data = {"app_info": {"name": Config.APP_NAME, "version": Config.APP_VERSION}}
         lcse_dic = []
         for lcse in License.select():
             acttn_date = date_to_ts(lcse.activation_date)
-            lcse_dic.append({
-                # "owner": lcse.owner,
-                "code": lcse.code,
-                "isactivated": lcse.isactivated,
-                "activation_date": acttn_date,
-                "can_expired": lcse.can_expired,
-                "expiration_date": date_to_ts(
-                    lcse.expiration_date) if lcse.can_expired else acttn_date,
-            })
+            lcse_dic.append(
+                {
+                    # "owner": lcse.owner,
+                    "code": lcse.code,
+                    "isactivated": lcse.isactivated,
+                    "activation_date": acttn_date,
+                    "can_expired": lcse.can_expired,
+                    "expiration_date": date_to_ts(lcse.expiration_date)
+                    if lcse.can_expired
+                    else acttn_date,
+                }
+            )
         data.update({"licenses": lcse_dic})
         return self.submit(url_, data)

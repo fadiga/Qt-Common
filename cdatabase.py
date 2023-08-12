@@ -3,19 +3,14 @@
 # Autor: Fadiga
 
 
-from __future__ import (
-    unicode_literals, absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-from Common.models import (
-    Owner, Organization, License, Version, FileJoin, History, Settings)
-
-from playhouse.migrate import migrate, CharField, BooleanField
+from models import FileJoin, History, License, Organization, Owner, Settings, Version
+from playhouse.migrate import BooleanField, CharField, migrate
 
 
 class AdminDatabase(object):
-
-    LIST_CREAT = [History, Owner, Organization,
-                  Settings, License, Version, FileJoin]
+    LIST_CREAT = [History, Owner, Organization, Settings, License, Version, FileJoin]
     CREATE_DB = True
     LIST_MIGRATE = []
 
@@ -29,8 +24,9 @@ class AdminDatabase(object):
                 did_create = True
 
         if did_create:
-            print(u"---- database -----")
+            print("---- database -----")
             from fixture import FixtInit
+
             FixtInit().create_all_or_pass()
 
     def make_migrate(self, db_v=1):
@@ -39,7 +35,8 @@ class AdminDatabase(object):
         print("number ", version.number, "  db_v : ", db_v)
         if db_v > version.number:
             print("--check migrate--")
-            from Common.models import migrator
+            from models import migrator
+
             print("Make migrate", self.LIST_MIGRATE)
             for x, y, z in self.LIST_MIGRATE:
                 try:

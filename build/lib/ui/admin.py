@@ -4,6 +4,7 @@
 # maintainer: Fad
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from configuration import Config
 from models import Organization, Owner
 from PyQt5.QtCore import SIGNAL, Qt
 from PyQt5.QtWidgets import (
@@ -36,11 +37,6 @@ from ui.common import (
 from ui.table import FTableWidget
 from ui.user_add_or_edit import NewOrEditUserViewWidget
 from ui.util import check_is_empty
-
-try:
-    from .configuration import Config
-except Exception as exc:
-    print(exc)
 
 try:
     unicode

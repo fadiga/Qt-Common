@@ -4,10 +4,17 @@
 # maintainer: Fad
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from configuration import Config
 from models import Owner
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QComboBox, QFormLayout, QGroupBox, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QIcon,
+    QPushButton,
+)
 from ui.common import (
     EnterTabbedLineEdit,
     ErrorLabel,
@@ -17,11 +24,6 @@ from ui.common import (
     LineEdit,
 )
 from ui.util import check_is_empty, field_error
-
-try:
-    from .configuration import Config
-except Exception as exc:
-    print(exc)
 
 
 class LoginWidget(FDialog, FMainWindow):

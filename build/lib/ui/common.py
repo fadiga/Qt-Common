@@ -5,32 +5,32 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from datetime import date
 
+from configuration import Config
 from periods import Period
-from PyQt5.QtCore import QSortFilterProxyModel
-from PyQt5.QtGui import (
+from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtWidgets import (
     QBrush,
     QColor,
-    QDoubleValidator,
-    QFont,
-    QIcon,
-    QIntValidator,
-    QPainter,
-    QPainterPath,
-    QPalette,
-    QPen,
-    QPixmap,
-    QRadialGradient,
-)
-from PyQt5.QtWidgets import (
     QComboBox,
     QCommandLinkButton,
     QCompleter,
     QDateTimeEdit,
     QDialog,
+    QDoubleValidator,
+    QFont,
+    QIcon,
+    QIntValidator,
     QLabel,
     QLineEdit,
     QMainWindow,
+    QPainter,
+    QPainterPath,
+    QPalette,
+    QPen,
+    QPixmap,
     QPushButton,
+    QRadialGradient,
+    QSortFilterProxyModel,
     QTabBar,
     QTextEdit,
     QToolButton,
@@ -38,10 +38,9 @@ from PyQt5.QtWidgets import (
 )
 from ui.statusbar import GStatusBar
 
-try:
-    from .configuration import Config
-except Exception as exc:
-    print(exc)
+# from PyQt4.QtWebKit import QWebView
+
+
 try:
     unicode
 except:

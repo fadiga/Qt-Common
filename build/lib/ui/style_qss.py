@@ -548,11 +548,7 @@ def get_style():
         Settings.FAD: bleu_mari_css,
     }
     # dic_t = Settings.THEME
-    try:
-        stt = Settings.get_or_create(id=1)
-    except Exception as exc:
-        return 1
-    return dic_t.get(stt.theme)
+    return dic_t.get(Settings.get(id=1).theme)
 
 
 theme = get_style()

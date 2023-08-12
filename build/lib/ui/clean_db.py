@@ -7,6 +7,7 @@ import os
 import shutil
 from datetime import datetime
 
+from configuration import Config
 from models import DB_FILE, Owner
 from PyQt5.QtWidgets import (
     QComboBox,
@@ -27,11 +28,6 @@ from ui.common import (
     LineEdit,
 )
 from ui.util import check_is_empty, field_error
-
-try:
-    from .configuration import Config
-except Exception as exc:
-    print(exc)
 
 DATETIME = "{}".format(datetime.now().strftime("%d-%m-%Y-%Hh%M"))
 

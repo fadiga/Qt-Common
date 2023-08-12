@@ -2,20 +2,24 @@
 # -*- coding: utf8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
-from __future__ import (
-    unicode_literals, absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
+import hashlib
 import os
 import time
-import hashlib
-import peewee
 
 # from peewee_migrate import Router
-from datetime import timedelta, datetime
-from playhouse.migrate import (
-    SqliteMigrator, migrate, CharField, BooleanField, DateTimeField)
+from datetime import datetime, timedelta
 
-from Common.ui.util import copy_file
+import peewee
+from playhouse.migrate import (
+    BooleanField,
+    CharField,
+    DateTimeField,
+    SqliteMigrator,
+    migrate,
+)
+from ui.util import copy_file
 
 DB_FILE = "database.db"
 
@@ -30,7 +34,6 @@ migrator = SqliteMigrator(dbh)
 
 
 class BaseModel(peewee.Model):
-
     class Meta:
         database = dbh
 
@@ -46,11 +49,10 @@ class BaseModel(peewee.Model):
 
 
 class FileJoin(BaseModel):
-
     DEST_FILES = "Files"
 
     class Meta:
-        ordering = (('file_name', 'desc'))
+        ordering = ("file_name", "desc")
         # db_table = 'file_join'
 
     file_name = peewee.CharField(max_length=200, null=True)
@@ -65,20 +67,22 @@ class FileJoin(BaseModel):
         super(FileJoin, self).save()
 
     def display_name(self):
-        return u"{}".format(self.file_name)
+        return "{}".format(self.file_name)
 
     @property
     def get_file(self):
         return os.path.join(
-            os.path.join(os.path.dirname(os.path.abspath('__file__')),
-                         self.DEST_FILES), self.file_slug)
+            os.path.join(os.path.dirname(os.path.abspath("__file__")), self.DEST_FILES),
+            self.file_slug,
+        )
 
     def show_file(self):
-        from Common.ui.util import uopen_file
+        from ui.util import uopen_file
+
         uopen_file(self.get_file)
 
     def remove_file(self):
-        """ Remove doc and file """
+        """Remove doc and file"""
         self.delete_instance()
         try:
             os.remove(self.get_file)
@@ -107,7 +111,7 @@ class FileJoin(BaseModel):
 
     @property
     def get_taille(self):
-        """ La taille du document"""
+        """La taille du document"""
         octe = 1024
         q = octe
         kocte = octe * octe
@@ -124,34 +128,34 @@ class FileJoin(BaseModel):
 
 class Owner(BaseModel):
 
-    """ The web user who is also owner of the Organization
-    """
+    """The web user who is also owner of the Organization"""
 
     class Meta:
-        ordering = (('username', 'desc'))
+        ordering = ("username", "desc")
         # db_table = 'owner'
 
-    USER = u"Utilisateur"
-    ADMIN = u"Administrateur"
-    ROOT = u"superuser"
+    USER = "Utilisateur"
+    ADMIN = "Administrateur"
+    ROOT = "superuser"
 
     username = peewee.CharField(
-        max_length=30, unique=True, verbose_name=("Identifiant"))
+        max_length=30, unique=True, verbose_name=("Identifiant")
+    )
     group = peewee.CharField(default=USER)
     islog = peewee.BooleanField(default=False)
-    phone = peewee.CharField(
-        max_length=30, null=True, verbose_name=("Telephone"))
+    phone = peewee.CharField(max_length=30, null=True, verbose_name=("Telephone"))
     password = peewee.CharField(max_length=150)
     isactive = peewee.BooleanField(default=True)
     last_login = peewee.DateTimeField(default=NOW)
     login_count = peewee.IntegerField(default=0)
 
     def __str__(self):
-        return u"{}".format(self.username)
+        return "{}".format(self.username)
 
     def display_name(self):
-        return u"{name}/{group}/{login_count}".format(
-            name=self.username, group=self.group, login_count=self.login_count)
+        return "{name}/{group}/{login_count}".format(
+            name=self.username, group=self.group, login_count=self.login_count
+        )
 
     def crypt_password(self, password):
         return hashlib.sha224(str(password).encode("utf-8")).hexdigest()
@@ -169,11 +173,7 @@ class Organization(BaseModel):
     USA = "dollar"
     XOF = "xof"
     EURO = "euro"
-    DEVISE = {
-        USA: "$",
-        XOF: "F",
-        EURO: "€"
-    }
+    DEVISE = {USA: "$", XOF: "F", EURO: "€"}
 
     is_login = peewee.BooleanField(default=True)
     name_orga = peewee.CharField(verbose_name=(""))
@@ -189,7 +189,7 @@ class Organization(BaseModel):
         return self.display_name()
 
     def display_name(self):
-        return u"{}/{}/{}".format(self.name_orga, self.phone, self.email_org)
+        return "{}/{}/{}".format(self.name_orga, self.phone, self.email_org)
 
     @classmethod
     def get_or_create(cls, name_orga, typ):
@@ -201,7 +201,6 @@ class Organization(BaseModel):
 
 
 class License(BaseModel):
-
     code = peewee.CharField(unique=True)
     isactivated = peewee.BooleanField(default=False)
     activation_date = peewee.DateTimeField(default=NOW)
@@ -222,6 +221,7 @@ class License(BaseModel):
 
     def can_use(self):
         from cstatic import CConstants
+
         if not self.isactivated:
             if self.can_expired:
                 return CConstants.OK if not self.is_expired else CConstants.IS_EXPIRED
@@ -241,8 +241,7 @@ class License(BaseModel):
 
     def get_evaluation(self):
         self.can_expired = True
-        self.expiration_date = datetime.now() + timedelta(
-            days=60, milliseconds=4)
+        self.expiration_date = datetime.now() + timedelta(days=60, milliseconds=4)
         self.save()
 
     def remove_activation(self):
@@ -252,16 +251,14 @@ class License(BaseModel):
 
 
 class Version(BaseModel):
-
-    date = peewee.DateTimeField(
-        default=NOW, verbose_name="Date de Version")
+    date = peewee.DateTimeField(default=NOW, verbose_name="Date de Version")
     number = peewee.IntegerField(default=1, verbose_name="Numéro de Version")
 
     def __str__(self):
-        return u"{}/{}".format(self.number, self.date)
+        return "{}/{}".format(self.number, self.date)
 
     def display_name(self):
-        return u"db-v{}".format(self.number)
+        return "db-v{}".format(self.number)
 
     def update_v(self):
         self.number += 1
@@ -271,7 +268,6 @@ class Version(BaseModel):
 
 
 class History(BaseModel):
-
     date = peewee.DateTimeField(default=NOW)
     data = peewee.CharField()
     action = peewee.CharField()
@@ -282,12 +278,15 @@ class History(BaseModel):
 
 class Settings(BaseModel):
     """docstring for Settings"""
+
     PREV = 0
     CURRENT = 1
     DEFAULT = 2
-    LCONFIG = ((PREV, u"Precedent"),
-               (DEFAULT, u"Par defaut"),
-               (CURRENT, u"Actuel"),)
+    LCONFIG = (
+        (PREV, "Precedent"),
+        (DEFAULT, "Par defaut"),
+        (CURRENT, "Actuel"),
+    )
 
     DF = "systeme"
     BL = "blue"
@@ -308,4 +307,4 @@ class Settings(BaseModel):
         return self.display_name()
 
     def display_name(self):
-        return u"{}/{}/{}".format(self.slug, self.is_login, self.theme)
+        return "{}/{}/{}".format(self.slug, self.is_login, self.theme)

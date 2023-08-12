@@ -2,20 +2,16 @@
 # -*- coding: utf-8 -*-
 # Autor: Fadiga
 
-from __future__ import (
-    unicode_literals, absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-
-from Common.models import Version, Settings
+from models import Settings, Version
 
 
 class AdminFixture(object):
-
     LIST_CREAT = [Version(number=1), Settings()]
 
     def create_all_or_pass(self):
-
-        print(u"---- Init fixture -----")
+        print("---- Init fixture -----")
 
         for f in self.LIST_CREAT:
             try:

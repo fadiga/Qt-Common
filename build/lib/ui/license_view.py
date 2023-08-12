@@ -8,6 +8,8 @@ from datetime import datetime
 from cstatic import CConstants
 from exports import export_license_as_file
 from models import License
+
+# from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QDialog,
     QFormLayout,

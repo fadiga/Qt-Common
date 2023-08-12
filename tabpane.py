@@ -3,13 +3,13 @@
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
 
-from PyQt4.QtGui import QTabWidget
-from Common.ui.common import TabPane
+from PyQt5.QtWidgets import QTabWidget
+from ui.common import TabPane
 
 
 def tabbox(*args):
-    """ adds a box with tab
-    params:  (widget, title) title is the string """
+    """adds a box with tab
+    params:  (widget, title) title is the string"""
     tab_widget = QTabWidget()
     tab_widget.setMovable(True)
     # tab_widget.setAutoFillBackground(True)
