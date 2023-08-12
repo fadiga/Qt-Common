@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 # maintainer: fad
 
-from __future__ import unicode_literals, absolute_import, division, print_function
+try:
+    from configuration import Config
+except Exception as e:
+    print(e)
 
-from PyQt4.QtGui import QIcon, QToolBar, QCursor
-from PyQt4.QtCore import Qt, QSize
-
-from Common.ui.common import FMainWindow
-
-from configuration import Config
+from PyQt4.QtCore import QSize, Qt
+from PyQt4.QtGui import QCursor, QIcon, QToolBar
+from ui.common import FMainWindow
 
 
 class FMenuToolBar(QToolBar, FMainWindow):
@@ -36,7 +36,7 @@ class FMenuToolBar(QToolBar, FMainWindow):
         # self.setAutoFillBackground(True)
         # self.addSeparator()
         self.addAction(
-            QIcon(u"{}exit.png".format(Config.img_cmedia)), u"Quiter", self.goto_exit
+            QIcon("{}exit.png".format(Config.img_cmedia)), "Quiter", self.goto_exit
         )
 
         menu = []

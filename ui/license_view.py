@@ -5,10 +5,18 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from datetime import datetime
 
-from Common.cstatic import CConstants
-from Common.exports import export_license_as_file
-from Common.models import License, Organization
-from Common.ui.common import (
+from cstatic import CConstants
+from exports import export_license_as_file
+from models import License, Organization
+from PyQt5.QtWidgets import (
+    QDialog,
+    QFormLayout,
+    QGridLayout,
+    QGroupBox,
+    QTextEdit,
+    QVBoxLayout,
+)
+from ui.common import (
     Button,
     ButtonSave,
     DeletedBtt,
@@ -17,20 +25,12 @@ from Common.ui.common import (
     LineEdit,
     PyTextViewer,
 )
-from Common.ui.util import (
+from ui.util import (
     check_is_empty,
     clean_mac,
     get_lcse_file,
     is_valide_codition_field,
     make_lcse,
-)
-from PyQt5.QtWidgets import (
-    QDialog,
-    QFormLayout,
-    QGridLayout,
-    QGroupBox,
-    QTextEdit,
-    QVBoxLayout,
 )
 
 

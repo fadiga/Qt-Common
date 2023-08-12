@@ -7,13 +7,17 @@ import sys
 from threading import Event
 
 import requests
-from Common.cstatic import logger
-from Common.ui.util import acces_server, get_serv_url, internet_on, is_valide_mac
-from configuration import Config
+from cstatic import logger
 from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QLabel, QProgressBar, QPushButton, QStatusBar
 from server import Network
+from ui.util import acces_server, get_serv_url, internet_on, is_valide_mac
+
+try:
+    from configuration import Config
+except Exception as e:
+    print(e)
 
 # base_url = Config.BASE_URL
 
@@ -199,7 +203,7 @@ class TaskThreadServer(QThread):
     def run(self):
         p = 1
         w = 5
-        from Common.models import Organization
+        from models import Organization
 
         while not self.stopped.wait(w):
             if Organization().select().count() > 0:

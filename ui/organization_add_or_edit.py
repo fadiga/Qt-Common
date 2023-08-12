@@ -3,9 +3,7 @@
 # maintainer: Fad
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from Common.models import Organization
-from Common.ui.common import ButtonSave, FormLabel, FWidget, IntLineEdit, LineEdit
-from Common.ui.util import check_is_empty
+from models import Organization
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QCheckBox,
@@ -16,6 +14,8 @@ from PyQt5.QtWidgets import (
     QTextEdit,
     QVBoxLayout,
 )
+from ui.common import ButtonSave, FormLabel, FWidget, IntLineEdit, LineEdit
+from ui.util import check_is_empty
 
 
 class NewOrEditOrganizationViewWidget(QDialog, FWidget):

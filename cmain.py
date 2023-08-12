@@ -9,18 +9,22 @@ import gettext
 import locale
 
 import gettext_windows
-from Common.cstatic import CConstants
-from Common.models import Organization, Owner, Settings
-from Common.ui.license_view import LicenseViewWidget
-from Common.ui.login import LoginWidget
-from Common.ui.organization_add_or_edit import NewOrEditOrganizationViewWidget
-from Common.ui.restoration_view import RestorationViewWidget
-from Common.ui.style_qss import theme
-from Common.ui.user_add_or_edit import NewOrEditUserViewWidget
-from Common.ui.util import is_valide_mac
-from Common.ui.window import FWindow
+from cstatic import CConstants
+from models import Organization, Owner, Settings
 from PyQt5.QtWidgets import QDialog
-from ui.mainwindow import MainWindow
+from ui.license_view import LicenseViewWidget
+from ui.login import LoginWidget
+from ui.organization_add_or_edit import NewOrEditOrganizationViewWidget
+from ui.restoration_view import RestorationViewWidget
+from ui.style_qss import theme
+from ui.user_add_or_edit import NewOrEditUserViewWidget
+from ui.util import is_valide_mac
+from ui.window import FWindow
+
+try:
+    from ui.mainwindow import MainWindow
+except Exception as exc:
+    print(exc)
 
 
 def cmain():

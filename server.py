@@ -3,12 +3,17 @@
 import json
 
 import requests
-from Common.cstatic import logger
-from Common.models import License, Organization, Owner, Settings, Version
-from Common.ui.util import acces_server, datetime_to_str, get_serv_url, is_valide_mac
+from cstatic import logger
 from info_hot import getSystemInfo
+from models import License, Organization, Owner, Settings, Version
 from PyQt5.QtCore import QObject
-from ui.util import date_to_ts, internet_on
+from ui.util import (
+    acces_server,
+    datetime_to_str,
+    get_serv_url,
+    internet_on,
+    is_valide_mac,
+)
 
 try:
     from configuration import Config

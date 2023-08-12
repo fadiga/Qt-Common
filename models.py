@@ -12,7 +12,6 @@ import time
 from datetime import datetime, timedelta
 
 import peewee
-from Common.ui.util import copy_file, date_to_str, datetime_to_str
 from playhouse.migrate import (
     BooleanField,
     CharField,
@@ -20,6 +19,7 @@ from playhouse.migrate import (
     SqliteMigrator,
     migrate,
 )
+from ui.util import copy_file, date_to_str, datetime_to_str
 
 DB_FILE = "database.db"
 
@@ -96,7 +96,7 @@ class FileJoin(BaseModel):
         )
 
     def show_file(self):
-        from Common.ui.util import uopen_file
+        from ui.util import uopen_file
 
         uopen_file(self.get_file)
 

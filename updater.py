@@ -2,17 +2,16 @@
 # -*- coding: utf-8 -*-
 # maintainer: fadiga
 
-from PyQt4.QtCore import QThread, SIGNAL, QObject, Qt
 import json
-
-import requests
 from datetime import datetime
 from threading import Event
-from Common.models import Settings, Organization, License
-from Common.ui.util import get_serv_url, acces_server, is_valide_mac
-from Common.cstatic import CConstants, logger
 
+import requests
+from cstatic import CConstants, logger
+from models import License, Organization, Settings
+from PyQt4.QtCore import SIGNAL, QObject, Qt, QThread
 from server import Network
+from ui.util import acces_server, get_serv_url, is_valide_mac
 
 
 class UpdaterInit(QObject):
@@ -56,7 +55,7 @@ class TaskThreadUpdater(QThread):
         self.stopped = parent.stopFlag
 
     def run(self):
-        # from Common.ui.statusbar import GStatusBar
+        # from ui.statusbar import GStatusBar
         w = 5
         while not self.stopped.wait(w):
             w = 50

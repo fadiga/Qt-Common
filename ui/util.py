@@ -15,9 +15,12 @@ from time import mktime, strptime
 from urllib.request import URLError, urlopen
 from uuid import getnode
 
-from Common.cstatic import CConstants, logger
-from Common.ui.window import FWindow
-from PyQt5 import QtCore, QtWidgets
+from cstatic import CConstants, logger
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QSystemTrayIcon
+
+# from PyQt5.QtGui import
+from ui.window import FWindow
 
 try:
     unicode
@@ -53,7 +56,7 @@ def acces_server():
 
 
 def device_amount(value, dvs=None):
-    from Common.models import Settings
+    from models import Settings
 
     if dvs:
         return "{} {}".format(formatted_number(value), dvs)
@@ -180,7 +183,7 @@ def raise_success(title, message):
 
 def formatted_number(number, sep=".", aftergam=None):
     """ """
-    from Common.models import Settings
+    from models import Settings
 
     if not aftergam:
         aftergam = int(Settings.select().get().after_cam)
@@ -203,11 +206,11 @@ def formatted_number(number, sep=".", aftergam=None):
         return "%s" % number
 
 
-class SystemTrayIcon(QtGui.QSystemTrayIcon):
+class SystemTrayIcon(QSystemTrayIcon):
     def __init__(self, mss, parent=None):
-        QtGui.QSystemTrayIcon.__init__(self, parent)
+        QSystemTrayIcon.__init__(self, parent)
 
-        self.setIcon(QtGui.QIcon.fromTheme("document-save"))
+        self.setIcon(QIcon.fromTheme("document-save"))
 
         self.activated.connect(self.click_trap)
         # self.mss = ("Confirmation", "Mali rapou!!!!")
@@ -216,15 +219,15 @@ class SystemTrayIcon(QtGui.QSystemTrayIcon):
     def click_trap(self, value):
         # left click!
         if value == self.Trigger:
-            self.left_menu.exec_(QtGui.QCursor.pos())
+            self.left_menu.exec_(QCursor.pos())
 
     def welcome(self):
         self.showMessage(self.mss[0], self.mss[1])
 
     def show(self, mss):
         self.mss = mss
-        QtGui.QSystemTrayIcon.show(self)
-        QtCore.QTimer.singleShot(1000, self.welcome)
+        QSystemTrayIcon.show(self)
+        QTimer.singleShot(1000, self.welcome)
 
 
 def is_float(val):
@@ -316,7 +319,7 @@ def get_path(path, filename):
 
 
 def get_serv_url(sub_url):
-    from Common.models import Settings
+    from models import Settings
 
     return "{}/{}".format(Settings.get(id=1).url, sub_url)
 
@@ -381,7 +384,7 @@ def getlog(text):
 
 def is_valide_mac():
     """check de license"""
-    from Common.models import License
+    from models import License
 
     try:
         lcse = License.get(License.code == str(make_lcse()))

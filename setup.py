@@ -11,6 +11,7 @@ setup(
         "peewee>=3.0.0",
         "PyQt5>=5.0.0",
         "requests>=2.0.0",
+        "psutil>=5.9.0",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

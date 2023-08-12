@@ -40,7 +40,7 @@ from ui.util import check_is_empty
 try:
     from configuration import Config
 except Exception as e:
-    raise e
+    print(e)
 try:
     unicode
 except NameError:
@@ -232,7 +232,7 @@ class OrganizationTableWidget(FWidget):
         self.setLayout(vbox)
 
     def upload_logo(self):
-        from Common.exports import upload_file
+        from exports import upload_file
 
         upload_file(folder="C://", dst_folder=Config.ARMOIRE)
         self.accept()

@@ -7,15 +7,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from datetime import datetime
 
-from Common.models import (
-    FileJoin,
-    History,
-    License,
-    Organization,
-    Owner,
-    Settings,
-    Version,
-)
+from models import FileJoin, History, License, Organization, Owner, Settings, Version
 from playhouse import migrate as migrate_
 from playhouse.migrate import (
     BooleanField,
@@ -87,7 +79,7 @@ class AdminDatabase(object):
         count_list = len(self.LIST_MIGRATE)
         print("--check migrate--")
         if count_list != number:
-            from Common.models import migrator
+            from models import migrator
 
             print("Make migrate", self.LIST_MIGRATE)
             for x, y, z in self.LIST_MIGRATE:

@@ -4,7 +4,6 @@
 # maintainer: Fad
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from configuration import Config
 from exports import export_backup, export_database_as_file, import_backup
 from models import Owner, Settings
 from PyQt5.QtCore import SIGNAL, SLOT
@@ -12,6 +11,11 @@ from PyQt5.QtWidgets import QAction, QIcon, QMenuBar, QMessageBox, QPixmap
 from ui.clean_db import DBCleanerWidget
 from ui.common import FWidget
 from ui.license_view import LicenseViewWidget
+
+try:
+    from configuration import Config
+except Exception as e:
+    print(e)
 
 
 class FMenuBar(QMenuBar, FWidget):
@@ -142,7 +146,7 @@ class FMenuBar(QMenuBar, FWidget):
         self.file_.addAction(exit_)
 
     def logout(self):
-        from Common.ui.login import LoginWidget
+        from ui.login import LoginWidget
 
         LoginWidget(hibernate=True).exec_()
 
@@ -164,7 +168,7 @@ class FMenuBar(QMenuBar, FWidget):
     # Admin
 
     def goto_admin(self):
-        from Common.ui.admin import AdminViewWidget
+        from ui.admin import AdminViewWidget
 
         self.change_main_context(AdminViewWidget)
 
@@ -200,7 +204,7 @@ class FMenuBar(QMenuBar, FWidget):
         self.open_dialog(HTMLView, modal=True)
 
     def open_logo_file(self):
-        from Common.ui import util
+        from ui import util
 
         try:
             util.uopen_file(Config.NAME_MAIN.replace(".py", ".log"))

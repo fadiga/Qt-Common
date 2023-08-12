@@ -8,9 +8,9 @@ import os
 import shutil
 from datetime import datetime
 
-from Common.models import DB_FILE, Organization, Version
-from Common.ui.util import get_lcse_file, raise_error, raise_success, uopen_file
+from models import DB_FILE, Organization, Version
 from PyQt5.QtWidgets import QFileDialog, QWidget
+from ui.util import get_lcse_file, raise_error, raise_success, uopen_file
 
 # from configuration import Config
 
