@@ -5,18 +5,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from datetime import datetime
 
-from cstatic import CConstants
-from exports import export_license_as_file
-from models import License
-from PyQt5.QtWidgets import (
-    QDialog,
-    QFormLayout,
-    QGridLayout,
-    QGroupBox,
-    QTextEdit,
-    QVBoxLayout,
-)
-from ui.common import (
+from Common.cstatic import CConstants
+from Common.exports import export_license_as_file
+from Common.models import License, Organization
+from Common.ui.common import (
     Button,
     ButtonSave,
     DeletedBtt,
@@ -25,12 +17,20 @@ from ui.common import (
     LineEdit,
     PyTextViewer,
 )
-from ui.util import (
+from Common.ui.util import (
     check_is_empty,
     clean_mac,
     get_lcse_file,
     is_valide_codition_field,
     make_lcse,
+)
+from PyQt5.QtWidgets import (
+    QDialog,
+    QFormLayout,
+    QGridLayout,
+    QGroupBox,
+    QTextEdit,
+    QVBoxLayout,
 )
 
 
@@ -40,7 +40,7 @@ class LicenseViewWidget(QDialog, FWidget):
         self.parent = parent
 
         self.intro = FormLabel(
-            "<h3>Vous devez activé la license pour pouvoir" "<i>utiliser.</i></h3>"
+            "<h3>Vous devez activé la license pour pouvoir<i>utiliser.</i></h3>"
         )
         vbox = QVBoxLayout()
         try:
@@ -69,7 +69,7 @@ class LicenseViewWidget(QDialog, FWidget):
             <h2> Elle est n'est valable que pour cette machine</h2>
             <p><b>proprièteur: </b> {name} </p>
             <p><b>date d'activation:</b> {a_date} </p><hr>
-            <p><b>date d'activation:</b> {ex_date} </p><hr>
+            <p><b>date d'expiration:</b> {ex_date} </p><hr>
              <p><b>Merci.</b></li>
             """.format(
                 name=self.lcse.owner,
@@ -109,7 +109,7 @@ class LicenseViewWidget(QDialog, FWidget):
         self.info_field = PyTextViewer(
             """Vous avez besoin du code ci desous pour l'activation:
             <hr> <b>{code}</b><hr> <h4>Contacts:</h4>{contact}""".format(
-                code=clean_mac(), contact=CConstants.TEL_AUT
+                code=Organization.get(id=1).slug, contact=CConstants.TEL_AUT
             )
         )
         self.name_field = LineEdit()
@@ -117,7 +117,8 @@ class LicenseViewWidget(QDialog, FWidget):
 
         trial_lcse = Button("Activée l'evaluation")
         trial_lcse.clicked.connect(self.active_trial)
-        if self.lcse.expiration_date:
+
+        if self.lcse.is_expired and self.lcse.evaluation:
             trial_lcse.setEnabled(False)
 
         self.butt = ButtonSave("Enregistrer")

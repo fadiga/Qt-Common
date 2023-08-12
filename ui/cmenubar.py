@@ -27,9 +27,26 @@ class FMenuBar(QMenuBar, FWidget):
         self.file_ = self.addMenu("&Fichier")
         # Export
         backup = self.file_.addMenu("&Base de données")
+        backup.setIcon(QIcon("{}db.png".format(Config.img_cmedia)))
+        # Sauvegarde
+        savegarder = QAction(
+            QIcon.fromTheme("", QIcon("{}export.png".format(Config.img_cmedia))),
+            "Sauvegarder",
+            self,
+        )
+        savegarder.setShortcut("Alt+E")
+        self.connect(savegarder, SIGNAL("triggered()"), self.goto_export_db)
+        backup.addAction(savegarder)
 
-        backup.addAction("Sauvegarder", self.goto_export_db)
-        backup.addAction("Importer", self.goto_import_backup)
+        # Importer db
+        import_db = QAction(
+            QIcon.fromTheme("", QIcon("{}import_db.png".format(Config.img_cmedia))),
+            "Importation db",
+            self,
+        )
+        import_db.setShortcut("Alt+I")
+        self.connect(import_db, SIGNAL("triggered()"), self.goto_import_backup)
+        backup.addAction(import_db)
 
         ow = Owner.select().where(Owner.islog == True)
         if ow.exists():
@@ -39,29 +56,12 @@ class FMenuBar(QMenuBar, FWidget):
                 )
 
         # Comptes utilisateur
-        admin = self.file_.addMenu("Outils")
-        admin_ = QAction(
-            QIcon.fromTheme("emblem-system", QIcon("")), "Gestion Admistration", self
-        )
-        admin_.setShortcut("Ctrl+G")
-        self.connect(admin_, SIGNAL("triggered()"), self.goto_admin)
-        if ow.exists():
-            if ow.get().group == Owner.ADMIN:
-                admin.addAction(admin_)
+        admin = self.file_.addMenu("&Outils")
 
-        if "license" not in exclude_mn:
-            license = QAction(
-                QIcon.fromTheme("emblem-system", QIcon("")), "Activation", self
-            )
-            license.setShortcut("Alt+A")
-            self.connect(license, SIGNAL("triggered()"), self.goto_license)
-            admin.addAction(license)
-
-        preference = self.addMenu("Préference")
+        preference = self.addMenu("&Préference")
 
         if "theme" not in exclude_mn:
             _theme = preference.addMenu("Theme")
-            # styles = dict_style()
             styles = Settings.THEME
             list_theme = [
                 (
@@ -75,7 +75,6 @@ class FMenuBar(QMenuBar, FWidget):
                 )
                 for k in styles.keys()
             ]
-
             for m in list_theme:
                 icon = ""
                 if m.get("theme") == Settings.get(id=1).theme:
@@ -93,21 +92,47 @@ class FMenuBar(QMenuBar, FWidget):
                 )
                 _theme.addSeparator()
                 _theme.addAction(el_menu)
+                _theme.setIcon(QIcon("{}theme.png".format(Config.img_cmedia)))
 
+        if ow.exists():
+            if ow.get().group == Owner.ADMIN:
+                admin_ = QAction(
+                    QIcon.fromTheme(
+                        "", QIcon("{}settings.png".format(Config.img_cmedia))
+                    ),
+                    "Gestion Administration",
+                    self,
+                )
+                admin_.setShortcut("Ctrl+G")
+                self.connect(admin_, SIGNAL("triggered()"), self.goto_admin)
+                preference.addAction(admin_)
         # logout
         lock = QAction(
             QIcon("{}login.png".format(Config.img_cmedia)), "Verrouiller", self
         )
         lock.setShortcut("Ctrl+V")
-        lock.setToolTip("Verrouile l'application")
+        lock.setToolTip("Verrouiller l'application")
         self.connect(lock, SIGNAL("triggered()"), self.logout)
         self.file_.addAction(lock)
         # R
         log_file = QAction(QIcon(), "Log ", self)
         log_file.setShortcut("Ctrl+l")
-        log_file.setToolTip("Verrouile l'application")
+        # log_file.setToolTip(u"Verrouiller l'application")
         self.connect(log_file, SIGNAL("triggered()"), self.open_logo_file)
         admin.addAction(log_file)
+
+        g_license = self.addMenu("&Licence")
+        if "license" not in exclude_mn:
+            license = QAction(
+                QIcon.fromTheme(
+                    "emblem-system", QIcon("{}licence.png".format(Config.img_cmedia))
+                ),
+                "Activation",
+                self,
+            )
+            license.setShortcut("Alt+A")
+            self.connect(license, SIGNAL("triggered()"), self.goto_license)
+            g_license.addAction(license)
 
         # Exit
         exit_ = QAction(QIcon.fromTheme("application-exit", QIcon("")), "Exit", self)
@@ -117,7 +142,7 @@ class FMenuBar(QMenuBar, FWidget):
         self.file_.addAction(exit_)
 
     def logout(self):
-        from ui.login import LoginWidget
+        from Common.ui.login import LoginWidget
 
         LoginWidget(hibernate=True).exec_()
 
@@ -139,7 +164,7 @@ class FMenuBar(QMenuBar, FWidget):
     # Admin
 
     def goto_admin(self):
-        from ui.admin import AdminViewWidget
+        from Common.ui.admin import AdminViewWidget
 
         self.change_main_context(AdminViewWidget)
 
@@ -175,7 +200,7 @@ class FMenuBar(QMenuBar, FWidget):
         self.open_dialog(HTMLView, modal=True)
 
     def open_logo_file(self):
-        from ui import util
+        from Common.ui import util
 
         try:
             util.uopen_file(Config.NAME_MAIN.replace(".py", ".log"))

@@ -14,24 +14,22 @@ from ui.common import (
     FDialog,
     FMainWindow,
     FormLabel,
+    FWidget,
     LineEdit,
 )
 from ui.util import check_is_empty, field_error
 
 try:
-    from .configuration import Config
+    from configuration import Config
 except Exception as exc:
     print(exc)
 
 
-class LoginWidget(FDialog, FMainWindow):
+class LoginWidget(FDialog, FWidget):
     title_page = "Identification"
 
-    # def __init__(self, hibernate=False):
     def __init__(self, parent=None, hibernate=False, *args, **kwargs):
-        # FDialog.__init__(self)
-        FDialog.__init__(self, parent=parent, *args, **kwargs)
-        self.setWindowTitle(self.set_window_title(self.title_page))
+        QDialog.__init__(self, parent=parent, *args, **kwargs)
         self.hibernate = hibernate
 
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -59,7 +57,6 @@ class LoginWidget(FDialog, FMainWindow):
 
     def loginUserGroupBox(self):
         self.topLeftGroupBox = QGroupBox(self.tr("Identification"))
-
         self.liste_username = Owner.select().where(Owner.isactive == True)
         # Combobox widget
         self.box_username = QComboBox()

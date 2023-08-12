@@ -5,7 +5,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from datetime import date
 
-from periods import Period
+from Common.periods import Period
+from Common.ui.statusbar import GStatusBar
+from configuration import Config
 from PyQt5.QtCore import QSortFilterProxyModel
 from PyQt5.QtGui import (
     QBrush,
@@ -36,12 +38,7 @@ from PyQt5.QtWidgets import (
     QToolButton,
     QWidget,
 )
-from ui.statusbar import GStatusBar
 
-try:
-    from .configuration import Config
-except Exception as exc:
-    print(exc)
 try:
     unicode
 except:
@@ -92,16 +89,16 @@ class FMainWindow(QMainWindow):
         d.exec_()
 
     def logout(self):
-        from models import Owner, Organization
+        from Common.models import Owner, Settings
 
         # print("logout")
-        if Organization.get(id=1).is_login:
+        if Settings.get(id=1).is_login:
             for ur in Owner.select().where(Owner.islog == True):
                 ur.islog = False
                 ur.save()
 
-    def Notify(self, mssg, type_mssg):
-        from notification import Notification
+    def Notify(self, mssg="Hi", type_mssg="warring"):
+        from Common.notification import Notification
 
         self.notify = Notification(mssg=mssg, type_mssg=type_mssg)
 

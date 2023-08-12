@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
 import json
-import os
 
 import requests
-from models import License
+from Common.cstatic import logger
+from Common.models import License, Organization, Owner, Settings, Version
+from Common.ui.util import acces_server, datetime_to_str, get_serv_url, is_valide_mac
+from info_hot import getSystemInfo
 from PyQt5.QtCore import QObject
 from ui.util import date_to_ts, internet_on
 
@@ -15,76 +17,79 @@ except Exception as exc:
 
 
 class Network(QObject):
-    # base_url =
     def __init__(self):
         QObject.__init__(self)
 
-        if not Config.SERV:
-            # print("Not Serveur ")
-            return
-
-        # self.check = TaskThreadServerM(self)
-        # QObject.connect(self.check, SIGNAL("download_"), self.download_)
-        # self.check.start()
+        logger.info("Connexion serveur ...")
 
     def submit(self, url, data):
-        print("submit", data)
-        if internet_on(Config.BASE_URL):
+        logger.debug("submit", "data", " url ", url)
+        resp_dict = {"response": {"message": "-"}}
+        if acces_server():
             client = requests.session()
-            response = client.get(url, data=json.dumps(data))
             try:
-                return json.loads(response.content.decode("UTF-8"))
-            except ValueError:
-                return False
-            except Exception as e:
-                print(e)
+                response = client.get(get_serv_url(url), data=json.dumps(data))
+                logger.info(response)
+                if response.status_code == 200:
+                    # logger.debug(response.status_code)
+                    try:
+                        return json.loads(response.content.decode("UTF-8"))
+                    except Exception as e:
+                        return {"response": e}
+            except:
+                return resp_dict.update({"response": "Serveur non disponible"})
         else:
-            pass
+            return resp_dict.update({"response": "Pas d'internet"})
 
     def update_version_checher(self):
-        url_ = Config.BASE_URL + "/desktop_client"
-        print("update_version_checher", url_)
-        data = {"app_info": {"name": Config.APP_NAME, "version": Config.APP_VERSION}}
-        lcse_dic = []
-        if Config.LSE:
-            for lcse in License.select():
-                acttn_date = date_to_ts(lcse.activation_date)
-                lcse_dic.append(
-                    {
-                        # "owner": lcse.owner,
-                        "code": lcse.code,
-                        "isactivated": lcse.isactivated,
-                        "activation_date": acttn_date,
-                        "can_expired": lcse.can_expired,
-                        "expiration_date": date_to_ts(lcse.expiration_date)
-                        if lcse.can_expired
-                        else acttn_date,
-                    }
-                )
-            data.update({"licenses": lcse_dic})
-        return self.submit(url_, data)
+        # logger.debug("update_version_checher")
 
-    def check_licence(self):
-        pass
+        from configuration import Config
 
-    def get_licence(self):
-        url_ = Config.BASE_URL + "/license"
-        print("update_license_checher", url_)
-        data = {"app_info": {"name": Config.APP_NAME, "version": Config.APP_VERSION}}
+        orga = Organization.get(id=1)
+        data = {
+            "org_slug": orga.slug,
+            "app_info": {"name": Config.APP_NAME, "version": Config.APP_VERSION},
+            "getSystemInfo": json.loads(getSystemInfo()),
+            "current_lcse": is_valide_mac()[0].code,
+        }
+
         lcse_dic = []
+        # if Config.LSE:
         for lcse in License.select():
-            acttn_date = date_to_ts(lcse.activation_date)
+            acttn_date = datetime_to_str(lcse.activation_date)
             lcse_dic.append(
                 {
-                    # "owner": lcse.owner,
                     "code": lcse.code,
                     "isactivated": lcse.isactivated,
                     "activation_date": acttn_date,
                     "can_expired": lcse.can_expired,
-                    "expiration_date": date_to_ts(lcse.expiration_date)
+                    "expiration_date": datetime_to_str(lcse.expiration_date)
                     if lcse.can_expired
                     else acttn_date,
                 }
             )
         data.update({"licenses": lcse_dic})
-        return self.submit(url_, data)
+
+        return self.submit("desktop_client", data)
+
+    def get_or_inscript_app(self):
+        from configuration import Config
+
+        orga = Organization.get(id=1)
+        sttg = Settings.get(id=1)
+        data = {
+            "app_info": {"name": Config.APP_NAME, "version": Config.APP_VERSION},
+            "getSystemInfo": json.loads(getSystemInfo()),
+            "organization": {"slug": orga.slug, "data": orga.data()},
+            "licenses": [i.data() for i in License.all()],
+        }
+
+        rep = self.submit("inscription_client", data)
+        if not rep:
+            logger.debug("No response")
+            return
+        if rep.get("is_create"):
+            orga.slug = rep.get("org_slug")
+            orga.save()
+        return rep

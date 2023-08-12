@@ -4,6 +4,8 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+# from num2words import num2words
+from Common.ui.util import openFile
 from reportlab.lib.colors import HexColor
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
@@ -14,12 +16,9 @@ from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 from reportlab.platypus.tables import Table, TableStyle
 
-# from num2words import num2words
-from ui.util import openFile
-
 # setup the empty canvas
 # from io import FileIO as file
-# from pyPdf import PdfFileWriter, PdfFileReader
+# from Common.pyPdf import PdfFileWriter, PdfFileReader
 # from PyPDF2 import PdfFileWriter, PdfFileReader
 # from datetime import datetime
 
@@ -44,7 +43,6 @@ def export_dynamic_data(dict_data):
     ldata.append(headers)
     #
     for r in data:
-        print(r)
         row_table = []
         for elr in r:
             row_table.append(Paragraph("{}".format(elr), styleN))

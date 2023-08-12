@@ -3,7 +3,9 @@
 # maintainer: Fad
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from models import Organization
+from Common.models import Organization
+from Common.ui.common import ButtonSave, FormLabel, FWidget, IntLineEdit, LineEdit
+from Common.ui.util import check_is_empty
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QCheckBox,
@@ -14,8 +16,6 @@ from PyQt5.QtWidgets import (
     QTextEdit,
     QVBoxLayout,
 )
-from ui.common import ButtonSave, FormLabel, FWidget, IntLineEdit, LineEdit
-from ui.util import check_is_empty
 
 
 class NewOrEditOrganizationViewWidget(QDialog, FWidget):
@@ -36,11 +36,11 @@ class NewOrEditOrganizationViewWidget(QDialog, FWidget):
     def organization_group_box(self):
         self.organGroupBoxBtt = QGroupBox(self.tr("Nouvelle Organisation"))
 
-        self.liste_devise = Organization.DEVISE
+        # self.liste_devise = Organization.DEVISE
         # Combobox widget
-        self.box_devise = QComboBox()
-        for index in self.liste_devise:
-            self.box_devise.addItem("{} {}".format(self.liste_devise[index], index))
+        # self.box_devise = QComboBox()
+        # for index in self.liste_devise:
+        #     self.box_devise.addItem("{} {}".format(self.liste_devise[index], index))
 
         self.checked = QCheckBox("Active")
         self.checked.setChecked(True)
@@ -48,6 +48,7 @@ class NewOrEditOrganizationViewWidget(QDialog, FWidget):
             """Cocher si vous voulez pour deactive
                                 le login continue à utiliser le systeme"""
         )
+        self.logo_orga = LineEdit()
         self.name_orga = LineEdit()
         self.phone = IntLineEdit()
         self.bp = LineEdit()
@@ -55,10 +56,11 @@ class NewOrEditOrganizationViewWidget(QDialog, FWidget):
         self.email_org = LineEdit()
 
         formbox = QFormLayout()
+        formbox.addRow(FormLabel("logo de l'organisation *"), self.logo_orga)
         formbox.addRow(FormLabel("Nom de l'organisation *"), self.name_orga)
         formbox.addRow(FormLabel("Tel *"), self.phone)
         formbox.addRow(FormLabel("Activer la saisie de mot de passe"), self.checked)
-        formbox.addRow(FormLabel("Devise"), self.box_devise)
+        # formbox.addRow(FormLabel(u"Devise"), self.box_devise)
         formbox.addRow(FormLabel("B.P"), self.bp)
         formbox.addRow(FormLabel("E-mail:"), self.email_org)
         formbox.addRow(FormLabel("Adresse complete:"), self.adress_org)
@@ -76,7 +78,7 @@ class NewOrEditOrganizationViewWidget(QDialog, FWidget):
         if check_is_empty(self.phone):
             return
         name_orga = str(self.name_orga.text())
-        device = str(self.box_devise.currentText().split()[1])
+        # device = str(self.box_devise.currentText().split()[1])
         bp = str(self.bp.text())
         email_org = str(self.email_org.text())
         phone = str(self.phone.text())
@@ -84,7 +86,7 @@ class NewOrEditOrganizationViewWidget(QDialog, FWidget):
 
         org = Organization()
         org.phone = phone
-        org.device = device
+        # org.device = device
         org.name_orga = name_orga
         org.email_org = email_org
         org.bp = bp

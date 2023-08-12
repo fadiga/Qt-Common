@@ -4,7 +4,7 @@
 # maintainer: Fad
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from models import Organization, Owner
+from models import Organization, Owner, Settings
 from PyQt5.QtCore import SIGNAL, Qt
 from PyQt5.QtWidgets import (
     QCheckBox,
@@ -38,10 +38,9 @@ from ui.user_add_or_edit import NewOrEditUserViewWidget
 from ui.util import check_is_empty
 
 try:
-    from .configuration import Config
-except Exception as exc:
-    print(exc)
-
+    from configuration import Config
+except Exception as e:
+    raise e
 try:
     unicode
 except NameError:
@@ -72,6 +71,11 @@ class AdminViewWidget(FWidget):
         gridbox = QGridLayout()
         history_table = QVBoxLayout()
 
+        table_settings = QVBoxLayout()
+        self.table_settings = SettingsTableWidget(parent=self)
+        table_settings.addLayout(editbox)
+        table_settings.addWidget(self.table_settings)
+
         self.history_table = TrashTableWidget(parent=self)
         history_table.addLayout(gridbox)
         history_table.addWidget(self.history_table)
@@ -82,9 +86,10 @@ class AdminViewWidget(FWidget):
         table_login.addWidget(self.table_login)
 
         tab_widget = tabbox(
+            (table_settings, _("Paramètre")),
             (table_config, _("Gestion de l'organisation")),
             (history_table, _("Historique")),
-            (table_login, _("Gestion d'Utilisateurs")),
+            (table_login, _("Gestion d'utilisateurs")),
         )
 
         vbox = QVBoxLayout()
@@ -121,7 +126,12 @@ class TrashTableWidget(FTableWidget):
 
         self.parent = parent
 
-        self.hheaders = [_("Selection"), _("Date"), _("categorie"), _("Description")]
+        self.hheaders = [
+            _("Selection"),
+            _("Date"),
+            _("categorie"),
+            _("Description"),
+        ]
         self.stretch_columns = [0]
         self.align_map = {0: "l"}
         self.ecart = -5
@@ -179,39 +189,37 @@ class OrganizationTableWidget(FWidget):
         # vbox.addWidget(FPageTitle(u"Utilisateur: %s " %
         # self.organisation.name_orga))
 
-        self.liste_devise = Organization.DEVISE
+        # self.liste_devise = Organization.DEVISE
         # Combobox widget
-        self.box_vilgule = QDoubleSpinBox()
 
-        self.box_devise = QComboBox()
-        for index, value in enumerate(self.liste_devise):
-            self.box_devise.addItem("{} {}".format(self.liste_devise[value], value))
-            if self.organization.devise == value:
-                self.box_devise.setCurrentIndex(index)
+        # self.checked = QCheckBox("Active")
+        # if self.organization.is_login:
+        #     self.checked.setCheckState(Qt.Checked)
+        # self.checked.setToolTip(
+        #     u"""Cocher si vous voulez pour deactive
+        #                         le login continue à utiliser le systeme"""
+        # )
 
-        self.checked = QCheckBox("Active")
-        if self.organization.is_login:
-            self.checked.setCheckState(Qt.Checked)
-        self.checked.setToolTip(
-            """Cocher si vous voulez pour deactive
-                                le login continue à utiliser le systeme"""
+        self.bn_upload = Button("logo de l'organisation")
+        self.bn_upload.setIcon(
+            QIcon.fromTheme("", QIcon("{}db.png".format(Config.img_cmedia)))
         )
+        self.bn_upload.clicked.connect(self.upload_logo)
+
+        self.logo_orga = LineEdit(self.organization.logo_orga)
         self.name_orga = LineEdit(self.organization.name_orga)
         self.phone = IntLineEdit(str(self.organization.phone))
-        self.after_cam = self.box_vilgule.setValue(float(self.organization.after_cam))
-        self.box_vilgule.setMaximum(4)
+        self.phone.setMaximumWidth(250)
         self.bp = LineEdit(self.organization.bp)
+        self.bp.setMaximumWidth(250)
         self.adress_org = QTextEdit(self.organization.adress_org)
         self.email_org = LineEdit(self.organization.email_org)
+        self.email_org.setMaximumWidth(250)
 
         formbox = QFormLayout()
+        formbox.addRow(self.bn_upload, self.logo_orga)
         formbox.addRow(FormLabel("Nom de l'organisation:"), self.name_orga)
         formbox.addRow(FormLabel("Tel:"), self.phone)
-        formbox.addRow(FormLabel("Activer le login"), self.checked)
-        formbox.addRow(FormLabel("Devise :"), self.box_devise)
-        formbox.addRow(
-            FormLabel("Nombre de chiffre après la vilgule :"), self.box_vilgule
-        )
         formbox.addRow(FormLabel("B.P:"), self.bp)
         formbox.addRow(FormLabel("E-mail:"), self.email_org)
         formbox.addRow(FormLabel("Adresse complete:"), self.adress_org)
@@ -222,6 +230,12 @@ class OrganizationTableWidget(FWidget):
 
         vbox.addLayout(formbox)
         self.setLayout(vbox)
+
+    def upload_logo(self):
+        from Common.exports import upload_file
+
+        upload_file(folder="C://", dst_folder=Config.ARMOIRE)
+        self.accept()
 
     def save_edit(self):
         """add operation"""
@@ -235,14 +249,10 @@ class OrganizationTableWidget(FWidget):
         orga = Organization().get(id=1)
         orga.name_orga = name_orga
         orga.phone = unicode(self.phone.text())
-        orga.is_login = True if self.checked.checkState() == Qt.Checked else False
-        orga.devise = str(self.box_devise.currentText().split()[1])
-        orga.after_cam = int(self.box_vilgule.value())
         orga.email_org = unicode(self.email_org.text())
         orga.bp = unicode(self.bp.text())
         orga.adress_org = unicode(self.adress_org.toPlainText())
         orga.save()
-        print(orga.is_login)
         self.parent.parent.Notify(
             "Le Compte %s a été mise à jour" % orga.name_orga, "success"
         )
@@ -255,19 +265,20 @@ class LoginManageWidget(FWidget):
         self.parent = parent
 
         self.table_owner = OwnerTableWidget(parent=self)
+        self.table_owner.setFixedWidth(300)
         self.table_info = InfoTableWidget(parent=self)
         self.operation = OperationWidget(parent=self)
-        # self.operation.
+        self.operation.setFixedHeight(100)
 
-        splitter = QSplitter(Qt.Vertical)
-        _splitter = QSplitter(Qt.Horizontal)
-        _splitter.addWidget(self.table_owner)
-        _splitter.addWidget(self.table_info)
-        splitter.addWidget(_splitter)
-        splitter.addWidget(self.operation)
-        # self.operation.resize(10, 10)
+        splitterH = QSplitter(Qt.Horizontal)
+        splitterH.addWidget(self.table_owner)
+
+        splitterV = QSplitter(Qt.Vertical)
+        splitterV.addWidget(self.operation)
+        splitterV.addWidget(self.table_info)
+        splitterH.addWidget(splitterV)
         vbox = QHBoxLayout(self)
-        vbox.addWidget(splitter)
+        vbox.addWidget(splitterH)
         self.setLayout(vbox)
 
 
@@ -282,16 +293,14 @@ class OperationWidget(FWidget):
         gridbox = QGridLayout()
         self.parent = parent
 
-        self.add_ow_but = Button(_("Nouvel utilisateur"))
+        self.add_ow_but = Button(_("+ Utilisateur"))
+        self.add_ow_but.setMaximumWidth(250)
+        # self.add_ow_but.setMaximumHeight(90)
         self.add_ow_but.setIcon(
             QIcon.fromTheme("", QIcon("{}user_add.png".format(Config.img_cmedia)))
         )
         self.add_ow_but.clicked.connect(self.add_owner)
-
-        gridbox.addWidget(self.add_ow_but, 0, 0)
-
-        gridbox.setColumnStretch(1, 5)
-        vbox.addLayout(gridbox)
+        vbox.addWidget(self.add_ow_but)
         self.setLayout(vbox)
 
     def add_owner(self):
@@ -338,7 +347,9 @@ class OwnerQListWidgetItem(QListWidgetItem):
             logo = "user_active" if self.owner.isactive else "user_deactive"
         icon = QIcon()
         icon.addPixmap(
-            QPixmap("{}{}.png".format(Config.img_cmedia, logo)), QIcon.Normal, QIcon.Off
+            QPixmap("{}{}.png".format(Config.img_cmedia, logo)),
+            QIcon.Normal,
+            QIcon.Off,
         )
         self.setIcon(icon)
         self.init_text()
@@ -376,11 +387,12 @@ class InfoTableWidget(FWidget):
             )
         )
         self.edit_ow_but.setEnabled(False)
+        self.edit_ow_but.setMaximumHeight(90)
         self.edit_ow_but.clicked.connect(self.edit_owner)
 
         self.formbox = QGridLayout()
-        self.formbox.addWidget(self.details, 0, 0)
-        self.formbox.addWidget(self.edit_ow_but, 0, 1)
+        self.formbox.addWidget(self.edit_ow_but, 0, 0)
+        self.formbox.addWidget(self.details, 1, 0)
         # self.formbox.ColumnStretch(4, 2)
         # self.formbox.RowStretch(6, 2)
         vbox = QVBoxLayout()
@@ -417,3 +429,99 @@ class InfoTableWidget(FWidget):
             modal=True,
             pp=self.parent.table_info,
         )
+
+
+class SettingsTableWidget(FWidget):
+    def __init__(self, parent, *args, **kwargs):
+        super(FWidget, self).__init__(parent=parent, *args, **kwargs)
+
+        self.settings = Settings().get(id=1)
+        self.parent = parent
+        vbox = QVBoxLayout()
+        # self.slug_field =
+        self.url_field = LineEdit(self.settings.url)
+        self.list_theme = Settings.THEME
+        # Combobox widget
+        self.box_theme = QComboBox()
+        for index, value in enumerate(self.list_theme):
+            self.box_theme.addItem("{}".format(self.list_theme[value]), value)
+            if self.settings.theme == value:
+                self.box_theme.setCurrentIndex(index)
+
+        self.box_vilgule = QDoubleSpinBox()
+
+        self.box_vilgule.setMaximum(4)
+        self.after_cam = self.box_vilgule.setValue(float(self.settings.after_cam))
+
+        self.liste_devise = Settings.DEVISE
+        # Combobox widget
+        self.box_devise = QComboBox()
+        for index, value in enumerate(self.liste_devise):
+            self.box_devise.addItem("{}".format(self.liste_devise[value]), value)
+            if self.settings.devise == value:
+                self.box_devise.setCurrentIndex(index)
+
+        self.liste_position = Settings.POSITION
+        # Combobox widget
+        self.box_position = QComboBox()
+        for index, value in enumerate(self.liste_position):
+            self.box_position.addItem("{}".format(self.liste_position[value]), value)
+            if self.settings.toolbar_position == value:
+                self.box_position.setCurrentIndex(index)
+
+        self.checked = QCheckBox("Active")
+        if self.settings.is_login:
+            self.checked.setCheckState(Qt.Checked)
+        self.checked.setToolTip(
+            """Cocher si vous voulez pour deactive
+                                le login continue à utiliser le systeme"""
+        )
+        self.toolbar_checked = QCheckBox("Active")
+        print("toolbar ", self.settings.toolbar)
+        if self.settings.toolbar:
+            self.toolbar_checked.setCheckState(Qt.Checked)
+        self.toolbar_checked.setToolTip(
+            """Cocher si vous voulez pour deactive
+                                le menu toolbar"""
+        )
+
+        formbox = QFormLayout()
+        formbox.addRow(FormLabel("URL :*"), self.url_field)
+        formbox.addRow(FormLabel("Theme :"), self.box_theme)
+        formbox.addRow(FormLabel("Identification"), self.checked)
+        formbox.addRow(FormLabel("Menu vertical"), self.toolbar_checked)
+        formbox.addRow(
+            FormLabel("Nombre de chiffre après la vilgule :"), self.box_vilgule
+        )
+        formbox.addRow(FormLabel("Devise :"), self.box_devise)
+        formbox.addRow(FormLabel("Position du menu :"), self.box_position)
+
+        butt = ButtonSave("Enregistrer")
+        butt.clicked.connect(self.save_edit)
+        formbox.addRow("", butt)
+
+        vbox.addLayout(formbox)
+        self.setLayout(vbox)
+
+    def save_edit(self):
+        """add operation"""
+        # if check_is_empty(self.url_field):
+        #     return
+
+        self.settings.url = str(self.url_field.text())
+        self.settings.is_login = (
+            True if self.checked.checkState() == Qt.Checked else False
+        )
+        self.settings.toolbar = (
+            True if self.toolbar_checked.checkState() == Qt.Checked else False
+        )
+        print("self.settings.toolbar", self.settings.toolbar)
+        self.settings.after_cam = int(self.box_vilgule.value())
+        self.settings.theme = self.box_theme.itemData(self.box_theme.currentIndex())
+        self.settings.devise = self.box_devise.itemData(self.box_devise.currentIndex())
+        self.settings.toolbar_position = self.box_position.itemData(
+            self.box_position.currentIndex()
+        )
+        self.settings.save()
+
+        self.parent.parent.Notify("Paramètre mise à jour avec success", "success")

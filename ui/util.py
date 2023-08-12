@@ -12,11 +12,12 @@ import sys
 import tempfile
 from datetime import datetime
 from time import mktime, strptime
+from urllib.request import URLError, urlopen
 from uuid import getnode
 
-from cstatic import CConstants
+from Common.cstatic import CConstants, logger
+from Common.ui.window import FWindow
 from PyQt5 import QtCore, QtWidgets
-from ui.window import FWindow
 
 try:
     unicode
@@ -24,13 +25,40 @@ except NameError:
     unicode = str
 
 
+def internet_on():
+    try:
+        urlopen("https://google.com", timeout=1)
+        return True
+    except URLError as err:
+        logger.debug("URLError {}".format(err))
+        return False
+    except Exception as exc:
+        logger.debug(exc)
+
+
+def acces_server():
+    if not CConstants.SERV:
+        logger.debug("Not server mode")
+        return False
+
+    if not internet_on():
+        return
+    try:
+        urlopen(get_serv_url(""), timeout=1)
+        return True
+    except URLError as err:
+        return False
+    except Exception as e:
+        logger.debug(e)
+
+
 def device_amount(value, dvs=None):
-    from models import Organization
+    from Common.models import Settings
 
     if dvs:
         return "{} {}".format(formatted_number(value), dvs)
     try:
-        organ = Organization().get(id=1)
+        organ = Settings().get(id=1)
     except Exception as e:
         print(e)
     d = organ.DEVISE[organ.devise]
@@ -47,7 +75,7 @@ def check_is_empty(field):
     containt = ""
     # if isinstance(field, )
     field.setToolTip("")
-    if isinstance(field, QtWidgets.QTextEdit):
+    if isinstance(field, QtGui.QTextEdit):
         containt = field.toPlainText()
     else:
         containt = field.text()
@@ -126,11 +154,11 @@ def get_temp_filename(extension=None):
 
 
 def raise_error(title, message):
-    box = QtWidgets.QMessageBox(
-        QtWidgets.QMessageBox.Critical,
+    box = QtGui.QMessageBox(
+        QtGui.QMessageBox.Critical,
         title,
         message,
-        QtWidgets.QMessageBox.Ok,
+        QtGui.QMessageBox.Ok,
         parent=FWindow.window,
     )
     box.setWindowOpacity(0.9)
@@ -139,11 +167,11 @@ def raise_error(title, message):
 
 
 def raise_success(title, message):
-    box = QtWidgets.QMessageBox(
-        QtWidgets.QMessageBox.Information,
+    box = QtGui.QMessageBox(
+        QtGui.QMessageBox.Information,
         title,
         message,
-        QtWidgets.QMessageBox.Ok,
+        QtGui.QMessageBox.Ok,
         parent=FWindow.window,
     )
     box.setWindowOpacity(0.9)
@@ -152,10 +180,10 @@ def raise_success(title, message):
 
 def formatted_number(number, sep=".", aftergam=None):
     """ """
-    from models import Organization
+    from Common.models import Settings
 
     if not aftergam:
-        aftergam = int(Organization.select().get().after_cam)
+        aftergam = int(Settings.select().get().after_cam)
     locale_name, encoding = locale.getlocale()
     locale.setlocale(locale.LC_ALL, "fra")
     fmt = "%s"
@@ -171,15 +199,15 @@ def formatted_number(number, sep=".", aftergam=None):
     except AttributeError:
         return locale.format(fmt, number, grouping=True)
     except Exception as e:
-        print("formatted_number : ", e)
+        logger.debug("formatted_number : ", e)
         return "%s" % number
 
 
-class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
+class SystemTrayIcon(QtGui.QSystemTrayIcon):
     def __init__(self, mss, parent=None):
-        QtWidgets.QSystemTrayIcon.__init__(self, parent)
+        QtGui.QSystemTrayIcon.__init__(self, parent)
 
-        self.setIcon(QtWidgets.QIcon.fromTheme("document-save"))
+        self.setIcon(QtGui.QIcon.fromTheme("document-save"))
 
         self.activated.connect(self.click_trap)
         # self.mss = ("Confirmation", "Mali rapou!!!!")
@@ -188,14 +216,14 @@ class SystemTrayIcon(QtWidgets.QSystemTrayIcon):
     def click_trap(self, value):
         # left click!
         if value == self.Trigger:
-            self.left_menu.exec_(QtWidgets.QCursor.pos())
+            self.left_menu.exec_(QtGui.QCursor.pos())
 
     def welcome(self):
         self.showMessage(self.mss[0], self.mss[1])
 
     def show(self, mss):
         self.mss = mss
-        QtWidgets.QSystemTrayIcon.show(self)
+        QtGui.QSystemTrayIcon.show(self)
         QtCore.QTimer.singleShot(1000, self.welcome)
 
 
@@ -205,6 +233,7 @@ def is_float(val):
         return float(val)
     except Exception as e:
         # print("is_float", e)
+        logger.debug("is_float ", e)
         return 0
 
 
@@ -217,7 +246,20 @@ def is_int(val):
         return int(v)
     except Exception as e:
         # print("is_int", e)
+        logger.debug("is_int ", e)
         return 0
+
+
+def date_to_str(date):
+    if not date:
+        return None
+    if isinstance(date, str):
+        d, m, y = date.split("/")
+        if len(y) == 4:
+            return "{}-{}-{}".format(y, m, d)
+        else:
+            return date.replace("/", "-")
+    return date.strftime("%Y-%m-%d")
 
 
 def alerte():
@@ -230,7 +272,7 @@ def format_date(dat):
     return "-".join([year, month, day])
 
 
-def date_to_ts(date):
+def datetime_to_str(date):
     return mktime(strptime(date.strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S"))
 
 
@@ -271,6 +313,12 @@ def rename_file(path, old_filename, new_filename):
 
 def get_path(path, filename):
     return os.path.join(path, filename)
+
+
+def get_serv_url(sub_url):
+    from Common.models import Settings
+
+    return "{}/{}".format(Settings.get(id=1).url, sub_url)
 
 
 def slug_mane_file(file_name):
@@ -331,34 +379,16 @@ def getlog(text):
     return "Log-{}".format(text)
 
 
-def internet_on(url):
-    from urllib.request import urlopen, URLError
-
-    try:
-        urlopen(url, timeout=1)
-        return True
-    except URLError as err:
-        print(err)
-        return False
-    except Exception as e:
-        print(e)
-
-
 def is_valide_mac():
     """check de license"""
-    from models import License
+    from Common.models import License
 
-    lcse = CConstants.IS_EXPIRED
-    # print(lcse)
-    if License.select(License.can_expired == 0).count() > 0:
-        return CConstants.OK
     try:
-        lcse = License.get(License.code == str(make_lcse())).can_use()
+        lcse = License.get(License.code == str(make_lcse()))
+        return lcse, lcse.can_use()
     except Exception as e:
-        print("/!\ invalide license.")
-        # print(e)
-
-    return lcse
+        logger.debug("/!\ invalide license.")
+        return None, CConstants.IS_EXPIRED
 
 
 def clean_mac():
@@ -366,7 +396,7 @@ def clean_mac():
 
 
 def make_lcse(lcse=clean_mac()):
-    print("lcse:", lcse)
+    # print("lcse:", lcse)
     lcse = hashlib.md5(str(lcse).encode("utf-8")).hexdigest()
     return lcse
 
@@ -377,3 +407,14 @@ def get_lcse_of_file():
 
 def get_lcse_file():
     return os.path.join(os.path.dirname(os.path.abspath("__file__")), "LICENCE")
+
+
+def _disk_c(self):
+    drive = unicode(os.getenv("SystemDrive"))
+    freeuser = ctypes.c_int64()
+    total = ctypes.c_int64()
+    free = ctypes.c_int64()
+    ctypes.windll.kernel32.GetDiskFreeSpaceExW(
+        drive, ctypes.byref(freeuser), ctypes.byref(total), ctypes.byref(free)
+    )
+    return freeuser.value
