@@ -25,17 +25,19 @@ try:
     from ui.mainwindow import MainWindow
 except Exception as exc:
     print(exc)
+    from ui.common import FMainWindow as MainWindow
 
 
-def cmain():
+def cmain(test=False):
     gettext_windows.setup_env()
     locale.setlocale(locale.LC_ALL, "")
     gettext.install("main.py", localedir="locale")
     window = MainWindow()
-    window.setStyleSheet(theme)
+    # window.setStyleSheet(theme)
     setattr(FWindow, "window", window)
 
-    if CConstants.DEBUG:
+    if CConstants.DEBUG or test:
+        window.showMaximized()
         print("Debug is True")
         return True
 

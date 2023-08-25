@@ -3,12 +3,13 @@
 # maintainer: fad
 
 try:
-    from configuration import Config
+    from cstatic import CConstants
 except Exception as e:
     print(e)
 
-from PyQt4.QtCore import QSize, Qt
-from PyQt4.QtGui import QCursor, QIcon, QToolBar
+
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QAction, QApplication, QMainWindow, QToolBar
 from ui.common import FMainWindow
 
 
@@ -36,7 +37,7 @@ class FMenuToolBar(QToolBar, FMainWindow):
         # self.setAutoFillBackground(True)
         # self.addSeparator()
         self.addAction(
-            QIcon("{}exit.png".format(Config.img_cmedia)), "Quiter", self.goto_exit
+            QIcon("{}exit.png".format(CConstants.img_cmedia)), "Quiter", self.goto_exit
         )
 
         menu = []

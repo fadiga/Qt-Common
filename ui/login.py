@@ -7,7 +7,14 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from models import Owner
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QComboBox, QFormLayout, QGroupBox, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QPushButton,
+)
 from ui.common import (
     EnterTabbedLineEdit,
     ErrorLabel,
@@ -20,7 +27,7 @@ from ui.common import (
 from ui.util import check_is_empty, field_error
 
 try:
-    from configuration import Config
+    from cstatic import CConstants
 except Exception as exc:
     print(exc)
 
@@ -35,7 +42,7 @@ class LoginWidget(FDialog, FWidget):
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.title = FormLabel(
             "<h4>{app_name}</h4><stromg>Ver: {version}</stromg>".format(
-                app_name=Config.APP_NAME, version=Config.APP_VERSION
+                app_name=CConstants.APP_NAME, version=CConstants.APP_VERSION
             )
         )
         self.title.setStyleSheet(
@@ -43,7 +50,7 @@ class LoginWidget(FDialog, FWidget):
                 border-radius: 14px 14px 8px 8px; border: 10px double #128a76 ;
                 width: 100%; height: auto; padding: 1em;
                 font: 8pt 'URW Bookman L';""".format(
-                Config.APP_LOGO
+                CConstants.APP_LOGO
             )
         )
         vbox = QHBoxLayout()
@@ -72,7 +79,7 @@ class LoginWidget(FDialog, FWidget):
         # login button
         self.login_button = QPushButton("&S'identifier")
         self.login_button.setIcon(
-            QIcon.fromTheme("save", QIcon("{}login.png".format(Config.img_cmedia)))
+            QIcon.fromTheme("save", QIcon("{}login.png".format(CConstants.img_cmedia)))
         )
         self.login_button.clicked.connect(self.login)
 

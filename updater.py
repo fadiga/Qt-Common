@@ -31,10 +31,10 @@ class UpdaterInit(QObject):
 
     def update_data(self, orga_slug):
         logger.info("update data")
-        from configuration import Config
+        from cstatic import CConstants
         from database import Setup
 
-        # self.base_url = Config.BASE_URL
+        # self.base_url = CConstants.BASE_URL
         logger.info("UpdaterInit start")
         self.emit(SIGNAL("contact_server"))
         for m in Setup.LIST_CREAT:

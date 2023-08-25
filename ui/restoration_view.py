@@ -13,7 +13,7 @@ from ui.common import Button, EnterTabbedLineEdit, FLabel, FormLabel, FWidget, L
 from ui.util import check_is_empty, field_error, is_valide_codition_field
 
 try:
-    from configuration import Config
+    from cstatic import CConstants
 except Exception as e:
     print(e)
 
@@ -33,26 +33,28 @@ class RestorationViewWidget(QDialog, FWidget):
         self.label = FLabel()
         self.label.setStyleSheet(
             "background: url('{}center.png') no-repeat scroll 0 0;"
-            "height: 50px;width:50px; margin: 0; padding: 0;".format(Config.img_media)
+            "height: 50px;width:50px; margin: 0; padding: 0;".format(
+                CConstants.img_media
+            )
         )
 
         # ==== Box of restor online ====
         self.onlineRestorBoxBtt = QGroupBox(self.tr("Restoration de données en line"))
         self.bn_resto_onligne = Button("Connexion")
         self.bn_resto_onligne.setIcon(
-            QIcon.fromTheme("", QIcon("{}cloud.png".format(Config.img_cmedia)))
+            QIcon.fromTheme("", QIcon("{}cloud.png".format(CConstants.img_cmedia)))
         )
         self.bn_resto_onligne.clicked.connect(self.resto_onligne)
 
         self.bn_resto_l = Button("Import de sauvegarde locale")
         self.bn_resto_l.setIcon(
-            QIcon.fromTheme("", QIcon("{}db.png".format(Config.img_cmedia)))
+            QIcon.fromTheme("", QIcon("{}db.png".format(CConstants.img_cmedia)))
         )
         self.bn_resto_l.clicked.connect(self.resto_local_db)
 
         self.bn_ignore = Button("Première installation")
         self.bn_ignore.setIcon(
-            QIcon.fromTheme("", QIcon("{}go-next.png".format(Config.img_cmedia)))
+            QIcon.fromTheme("", QIcon("{}go-next.png".format(CConstants.img_cmedia)))
         )
         self.bn_ignore.clicked.connect(self.ignore_resto)
 
@@ -96,5 +98,5 @@ class RestorationViewWidget(QDialog, FWidget):
         self.accept()
 
     def resto_local_db(self):
-        import_backup(folder="C://", dst_folder=Config.ARMOIRE)
+        import_backup(folder="C://", dst_folder=CConstants.ARMOIRE)
         self.accept()

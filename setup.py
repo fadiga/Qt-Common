@@ -7,6 +7,7 @@ setup(
     author_email="ibfadiga@gmail.com",
     description="A sample package",
     packages=find_packages(),
+    py_modules=["QtCommon"],
     install_requires=[
         "peewee>=3.0.0",
         "PyQt5>=5.0.0",

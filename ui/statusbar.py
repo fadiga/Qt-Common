@@ -15,17 +15,17 @@ from server import Network
 from ui.util import acces_server, get_serv_url, internet_on, is_valide_mac
 
 try:
-    from configuration import Config
+    from cstatic import CConstants
 except Exception as e:
     print(e)
 
-# base_url = Config.BASE_URL
+# base_url = CConstants.BASE_URL
 
 
 class GStatusBar(QStatusBar):
     def __init__(self, parent=None):
         QStatusBar.__init__(self, parent)
-        if not Config.SERV:
+        if not CConstants.SERV:
             logger.info("Not Serveur ")
             return
         logger.info("Option server active")
@@ -37,7 +37,7 @@ class GStatusBar(QStatusBar):
             'Développer par IBS-Mali | <a href="https://ibsmali.ml/">ibsmali.ml</a>'
         )
         name_label.setOpenExternalLinks(True)
-        icon_label.setPixmap(QPixmap("{}".format(Config.IBS_LOGO)))
+        icon_label.setPixmap(QPixmap("{}".format(CConstants.IBS_LOGO)))
         self.addWidget(icon_label, 0)
         self.addWidget(name_label, 1)
         self.addWidget(self.info_label, 1)
@@ -66,7 +66,7 @@ class GStatusBar(QStatusBar):
                 "",
                 QIcon(
                     "{img_media}{img}".format(
-                        img_media=Config.img_cmedia, img="setup.png"
+                        img_media=CConstants.img_cmedia, img="setup.png"
                     )
                 ),
             )
@@ -105,7 +105,7 @@ class GStatusBar(QStatusBar):
                 "",
                 QIcon(
                     "{img_media}{img}".format(
-                        img_media=Config.img_cmedia, img="setup.png"
+                        img_media=CConstants.img_cmedia, img="setup.png"
                     )
                 ),
             )

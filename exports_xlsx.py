@@ -8,7 +8,7 @@ import os
 from datetime import datetime
 
 import xlsxwriter
-from configuration import Config
+from cstatic import CConstants
 from models import Organization
 from ui.util import openFile
 
@@ -102,10 +102,10 @@ def export_dynamic_data(dict_data):
     style_def = workbook.add_format({})
     rowx = 1
     end_colx = len(headers) - 1
-    if Config.ORG_LOGO:
+    if CConstants.ORG_LOGO:
         worksheet.insert_image(
             "A1:B2",
-            os.path.join(Config.img_media, Config.ORG_LOGO),
+            os.path.join(CConstants.img_media, CConstants.ORG_LOGO),
             {"x_offset": 1.5, "y_offset": 0.5},
         )
         rowx += 6

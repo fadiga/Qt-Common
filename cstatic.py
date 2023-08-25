@@ -3,8 +3,8 @@
 # vim: ai ts=4 sts=4 et sw=4 nu
 # Maintainer: Fad
 
-import os
 import logging
+import os
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath("__file__")))
 
@@ -13,8 +13,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", datefmt="%m/%d/%Y %I:%M:%S"
 )
 
-
-# logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 
 class CConstants(object):
@@ -27,7 +26,7 @@ class CConstants(object):
     OK = "ok"
     IS_NOT_ACTIVATED = "is_not_activated"
     IS_EXPIRED = "is_expired"
-
+    img_media = ""
     file_img = os.path.join(os.path.dirname(os.path.abspath("__file__")), "cimages/")
     # deployment
     if os.path.exists(file_img):

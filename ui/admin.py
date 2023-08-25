@@ -38,7 +38,7 @@ from ui.user_add_or_edit import NewOrEditUserViewWidget
 from ui.util import check_is_empty
 
 try:
-    from configuration import Config
+    from cstatic import CConstants
 except Exception as e:
     print(e)
 try:
@@ -53,7 +53,7 @@ class AdminViewWidget(FWidget):
 
         self.parent = parent
 
-        self.parentWidget().setWindowTitle(Config.APP_NAME + "    ADMINISTRATION")
+        self.parentWidget().setWindowTitle(CConstants.APP_NAME + "    ADMINISTRATION")
 
         editbox = QGridLayout()
         table_config = QVBoxLayout()
@@ -202,7 +202,7 @@ class OrganizationTableWidget(FWidget):
 
         self.bn_upload = Button("logo de l'organisation")
         self.bn_upload.setIcon(
-            QIcon.fromTheme("", QIcon("{}db.png".format(Config.img_cmedia)))
+            QIcon.fromTheme("", QIcon("{}db.png".format(CConstants.img_cmedia)))
         )
         self.bn_upload.clicked.connect(self.upload_logo)
 
@@ -234,7 +234,7 @@ class OrganizationTableWidget(FWidget):
     def upload_logo(self):
         from exports import upload_file
 
-        upload_file(folder="C://", dst_folder=Config.ARMOIRE)
+        upload_file(folder="C://", dst_folder=CConstants.ARMOIRE)
         self.accept()
 
     def save_edit(self):
@@ -297,7 +297,7 @@ class OperationWidget(FWidget):
         self.add_ow_but.setMaximumWidth(250)
         # self.add_ow_but.setMaximumHeight(90)
         self.add_ow_but.setIcon(
-            QIcon.fromTheme("", QIcon("{}user_add.png".format(Config.img_cmedia)))
+            QIcon.fromTheme("", QIcon("{}user_add.png".format(CConstants.img_cmedia)))
         )
         self.add_ow_but.clicked.connect(self.add_owner)
         vbox.addWidget(self.add_ow_but)
@@ -347,7 +347,7 @@ class OwnerQListWidgetItem(QListWidgetItem):
             logo = "user_active" if self.owner.isactive else "user_deactive"
         icon = QIcon()
         icon.addPixmap(
-            QPixmap("{}{}.png".format(Config.img_cmedia, logo)),
+            QPixmap("{}{}.png".format(CConstants.img_cmedia, logo)),
             QIcon.Normal,
             QIcon.Off,
         )
@@ -383,7 +383,7 @@ class InfoTableWidget(FWidget):
         self.edit_ow_but = Button("Mettre à jour")
         self.edit_ow_but.setIcon(
             QIcon.fromTheme(
-                "document-new", QIcon("{}edit_user.png".format(Config.img_cmedia))
+                "document-new", QIcon("{}edit_user.png".format(CConstants.img_cmedia))
             )
         )
         self.edit_ow_but.setEnabled(False)

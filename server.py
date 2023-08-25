@@ -16,7 +16,7 @@ from ui.util import (
 )
 
 try:
-    from configuration import Config
+    from cstatic import CConstants
 except Exception as exc:
     print(exc)
 
@@ -49,18 +49,19 @@ class Network(QObject):
     def update_version_checher(self):
         # logger.debug("update_version_checher")
 
-        from configuration import Config
-
         orga = Organization.get(id=1)
         data = {
             "org_slug": orga.slug,
-            "app_info": {"name": Config.APP_NAME, "version": Config.APP_VERSION},
+            "app_info": {
+                "name": CConstants.APP_NAME,
+                "version": CConstants.APP_VERSION,
+            },
             "getSystemInfo": json.loads(getSystemInfo()),
             "current_lcse": is_valide_mac()[0].code,
         }
 
         lcse_dic = []
-        # if Config.LSE:
+        # if CConstants.LSE:
         for lcse in License.select():
             acttn_date = datetime_to_str(lcse.activation_date)
             lcse_dic.append(
@@ -79,12 +80,13 @@ class Network(QObject):
         return self.submit("desktop_client", data)
 
     def get_or_inscript_app(self):
-        from configuration import Config
-
         orga = Organization.get(id=1)
         sttg = Settings.get(id=1)
         data = {
-            "app_info": {"name": Config.APP_NAME, "version": Config.APP_VERSION},
+            "app_info": {
+                "name": CConstants.APP_NAME,
+                "version": CConstants.APP_VERSION,
+            },
             "getSystemInfo": json.loads(getSystemInfo()),
             "organization": {"slug": orga.slug, "data": orga.data()},
             "licenses": [i.data() for i in License.all()],

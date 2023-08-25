@@ -8,12 +8,14 @@ import shutil
 from datetime import datetime
 
 from models import DB_FILE, Owner
+from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import (
+    QAction,
     QComboBox,
     QDialog,
     QFormLayout,
     QGroupBox,
-    QIcon,
+    QMessageBox,
     QPushButton,
     QVBoxLayout,
 )
@@ -29,7 +31,7 @@ from ui.common import (
 from ui.util import check_is_empty, field_error
 
 try:
-    from .configuration import Config
+    from cstatic import CConstants
 except Exception as exc:
     print(exc)
 
@@ -71,7 +73,9 @@ class DBCleanerWidget(QDialog, FWidget):
         # login button
         self.login_button = DeletedBtt("&Supprimer")
         self.login_button.setIcon(
-            QIcon.fromTheme("delete", QIcon("{}login.png".format(Config.img_cmedia)))
+            QIcon.fromTheme(
+                "delete", QIcon("{}login.png".format(CConstants.img_cmedia))
+            )
         )
         self.login_button.clicked.connect(self.login)
 
@@ -125,7 +129,7 @@ class DBCleanerWidget(QDialog, FWidget):
         )
         shutil.copy(path_db_file, "{}__{}.old".format(DB_FILE, DATETIME))
 
-        for mod in Config.list_models:
+        for mod in CConstants.list_models:
             print(mod)
             for m in mod:
                 print(m)

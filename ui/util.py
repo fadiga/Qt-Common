@@ -18,8 +18,6 @@ from uuid import getnode
 from cstatic import CConstants, logger
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QSystemTrayIcon
-
-# from PyQt5.QtGui import
 from ui.window import FWindow
 
 try:

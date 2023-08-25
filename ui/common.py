@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from datetime import date
 
 from periods import Period
-from PyQt5.QtCore import QSortFilterProxyModel
+from PyQt5.QtCore import QSortFilterProxyModel, Qt
 from PyQt5.QtGui import (
     QBrush,
     QColor,
@@ -39,7 +39,7 @@ from PyQt5.QtWidgets import (
 from ui.statusbar import GStatusBar
 
 try:
-    from configuration import Config
+    from cstatic import CConstants
 except Exception as e:
     print(e)
 
@@ -55,7 +55,7 @@ class FMainWindow(QMainWindow):
         print("FMainWindow")
         # self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setWindowIcon(
-            QIcon.fromTheme("logo", QIcon("{}logo.png".format(Config.img_media)))
+            QIcon.fromTheme("logo", QIcon("{}logo.png".format(CConstants.img_media)))
         )
 
         self.statusbar = GStatusBar(self)
@@ -64,11 +64,11 @@ class FMainWindow(QMainWindow):
         self.wc = self.width()
         self.hc = self.height()
         self.resize(self.wc, self.hc)
-        self.setWindowTitle(Config.APP_NAME)
-        self.setWindowIcon(QIcon(Config.APP_LOGO))
+        self.setWindowTitle(CConstants.APP_NAME)
+        self.setWindowIcon(QIcon(CConstants.APP_LOGO))
 
     def set_window_title(self, page_name):
-        self.setWindowTitle(" > ".join([Config.APP_NAME, page_name]))
+        self.setWindowTitle(" > ".join([CConstants.APP_NAME, page_name]))
 
     def resizeEvent(self, event):
         """lancé à chaque redimensionnement de la fenêtre"""
@@ -471,7 +471,7 @@ class WarningBtt(Button):
                 "save",
                 QIcon(
                     "{img_media}{img}".format(
-                        img_media=Config.img_media, img="warning.png"
+                        img_media=CConstants.img_media, img="warning.png"
                     )
                 ),
             )
@@ -499,7 +499,7 @@ class ButtonSave(Button):
                 "",
                 QIcon(
                     "{img_media}{img}".format(
-                        img_media=Config.img_media, img="save.png"
+                        img_media=CConstants.img_media, img="save.png"
                     )
                 ),
             )
@@ -554,7 +554,7 @@ class BttExport(Button):
 
         self.pixmap = QPixmap(
             "{img_media}{img}".format(
-                img_media=Config.img_cmedia, img="{}.png".format(img)
+                img_media=CConstants.img_cmedia, img="{}.png".format(img)
             )
         )
         self.setFixedHeight(85)
