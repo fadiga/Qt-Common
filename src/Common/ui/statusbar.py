@@ -7,15 +7,16 @@ import sys
 from threading import Event
 
 import requests
-from cstatic import logger
 from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QLabel, QProgressBar, QPushButton, QStatusBar
-from server import Network
-from ui.util import acces_server, get_serv_url, internet_on, is_valide_mac
+
+from ..cstatic import logger
+from ..server import Network
+from .util import acces_server, get_serv_url, internet_on, is_valide_mac
 
 try:
-    from cstatic import CConstants
+    from ..cstatic import CConstants
 except Exception as e:
     print(e)
 

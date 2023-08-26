@@ -3,7 +3,6 @@
 # maintainer: Fad
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from models import Organization
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QCheckBox,
@@ -14,8 +13,10 @@ from PyQt5.QtWidgets import (
     QTextEdit,
     QVBoxLayout,
 )
-from ui.common import ButtonSave, FormLabel, FWidget, IntLineEdit, LineEdit
-from ui.util import check_is_empty
+
+from ..models import Organization
+from .common import ButtonSave, FormLabel, FWidget, IntLineEdit, LineEdit
+from .util import check_is_empty
 
 
 class NewOrEditOrganizationViewWidget(QDialog, FWidget):
@@ -90,7 +91,11 @@ class NewOrEditOrganizationViewWidget(QDialog, FWidget):
         org.name_orga = name_orga
         org.email_org = email_org
         org.bp = bp
+        org.after_cam = 0
         org.adress_org = adress_org
         org.is_login = True if self.checked.checkState() == Qt.Checked else False
-        org.save()
-        self.accept()
+        try:
+            org.save()
+            self.accept()
+        except Exception as e:
+            print(f"name_orga {e}")

@@ -19,7 +19,8 @@ from playhouse.migrate import (
     SqliteMigrator,
     migrate,
 )
-from ui.util import copy_file, date_to_str, datetime_to_str
+
+from .ui.util import copy_file, date_to_str, datetime_to_str
 
 DB_FILE = "database.db"
 
@@ -274,7 +275,7 @@ class License(BaseModel):
         return NOW > self.expiration_date if self.expiration_date else True
 
     def can_use(self):
-        from cstatic import CConstants
+        from .cstatic import CConstants
 
         if not self.isactivated:
             if self.can_expired:
@@ -391,7 +392,7 @@ class Settings(BaseModel):
 
     slug = peewee.CharField(choices=LCONFIG, default=DEFAULT)
     is_login = peewee.BooleanField(default=True)
-    after_cam = peewee.IntegerField(null=True, default=0, verbose_name="")
+    after_cam = peewee.IntegerField(default=1, verbose_name="")
     toolbar = peewee.BooleanField(default=True)
     toolbar_position = peewee.CharField(choices=POSITION, default=LEFT)
     url = peewee.CharField(default="http://file-repo.ml")

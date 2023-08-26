@@ -7,31 +7,32 @@ from datetime import datetime
 from threading import Event
 
 import requests
-from cstatic import CConstants, logger
-from models import License, Organization, Settings
-from PyQt4.QtCore import SIGNAL, QObject, Qt, QThread
-from server import Network
-from ui.util import acces_server, get_serv_url, is_valide_mac
+from PyQt5.QtCore import QObject, Qt, QThread  # , pyqtSignal
+
+from .cstatic import CConstants, logger
+from .models import License, Organization, Settings
+from .server import Network
+from .ui.util import acces_server, get_serv_url, is_valide_mac
 
 
 class UpdaterInit(QObject):
     def __init__(self):
         QObject.__init__(self)
 
-        # self.status_bar = QStatusBar()
-        self.stopFlag = Event()
-        self.check = TaskThreadUpdater(self)
-        self.connect(
-            self.check, SIGNAL("update_data"), self.update_data, Qt.QueuedConnection
-        )
-        try:
-            self.check.start()
-        except Exception as exc:
-            logger.warning("Exc :", exc)
+        ## self.status_bar = QStatusBar()
+        # self.stopFlag = Event()
+        # self.check = TaskThreadUpdater(self)
+        # self.connect(
+        #     self.check, SIGNAL("update_data"), self.update_data, Qt.QueuedConnection
+        # )
+        # try:
+        #     self.check.start()
+        # except Exception as exc:
+        #     logger.warning("Exc :", exc)
 
     def update_data(self, orga_slug):
         logger.info("update data")
-        from cstatic import CConstants
+        from .cstatic import CConstants
         from database import Setup
 
         # self.base_url = CConstants.BASE_URL

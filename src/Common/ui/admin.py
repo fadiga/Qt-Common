@@ -4,7 +4,6 @@
 # maintainer: Fad
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from models import Organization, Owner, Settings
 from PyQt5.QtCore import SIGNAL, Qt
 from PyQt5.QtWidgets import (
     QCheckBox,
@@ -24,7 +23,9 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
 )
 from tabpane import tabbox
-from ui.common import (
+
+from ..models import Organization, Owner, Settings
+from .common import (
     Button,
     ButtonSave,
     FLabel,
@@ -33,12 +34,12 @@ from ui.common import (
     IntLineEdit,
     LineEdit,
 )
-from ui.table import FTableWidget
-from ui.user_add_or_edit import NewOrEditUserViewWidget
-from ui.util import check_is_empty
+from .table import FTableWidget
+from .user_add_or_edit import NewOrEditUserViewWidget
+from .util import check_is_empty
 
 try:
-    from cstatic import CConstants
+    from ..cstatic import CConstants
 except Exception as e:
     print(e)
 try:

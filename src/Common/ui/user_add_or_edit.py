@@ -3,12 +3,13 @@
 # maintainer: Fad
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from models import Owner
 from peewee import IntegrityError
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QCheckBox, QComboBox, QDialog, QFormLayout, QVBoxLayout
-from ui.common import Button, ButtonSave, FLabel, FWidget, IntLineEdit, LineEdit
-from ui.util import check_is_empty, field_error, is_valide_codition_field
+
+from ..models import Owner
+from .common import Button, ButtonSave, FLabel, FWidget, IntLineEdit, LineEdit
+from .util import check_is_empty, field_error, is_valide_codition_field
 
 try:
     unicode

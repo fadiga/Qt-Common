@@ -1,4 +1,4 @@
-from models import Settings
+from ..models import Settings
 
 blue_css = """/* Theme Blue*/
     palette {background: rgb(17, 133, 209, 255); disabled: rgb(200, 200, 200, 255);}
@@ -552,7 +552,8 @@ def get_style():
         stt = Settings.get_or_create(id=1)
     except Exception as exc:
         return 1
-    return dic_t.get(stt.theme)
+    # return dic_t.get(stt.theme)
+    return dic_t.get(Settings.get(id=1).theme)
 
 
 theme = get_style()

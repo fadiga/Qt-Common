@@ -3,11 +3,12 @@
 import json
 
 import requests
-from cstatic import logger
-from info_hot import getSystemInfo
-from models import License, Organization, Owner, Settings, Version
 from PyQt5.QtCore import QObject
-from ui.util import (
+
+from .cstatic import logger
+from .info_hot import getSystemInfo
+from .models import License, Organization, Owner, Settings, Version
+from .ui.util import (
     acces_server,
     datetime_to_str,
     get_serv_url,
@@ -16,7 +17,7 @@ from ui.util import (
 )
 
 try:
-    from cstatic import CConstants
+    from .cstatic import CConstants
 except Exception as exc:
     print(exc)
 

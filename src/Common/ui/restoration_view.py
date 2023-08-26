@@ -3,17 +3,25 @@
 # maintainer: Fad
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from exports import import_backup
-from models import Owner
 from peewee import IntegrityError
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QCheckBox, QComboBox, QDialog, QFormLayout, QVBoxLayout
-from ui.common import Button, EnterTabbedLineEdit, FLabel, FormLabel, FWidget, LineEdit
-from ui.util import check_is_empty, field_error, is_valide_codition_field
+from PyQt5.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QDialog,
+    QFormLayout,
+    QGroupBox,
+    QVBoxLayout,
+)
+
+from ..exports import import_backup
+from ..models import Owner
+from .common import Button, EnterTabbedLineEdit, FLabel, FormLabel, FWidget, LineEdit
+from .util import check_is_empty, field_error, is_valide_codition_field
 
 try:
-    from cstatic import CConstants
+    from ..cstatic import CConstants
 except Exception as e:
     print(e)
 

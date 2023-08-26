@@ -7,16 +7,17 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import datetime
 
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import (
     QAbstractItemView,
-    QFont,
     QLabel,
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
     QWidget,
 )
-from ui.util import formatted_number
+
+from .util import formatted_number
 
 try:
     basestring

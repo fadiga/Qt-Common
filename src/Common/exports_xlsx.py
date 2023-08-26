@@ -8,9 +8,10 @@ import os
 from datetime import datetime
 
 import xlsxwriter
-from cstatic import CConstants
-from models import Organization
-from ui.util import openFile
+
+from .cstatic import CConstants
+from .models import Organization
+from .ui.util import openFile
 
 style_org = {
     "align": "center",
@@ -74,7 +75,6 @@ def export_dynamic_data(dict_data):
     footers = dict_data.get("footers")
     exclude_row = dict_data.get("exclude_row")
     format_money = dict_data.get("format_money")
-    # print(data)
 
     dict_alph = {
         1: "A",

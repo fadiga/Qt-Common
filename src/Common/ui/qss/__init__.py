@@ -45,7 +45,6 @@ def load_stylesheet(file_qss):
 
 def read_qss_file(file_name):
     styleFile = os.path.join(ROOT_DIR, file_name + ".qss")
-    print(styleFile)
     styleSheetStr = open(styleFile, "r").read()
     return styleSheetStr
 

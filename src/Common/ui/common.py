@@ -5,8 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from datetime import date
 
-from periods import Period
-from PyQt5.QtCore import QSortFilterProxyModel, Qt
+from PyQt5.QtCore import QSize, QSortFilterProxyModel, Qt
 from PyQt5.QtGui import (
     QBrush,
     QColor,
@@ -36,10 +35,12 @@ from PyQt5.QtWidgets import (
     QToolButton,
     QWidget,
 )
-from ui.statusbar import GStatusBar
+
+from ..periods import Period
+from .statusbar import GStatusBar
 
 try:
-    from cstatic import CConstants
+    from ..cstatic import CConstants
 except Exception as e:
     print(e)
 

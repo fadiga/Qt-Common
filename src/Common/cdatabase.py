@@ -7,7 +7,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from datetime import datetime
 
-from models import FileJoin, History, License, Organization, Owner, Settings, Version
 from playhouse import migrate as migrate_
 from playhouse.migrate import (
     BooleanField,
@@ -16,6 +15,17 @@ from playhouse.migrate import (
     ForeignKeyField,
     IntegerField,
     migrate,
+)
+
+from .models import (
+    FileJoin,
+    History,
+    License,
+    Organization,
+    Owner,
+    Settings,
+    Version,
+    migrator,
 )
 
 
@@ -53,7 +63,6 @@ class AdminDatabase(object):
     MIG_VERSION = 1
 
     def create_all_or_pass(self, drop_tables=False):
-        # print("all or pass")
         did_create = False
         for model in self.LIST_CREAT:
             if drop_tables:
@@ -69,9 +78,9 @@ class AdminDatabase(object):
             FixtInit().create_all_or_pass()
         self.make_migrate()
 
-    def make_migrate(self):
+    def make_migrate(self, db_v=1):
         try:
-            version = Version.get_or_none(Version.id == 1)
+            version = Version.get_or_none(Version.id == db_v)
             number = version.number
         except:
             number = 0
@@ -79,9 +88,6 @@ class AdminDatabase(object):
         count_list = len(self.LIST_MIGRATE)
         print("--check migrate--")
         if count_list != number:
-            from models import migrator
-
-            print("Make migrate", self.LIST_MIGRATE)
             for x, y, z in self.LIST_MIGRATE:
                 try:
                     migrate(migrator.add_column(x, y, z))

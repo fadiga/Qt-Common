@@ -9,23 +9,24 @@ import gettext
 import locale
 
 import gettext_windows
-from cstatic import CConstants
-from models import Organization, Owner, Settings
 from PyQt5.QtWidgets import QDialog
-from ui.license_view import LicenseViewWidget
-from ui.login import LoginWidget
-from ui.organization_add_or_edit import NewOrEditOrganizationViewWidget
-from ui.restoration_view import RestorationViewWidget
-from ui.style_qss import theme
-from ui.user_add_or_edit import NewOrEditUserViewWidget
-from ui.util import is_valide_mac
-from ui.window import FWindow
+
+from .cstatic import CConstants
+from .models import Organization, Owner, Settings
+from .ui.license_view import LicenseViewWidget
+from .ui.login import LoginWidget
+from .ui.organization_add_or_edit import NewOrEditOrganizationViewWidget
+from .ui.restoration_view import RestorationViewWidget
+from .ui.style_qss import theme
+from .ui.user_add_or_edit import NewOrEditUserViewWidget
+from .ui.util import is_valide_mac
+from .ui.window import FWindow
 
 try:
     from ui.mainwindow import MainWindow
 except Exception as exc:
-    print(exc)
-    from ui.common import FMainWindow as MainWindow
+    print("import MainWindow", exc)
+    # from .ui.common import FMainWindow as MainWindow
 
 
 def cmain(test=False):
@@ -33,7 +34,7 @@ def cmain(test=False):
     locale.setlocale(locale.LC_ALL, "")
     gettext.install("main.py", localedir="locale")
     window = MainWindow()
-    # window.setStyleSheet(theme)
+    window.setStyleSheet(theme)
     setattr(FWindow, "window", window)
 
     if CConstants.DEBUG or test:

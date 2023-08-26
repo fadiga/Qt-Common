@@ -5,9 +5,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from datetime import datetime
 
-from cstatic import CConstants
-from exports import export_license_as_file
-from models import License, Organization
 from PyQt5.QtWidgets import (
     QDialog,
     QFormLayout,
@@ -16,7 +13,11 @@ from PyQt5.QtWidgets import (
     QTextEdit,
     QVBoxLayout,
 )
-from ui.common import (
+
+from ..cstatic import CConstants
+from ..exports import export_license_as_file
+from ..models import License, Organization
+from .common import (
     Button,
     ButtonSave,
     DeletedBtt,
@@ -25,7 +26,7 @@ from ui.common import (
     LineEdit,
     PyTextViewer,
 )
-from ui.util import (
+from .util import (
     check_is_empty,
     clean_mac,
     get_lcse_file,

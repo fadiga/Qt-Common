@@ -4,16 +4,17 @@
 # maintainer: Fad
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from exports import export_backup, export_database_as_file, import_backup
-from models import Owner, Settings
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QAction, QMenuBar, QMessageBox
-from ui.clean_db import DBCleanerWidget
-from ui.common import FWidget
-from ui.license_view import LicenseViewWidget
+
+from ..exports import export_backup, export_database_as_file, import_backup
+from ..models import Owner, Settings
+from .clean_db import DBCleanerWidget
+from .common import FWidget
+from .license_view import LicenseViewWidget
 
 try:
-    from cstatic import CConstants
+    from ..cstatic import CConstants
 except Exception as e:
     print(e)
 
@@ -90,11 +91,12 @@ class FMenuBar(QMenuBar, FWidget):
                     self,
                 )
                 el_menu.setShortcut(m.get("shortcut"))
-                self.connect(
-                    el_menu,
-                    SIGNAL("triggered()"),
-                    lambda m=m: self.change_theme(m.get("theme")),
-                )
+                el_menu.triggered.connect(lambda m=m: self.change_theme(m.get("theme")))
+                # self.connect(
+                #     el_menu,
+                #     SIGNAL("triggered()"),
+                #     lambda m=m: self.change_theme(m.get("theme")),
+                # )
                 _theme.addSeparator()
                 _theme.addAction(el_menu)
                 _theme.setIcon(QIcon("{}theme.png".format(CConstants.img_cmedia)))
@@ -144,7 +146,7 @@ class FMenuBar(QMenuBar, FWidget):
         exit_ = QAction(QIcon.fromTheme("application-exit", QIcon("")), "Exit", self)
         exit_.setShortcut("Ctrl+Q")
         exit_.setToolTip("Quiter l'application")
-        exit_.triggered.connect(self.parent.close())
+        # exit_.triggered.connect(self.parent.close())
         self.file_.addAction(exit_)
 
     def logout(self):

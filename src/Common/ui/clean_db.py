@@ -7,7 +7,6 @@ import os
 import shutil
 from datetime import datetime
 
-from models import DB_FILE, Owner
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import (
     QAction,
@@ -19,7 +18,9 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QVBoxLayout,
 )
-from ui.common import (
+
+from ..models import DB_FILE, Owner
+from .common import (
     DeletedBtt,
     EnterTabbedLineEdit,
     ErrorLabel,
@@ -28,10 +29,10 @@ from ui.common import (
     FWidget,
     LineEdit,
 )
-from ui.util import check_is_empty, field_error
+from .util import check_is_empty, field_error
 
 try:
-    from cstatic import CConstants
+    from ..cstatic import CConstants
 except Exception as exc:
     print(exc)
 

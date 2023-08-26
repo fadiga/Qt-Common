@@ -15,7 +15,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 from reportlab.platypus.tables import Table, TableStyle
 
 # from num2words import num2words
-from ui.util import openFile
+from .ui.util import openFile
 
 # setup the empty canvas
 # from io import FileIO as file

@@ -8,12 +8,10 @@ import os
 import shutil
 from datetime import datetime
 
-from models import DB_FILE, Organization, Version
 from PyQt5.QtWidgets import QFileDialog, QWidget
-from ui.util import get_lcse_file, raise_error, raise_success, uopen_file
 
-# from cstatic import CConstants
-
+from .models import DB_FILE, Organization, Version
+from .ui.util import get_lcse_file, raise_error, raise_success, uopen_file
 
 DATETIME = "{}".format(datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss"))
 # print(DATETIME)

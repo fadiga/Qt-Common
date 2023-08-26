@@ -4,7 +4,6 @@
 # maintainer: Fad
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from models import Owner
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
@@ -15,7 +14,9 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QPushButton,
 )
-from ui.common import (
+
+from ..models import Owner
+from .common import (
     EnterTabbedLineEdit,
     ErrorLabel,
     FDialog,
@@ -24,10 +25,10 @@ from ui.common import (
     FWidget,
     LineEdit,
 )
-from ui.util import check_is_empty, field_error
+from .util import check_is_empty, field_error
 
 try:
-    from cstatic import CConstants
+    from ..cstatic import CConstants
 except Exception as exc:
     print(exc)
 

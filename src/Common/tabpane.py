@@ -4,7 +4,8 @@
 # maintainer: Fad
 
 from PyQt5.QtWidgets import QTabWidget
-from ui.common import TabPane
+
+from .ui.common import TabPane
 
 
 def tabbox(*args):

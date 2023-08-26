@@ -15,10 +15,11 @@ from time import mktime, strptime
 from urllib.request import URLError, urlopen
 from uuid import getnode
 
-from cstatic import CConstants, logger
 from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QSystemTrayIcon
-from ui.window import FWindow
+from PyQt5.QtWidgets import QMessageBox, QSystemTrayIcon, QTextEdit
+
+from ..cstatic import CConstants, logger
+from .window import FWindow
 
 try:
     unicode
@@ -54,7 +55,7 @@ def acces_server():
 
 
 def device_amount(value, dvs=None):
-    from models import Settings
+    from Common.models import Settings
 
     if dvs:
         return "{} {}".format(formatted_number(value), dvs)
@@ -76,7 +77,7 @@ def check_is_empty(field):
     containt = ""
     # if isinstance(field, )
     field.setToolTip("")
-    if isinstance(field, QtGui.QTextEdit):
+    if isinstance(field, QTextEdit):
         containt = field.toPlainText()
     else:
         containt = field.text()
@@ -155,11 +156,11 @@ def get_temp_filename(extension=None):
 
 
 def raise_error(title, message):
-    box = QtGui.QMessageBox(
-        QtGui.QMessageBox.Critical,
+    box = QMessageBox(
+        QMessageBox.Critical,
         title,
         message,
-        QtGui.QMessageBox.Ok,
+        QMessageBox.Ok,
         parent=FWindow.window,
     )
     box.setWindowOpacity(0.9)
@@ -168,11 +169,11 @@ def raise_error(title, message):
 
 
 def raise_success(title, message):
-    box = QtGui.QMessageBox(
-        QtGui.QMessageBox.Information,
+    box = QMessageBox(
+        QMessageBox.Information,
         title,
         message,
-        QtGui.QMessageBox.Ok,
+        QMessageBox.Ok,
         parent=FWindow.window,
     )
     box.setWindowOpacity(0.9)
@@ -181,7 +182,8 @@ def raise_success(title, message):
 
 def formatted_number(number, sep=".", aftergam=None):
     """ """
-    from models import Settings
+
+    from Common.models import Settings
 
     if not aftergam:
         aftergam = int(Settings.select().get().after_cam)
@@ -317,7 +319,7 @@ def get_path(path, filename):
 
 
 def get_serv_url(sub_url):
-    from models import Settings
+    from Common.models import Settings
 
     return "{}/{}".format(Settings.get(id=1).url, sub_url)
 
@@ -382,7 +384,7 @@ def getlog(text):
 
 def is_valide_mac():
     """check de license"""
-    from models import License
+    from Common.models import License
 
     try:
         lcse = License.get(License.code == str(make_lcse()))

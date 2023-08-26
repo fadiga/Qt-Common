@@ -3,14 +3,15 @@
 # maintainer: fad
 
 try:
-    from cstatic import CConstants
+    from ..cstatic import CConstants
 except Exception as e:
     print(e)
 
 
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction, QApplication, QMainWindow, QToolBar
-from ui.common import FMainWindow
+
+from .common import FMainWindow
 
 
 class FMenuToolBar(QToolBar, FMainWindow):
