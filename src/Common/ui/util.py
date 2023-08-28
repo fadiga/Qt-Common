@@ -188,7 +188,7 @@ def formatted_number(number, sep=".", aftergam=None):
     if not aftergam:
         aftergam = int(Settings.select().get().after_cam)
     locale_name, encoding = locale.getlocale()
-    locale.setlocale(locale.LC_ALL, "fra")
+    # locale.setlocale(locale.LC_ALL, "fra")
     fmt = "%s"
     if isinstance(number, int):
         # print("int ", number)

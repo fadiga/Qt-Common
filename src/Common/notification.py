@@ -6,13 +6,12 @@
 #  modif by: Fadiga Ibrahima  #
 #  File: Notification System  #
 ###############################
-
 import time
 
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore, QtWidgets
 
 
-class Notification(QtGui.QWidget):
+class Notification(QtWidgets.QWidget):
     closed = QtCore.pyqtSignal()
 
     def __init__(self, mssg, parent=None, type_mssg="", *args, **kwargs):
@@ -24,7 +23,7 @@ class Notification(QtGui.QWidget):
             background = "green"
         elif type_mssg == "error":
             background = "red"
-        elif type_mssg == "warring":
+        elif type_mssg == "warning":
             background = "grey"
         else:
             background = "black"
@@ -35,79 +34,47 @@ class Notification(QtGui.QWidget):
         self.show()
 
     def create_notification(self):
-        # cp = QtGui.QDesktopWidget().availableGeometry()
-        # self.x = cp.width()
         self.x = 2
         self.y = 1
-        # Set the opacity
         self.f = 1.0
-        # Start Worker
         self.workThread = WorkThread(self)
-        self.connect(
-            self.workThread,
-            QtCore.SIGNAL("update(QString)"),
-            self.animate,
-            QtCore.Qt.QueuedConnection,
-        )
-        self.connect(
-            self.workThread,
-            QtCore.SIGNAL("vanish(QString)"),
-            self.disappear,
-            QtCore.Qt.QueuedConnection,
-        )
-        self.connect(
-            self.workThread,
-            QtCore.SIGNAL("finished()"),
-            self.done,
-            QtCore.Qt.QueuedConnection,
-        )
+        self.workThread.update.connect(self.animate, QtCore.Qt.QueuedConnection)
+        self.workThread.vanish.connect(self.disappear, QtCore.Qt.QueuedConnection)
+        self.workThread.finished.connect(self.done, QtCore.Qt.QueuedConnection)
 
         self.workThread.start()
 
-        vbox = QtGui.QVBoxLayout()
-        # Set the message
-        vbox.addWidget(QtGui.QLabel(self.mssg))
+        vbox = QtWidgets.QVBoxLayout()
+        vbox.addWidget(QtWidgets.QLabel(self.mssg))
         self.setLayout(vbox)
 
-        return
-
-    # Quit when done
     def done(self):
-        # self.hide()
         self.close()
-        return
 
-    # Reduce opacity of the window
     def disappear(self):
         self.f -= 0.0002
         self.setWindowOpacity(self.f)
-        return
-
-    # Move in animation
 
     def animate(self):
         self.move(self.x, self.y)
         self.y += 0.5
-        return
-
-
-# The Worker
 
 
 class WorkThread(QtCore.QThread):
+    update = QtCore.pyqtSignal()
+    vanish = QtCore.pyqtSignal()
+    finished = QtCore.pyqtSignal()
+
     def __init__(self, mv):
-        super(QtCore.QThread, self).__init__()
+        super(WorkThread, self).__init__()
 
     def run(self):
         while True:
-            # Bring em in :D
             for i in range(30):
                 time.sleep(0.01)
-                self.emit(QtCore.SIGNAL("update(QString)"), "ping")
-            # Hide u bitch :P
+                self.update.emit()
             time.sleep(0.1)
-            self.emit(QtCore.SIGNAL("vanish(QString)"), "ping")
-
+            self.vanish.emit()
             time.sleep(0.1)
-            self.emit(QtCore.SIGNAL("finished(QString)"), "ping")
+            self.finished.emit()
             return

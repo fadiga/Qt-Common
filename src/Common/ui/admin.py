@@ -4,27 +4,25 @@
 # maintainer: Fad
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from PyQt5.QtCore import SIGNAL, Qt
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont, QIcon, QPixmap
 from PyQt5.QtWidgets import (
     QCheckBox,
     QComboBox,
     QDoubleSpinBox,
-    QFont,
     QFormLayout,
     QGridLayout,
     QHBoxLayout,
-    QIcon,
     QListWidget,
     QListWidgetItem,
     QMessageBox,
-    QPixmap,
     QSplitter,
     QTextEdit,
     QVBoxLayout,
 )
-from tabpane import tabbox
 
 from ..models import Organization, Owner, Settings
+from ..tabpane import tabbox
 from .common import (
     Button,
     ButtonSave,
@@ -171,7 +169,7 @@ class TrashTableWidget(FTableWidget):
             editor = QCheckBox()
             if data == 2:
                 editor.setCheckState(2)
-            self.connect(editor, SIGNAL("stateChanged(int)"), self.parent.enablebtt)
+            editor.stateChanged.connect(self.parent.enablebtt)
             return editor
         return super(TrashTableWidget, self)._item_for_data(row, column, data, context)
 

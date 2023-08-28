@@ -91,12 +91,9 @@ class FMenuBar(QMenuBar, FWidget):
                     self,
                 )
                 el_menu.setShortcut(m.get("shortcut"))
-                el_menu.triggered.connect(lambda m=m: self.change_theme(m.get("theme")))
-                # self.connect(
-                #     el_menu,
-                #     SIGNAL("triggered()"),
-                #     lambda m=m: self.change_theme(m.get("theme")),
-                # )
+                el_menu.triggered.connect(
+                    lambda checked, goto=m["theme"]: self.change_theme(goto)
+                )
                 _theme.addSeparator()
                 _theme.addAction(el_menu)
                 _theme.setIcon(QIcon("{}theme.png".format(CConstants.img_cmedia)))
@@ -150,7 +147,7 @@ class FMenuBar(QMenuBar, FWidget):
         self.file_.addAction(exit_)
 
     def logout(self):
-        from ui.login import LoginWidget
+        from .login import LoginWidget
 
         LoginWidget(hibernate=True).exec_()
 
@@ -172,7 +169,7 @@ class FMenuBar(QMenuBar, FWidget):
     # Admin
 
     def goto_admin(self):
-        from ui.admin import AdminViewWidget
+        from .admin import AdminViewWidget
 
         self.change_main_context(AdminViewWidget)
 
@@ -208,10 +205,10 @@ class FMenuBar(QMenuBar, FWidget):
         self.open_dialog(HTMLView, modal=True)
 
     def open_logo_file(self):
-        from ui import util
+        from .util import uopen_file
 
         try:
-            util.uopen_file(CConstants.NAME_MAIN.replace(".py", ".log"))
+            uopen_file(CConstants.NAME_MAIN.replace(".py", ".log"))
         except Exception as e:
             print("show log file ", e)
 

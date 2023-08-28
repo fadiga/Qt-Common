@@ -27,6 +27,7 @@ class CConstants(object):
     IS_NOT_ACTIVATED = "is_not_activated"
     IS_EXPIRED = "is_expired"
     img_media = ""
+    NAME_MAIN = "main.py"
     file_img = os.path.join(os.path.dirname(os.path.abspath("__file__")), "cimages/")
     # deployment
     if os.path.exists(file_img):
