@@ -10,6 +10,7 @@ import locale
 
 import gettext_windows
 from PyQt5.QtWidgets import QDialog
+from ui.mainwindow import MainWindow
 
 from .cstatic import CConstants
 from .models import Organization, Owner, Settings
