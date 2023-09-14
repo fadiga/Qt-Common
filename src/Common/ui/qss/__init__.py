@@ -13,7 +13,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import platform
 
-from models import Organization
+from .models import Organization
 
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 

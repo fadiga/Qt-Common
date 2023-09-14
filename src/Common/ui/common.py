@@ -94,7 +94,7 @@ class FMainWindow(QMainWindow):
         d.exec_()
 
     def logout(self):
-        from models import Owner, Settings
+        from .models import Owner, Settings
 
         # print("logout")
         if Settings.get(id=1).is_login:

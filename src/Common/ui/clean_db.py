@@ -123,8 +123,6 @@ class DBCleanerWidget(QDialog, FWidget):
             return False
 
     def cleaner_db(self):
-        # from models import Reports
-
         path_db_file = os.path.join(
             os.path.dirname(os.path.abspath("__file__")), DB_FILE
         )

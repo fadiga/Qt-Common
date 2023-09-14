@@ -204,7 +204,7 @@ class TaskThreadServer(QThread):
     def run(self):
         p = 1
         w = 5
-        from models import Organization
+        from .models import Organization
 
         while not self.stopped.wait(w):
             if Organization().select().count() > 0:
