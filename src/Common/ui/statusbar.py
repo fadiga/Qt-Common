@@ -7,20 +7,18 @@ import sys
 from threading import Event
 
 import requests
-from PyQt5.QtCore import QObject, Qt, QThread, pyqtSignal
+from Common.ui.util import access_server, get_server_url, internet_on, is_valide_mac
+from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QLabel, QProgressBar, QPushButton, QStatusBar
 
 from ..cstatic import logger
 from ..server import Network
-from .util import acces_server, get_serv_url, internet_on, is_valide_mac
 
 try:
     from ..cstatic import CConstants
 except Exception as e:
     print(e)
-
-# base_url = CConstants.BASE_URL
 
 
 class GStatusBar(QStatusBar):
@@ -28,16 +26,19 @@ class GStatusBar(QStatusBar):
         super(GStatusBar, self).__init__(parent)
 
         if not CConstants.SERV:
-            logger.info("Not Serveur ")
+            logger.info("Server not configured.")
             return
 
-        logger.info("Option server active")
-        self.stopFlag = QThread.Event()
+        logger.info("Server option active.")
+        self.stopFlag = Event()
         self.info_label = QLabel()
+        self.init_ui()
+
+    def init_ui(self):
         icon_label = QLabel()
         name_label = QLabel()
         name_label.setText(
-            'Développé par IBS-Mali | <a href="https://ibsmali.ml/">ibsmali.ml</a>'
+            'Developed by IBS-Mali | <a href="https://ibsmali.ml/">ibsmali.ml</a>'
         )
         name_label.setOpenExternalLinks(True)
         icon_label.setPixmap(QPixmap("{}".format(CConstants.IBS_LOGO)))
@@ -47,17 +48,16 @@ class GStatusBar(QStatusBar):
 
         self.check_serv = TaskThreadServer(self)
         self.check_serv.contact_server_signal.connect(self.contact_server)
-        self.check_serv.download_signal.connect(self.download_)
+        self.check_serv.download_signal.connect(self.download)
 
         try:
-            logger.info("check_serv")
             self.check_serv.start()
         except Exception as e:
-            logger.error("Failed start check serv ", e)
+            logger.error("Failed to start server check thread: {}".format(e))
 
-    def download_(self):
-        self.b = QPushButton("")
-        self.b.setIcon(
+    def download(self):
+        self.download_button = QPushButton("")
+        self.download_button.setIcon(
             QIcon.fromTheme(
                 "",
                 QIcon(
@@ -67,35 +67,28 @@ class GStatusBar(QStatusBar):
                 ),
             )
         )
-        self.b.clicked.connect(self.get_setup)
-        self.b.setText(self.check_serv.data.get("message"))
-        self.addWidget(self.b)
+        self.download_button.clicked.connect(self.start_download)
+        self.download_button.setText(self.check_serv.data.get("message"))
+        self.addWidget(self.download_button)
 
-    def get_setup(self):
-        self.progressBar = QProgressBar(self)
-        self.addWidget(self.progressBar, 2)
-        self.t = TaskThreadDowload(self)
-        self.t.download_finish_signal.connect(self.download_finish)
+    def start_download(self):
+        self.progress_bar = QProgressBar(self)
+        self.addWidget(self.progress_bar, 2)
+        download_thread = TaskThreadDownload(self)
+        download_thread.download_finish_signal.connect(self.download_finish)
 
         try:
-            self.t.start()
+            download_thread.start()
         except Exception as exc:
-            logger.error("exc :", exc)
-
-    def failure(self):
-        logger.warning("La mise à jour a échoué.")
-        self.info_label.setText("La mise à jour a échoué.")
-        self.progressBar.close()
-        self.b.setEnabled(True)
+            logger.error("Failed to start download thread: {}".format(exc))
 
     def download_finish(self):
-        logger.info("download_finish")
-        self.b.hide()
-        self.progressBar.close()
-        self.instb = QPushButton(
-            "installer la Ver. {}".format(self.check_serv.data.get("version"))
+        self.download_button.hide()
+        self.progress_bar.close()
+        self.install_button = QPushButton(
+            "Install Version {}".format(self.check_serv.data.get("version"))
         )
-        self.instb.setIcon(
+        self.install_button.setIcon(
             QIcon.fromTheme(
                 "",
                 QIcon(
@@ -105,79 +98,79 @@ class GStatusBar(QStatusBar):
                 ),
             )
         )
-        self.instb.clicked.connect(self.start_install)
-        self.addWidget(self.instb)
+        self.install_button.clicked.connect(self.start_install)
+        self.addWidget(self.install_button)
 
     def start_install(self):
         try:
             os.startfile(os.path.basename(self.installer_name))
             sys.exit()
         except Exception as e:
-            self.failure()
+            self.show_failure_message()
 
     def download_setup_file(self):
-        logger.info("download setup")
-        self.b.setEnabled(False)
-        self.info_label.setText("Téléchargement en cours ...")
+        self.download_button.setEnabled(False)
+        self.info_label.setText("Downloading in progress...")
 
         self.installer_name = "{}.exe".format(self.check_serv.data.get("app"))
-        url = get_serv_url(self.check_serv.data.get("setup_file_url"))
-        r = requests.get(url, stream=True)
-        if r.status_code == 200:
-            total_length = r.headers.get("content-length")
-            with open(self.installer_name, "wb") as f:
+        url = get_server_url(self.check_serv.data.get("setup_file_url"))
+        response = requests.get(url, stream=True)
+
+        if response.status_code == 200:
+            total_length = response.headers.get("content-length")
+            with open(self.installer_name, "wb") as file:
                 if total_length is None:
-                    f.write(r.content)
+                    file.write(response.content)
                 else:
-                    dl = 0
-                    for data in r.iter_content(chunk_size=4096):
-                        dl += len(data)
-                        f.write(data)
-                        done = int(100 * dl / int(total_length))
-                        self.progressBar.setValue(done)
-        self.info_label.setText("Fin de téléchargement ...")
+                    downloaded_length = 0
+                    for data in response.iter_content(chunk_size=4096):
+                        downloaded_length += len(data)
+                        file.write(data)
+                        progress = int(100 * downloaded_length / int(total_length))
+                        self.progress_bar.setValue(progress)
+
+        self.info_label.setText("Download complete.")
 
     def contact_server(self):
-        logger.info("check contact")
+        net_style, net_response = "color:red", "Connection lost!"
+        lse_style, r_lse = "color:red", "Not allowed"
+        sy_style, r_sy = "color:red", "Not allowed"
 
-        s_style, response_s = "color:red", "Connexion perdue !"
-        net_style, net_response = "color:red", "Connexion perdue !"
-        lse_style, r_lse = "color:red", "Non autorisée"
-        sy_style, r_sy = "color:red", "Non autorisée"
         if internet_on():
-            net_style, net_response = "color:green", "ok"
-        if acces_server():
-            s_style, response_s = "color:green", "Connecté"
-            if self.check_serv.data.get("backup_online"):
-                sy_style, r_sy = "color:green", "autorisé"
+            net_style, net_response = "color:green", "OK"
 
-        lse, valide = is_valide_mac()
+        if access_server():
+            net_style, net_response = "color:green", "Connected"
+            if self.check_serv.data.get("backup_online"):
+                sy_style, r_sy = "color:green", "Authorized"
+
+        lse, valid = is_valide_mac()
         if lse:
             lse_style, r_lse = (
                 "color:green",
-                "<b>{}</b>".format(lse.remaining_days()) if valide else "Expirée",
+                "<b>{}</b>".format(lse.remaining_days()) if valid else "Expired",
             )
+
         self.info_label.setText(
             """
-            <strong>internet : </strong><span style={net_style}>{net_response} </span> 
-            <strong>Serveur : </strong><span style={s_style}>{response_s}</span><br>
-            <strong> Synchronisation : </strong><span style={sy_style}>{r_sy}</span>
-            <strong> License : </strong><span style={lse_style}>{r_lse}</span>
+            <strong>Internet:</strong><span style={net_style}>{net_response}</span>
+            <strong>Server:</strong><span style={net_style}>{net_response}</span><br>
+            <strong>Synchronization:</strong><span style={sy_style}>{r_sy}</span>
+            <strong>License:</strong><span style={lse_style}>{r_lse}</span>
             """.format(
-                s_style=s_style,
-                response_s=response_s,
                 net_style=net_style,
                 net_response=net_response,
-                lse_style=lse_style,
-                r_lse=r_lse,
                 sy_style=sy_style,
                 r_sy=r_sy,
+                lse_style=lse_style,
+                r_lse=r_lse,
             )
         )
-        self.check_serv_contact_server()
+
+        # self.check_serv_contact_server()
 
 
-class TaskThreadDowload(QThread):
+class TaskThreadDownload(QThread):
     download_finish_signal = pyqtSignal()
 
     def __init__(self, parent):
@@ -199,25 +192,24 @@ class TaskThreadServer(QThread):
         self.stopped = parent.stopFlag
 
     def run(self):
-        p = 1
-        w = 5
-        from .models import Organization
+        check_interval = 5
+        from Common.models import Organization
 
-        while not self.stopped.wait(w):
+        while not self.stopped.wait(check_interval):
             if Organization().select().count() > 0:
                 orga_slug = Organization.get(id=1).slug
-                if acces_server():
+                if access_server():
                     logger.info("Server access is OK")
                     if not orga_slug:
-                        rep_serv = Network().get_or_inscript_app()
+                        Network().get_or_inscribe_app()
                     else:
-                        self.data = Network().update_version_checher()
-                        w = 50
+                        self.data = Network().update_version_checker()
+                        check_interval = 150
                         if not self.data:
                             return
-                        if not self.data.get("is_last") and p == 1:
-                            p += 1
+                        if not self.data.get("is_last"):
                             self.download_signal.emit()
                 else:
                     logger.info("No server access")
+
                 self.contact_server_signal.emit()

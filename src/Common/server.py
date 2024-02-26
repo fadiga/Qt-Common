@@ -7,14 +7,8 @@ from PyQt5.QtCore import QObject
 
 from .cstatic import logger
 from .info_hot import getSystemInfo
-from .models import License, Organization, Owner, Settings, Version
-from .ui.util import (
-    acces_server,
-    datetime_to_str,
-    get_serv_url,
-    internet_on,
-    is_valide_mac,
-)
+from .models import License, Organization, Settings
+from .ui.util import access_server, datetime_to_str, get_server_url, is_valide_mac
 
 try:
     from .cstatic import CConstants
@@ -31,10 +25,10 @@ class Network(QObject):
     def submit(self, url, data):
         logger.debug("submit", "data", " url ", url)
         resp_dict = {"response": {"message": "-"}}
-        if acces_server():
+        if access_server():
             client = requests.session()
             try:
-                response = client.get(get_serv_url(url), data=json.dumps(data))
+                response = client.get(get_server_url(url), data=json.dumps(data))
                 logger.info(response)
                 if response.status_code == 200:
                     # logger.debug(response.status_code)

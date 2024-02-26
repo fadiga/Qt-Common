@@ -40,7 +40,7 @@ def internet_on():
         logger.debug(exc)
 
 
-def acces_server():
+def access_server():
     if not CConstants.SERV:
         logger.debug("Not server mode")
         return False
@@ -48,7 +48,7 @@ def acces_server():
     if not internet_on():
         return
     try:
-        urlopen(get_serv_url(""), timeout=1)
+        urlopen(get_server_url(""), timeout=1)
         return True
     except URLError as err:
         return False
@@ -332,7 +332,7 @@ def get_path(path, filename):
     return os.path.join(path, filename)
 
 
-def get_serv_url(sub_url):
+def get_server_url(sub_url):
     from Common.models import Settings
 
     return "{}/{}".format(Settings.get(id=1).url, sub_url)

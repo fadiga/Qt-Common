@@ -2,70 +2,65 @@
 # -*- coding: utf-8 -*-
 # maintainer: fadiga
 
-import json
 from datetime import datetime
 from threading import Event
 
-import requests
-from PyQt5.QtCore import QObject, Qt, QThread  # , pyqtSignal
+from PyQt5.QtCore import QObject, QThread, pyqtSignal
 
 from .cstatic import CConstants, logger
-from .models import License, Organization, Settings
+from .models import Organization
 from .server import Network
-from .ui.util import acces_server, get_serv_url, is_valide_mac
+from .ui.util import access_server, is_valide_mac
 
 
 class UpdaterInit(QObject):
+    contact_server_signal = pyqtSignal()
+
     def __init__(self):
         QObject.__init__(self)
 
-        ## self.status_bar = QStatusBar()
-        # self.stopFlag = Event()
-        # self.check = TaskThreadUpdater(self)
-        # self.connect(
-        #     self.check, SIGNAL("update_data"), self.update_data, Qt.QueuedConnection
-        # )
-        # try:
-        #     self.check.start()
-        # except Exception as exc:
-        #     logger.warning("Exc :", exc)
+        self.stopFlag = Event()
+        self.check = TaskThreadUpdater(self)
+        self.check.contact_server_signal.connect(self.contact_server)
 
-    def update_data(self, orga_slug):
-        logger.info("update data")
-        from .cstatic import CConstants
-        from database import Setup
+        try:
+            self.check.start()
+        except Exception as exc:
+            logger.warning(
+                "Exception occurred while starting the updater thread: {}".format(exc)
+            )
 
-        # self.base_url = CConstants.BASE_URL
-        logger.info("UpdaterInit start")
-        self.emit(SIGNAL("contact_server"))
-        for m in Setup.LIST_CREAT:
-            for d in m.select().where(m.is_syncro == True):
-                # logger.info(type(d).__name__)
-                resp = Network().submit(
-                    "update-data",
-                    {"slug": orga_slug, "model": type(d).__name__, "data": d.data()},
-                )
-                if resp.get("save"):
-                    d.updated()
+    def contact_server(self):
+        logger.info("Contacting server for updates")
+        orga_slug = self.get_organization_slug()
+
+        if orga_slug:
+            self.check.update_data(orga_slug)
+
+    def get_organization_slug(self):
+        if Organization.select().count() > 0:
+            return Organization.get(id=1).slug
+        return None
 
 
 class TaskThreadUpdater(QThread):
+    contact_server_signal = pyqtSignal()
+
     def __init__(self, parent):
         QThread.__init__(self, parent)
         self.parent = parent
         self.stopped = parent.stopFlag
 
     def run(self):
-        # from ui.statusbar import GStatusBar
-        w = 5
-        while not self.stopped.wait(w):
-            w = 50
-            if acces_server():
-                if Organization().select().count() == 0:
-                    return
-                orga_slug = Organization.get(id=1).slug
+        check_interval_without_server = 5
+        check_interval_with_server = 50
+
+        while not self.stopped.wait(check_interval_without_server):
+            if access_server():
+                orga_slug = self.get_organization_slug()
+
                 if not orga_slug or orga_slug == "-":
-                    rep_serv = Network().get_or_inscript_app()
+                    rep_serv = Network().get_or_inscribe_app()
                 else:
                     lcse = is_valide_mac()[0]
                     resp = Network().submit(
@@ -75,14 +70,34 @@ class TaskThreadUpdater(QThread):
                         not resp.get("force_kill")
                         or resp.get("can_use") != CConstants.IS_EXPIRED
                     ):
-                        # logger.info("resp expiration_date :: ", resp)
                         lcse.expiration_date = datetime.fromtimestamp(
                             resp.get("expiration_date")
                         )
                         lcse.save()
                     else:
-                        # logger.info("remove_activation")
                         lcse.remove_activation()
 
                     if resp.get("is_syncro"):
-                        self.parent.update_data(orga_slug)
+                        self.contact_server_signal.emit()
+
+                    check_interval_without_server = check_interval_with_server
+            else:
+                logger.info("No server access")
+
+    def get_organization_slug(self):
+        return self.parent.get_organization_slug()
+
+    def update_data(self, orga_slug):
+        logger.info("Updating data")
+        from database import Setup
+
+        self.contact_server_signal.emit()
+
+        for m in Setup.LIST_CREAT:
+            for d in m.select().where(m.is_syncro == True):
+                resp = Network().submit(
+                    "update-data",
+                    {"slug": orga_slug, "model": type(d).__name__, "data": d.data()},
+                )
+                if resp.get("save"):
+                    d.updated()

@@ -55,7 +55,7 @@ class CConstants(object):
     EXCLUDE_MENU_ADMIN = []
     LSE = True
     ORG = False
-    SERV = False
+    SERV = True
     list_models = []
     APP_LOGO = os.path.join(img_cmedia, "logo.png")
     APP_LOGO_ICO = os.path.join(img_cmedia, "logo.ico")
