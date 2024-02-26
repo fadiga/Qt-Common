@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 import hashlib
 import os

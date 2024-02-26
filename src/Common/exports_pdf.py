@@ -2,7 +2,6 @@
 # -*- coding= UTF-8 -*-
 # maintainer: Fadiga
 
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 from reportlab.lib.colors import HexColor
 from reportlab.lib.pagesizes import A4

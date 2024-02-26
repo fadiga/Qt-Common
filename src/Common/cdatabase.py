@@ -3,16 +3,13 @@
 # Autor: Fadiga
 
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from datetime import datetime
 
 from playhouse import migrate as migrate_
 from playhouse.migrate import (
     BooleanField,
-    CharField,
+    CharField,  # ForeignKeyField,
     DateTimeField,
-    ForeignKeyField,
     IntegerField,
     migrate,
 )

@@ -1,7 +1,7 @@
 #!usr/bin/env python
 # -*- coding: utf8 -*-
 # maintainer: Fad
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 from peewee import IntegrityError
 from PyQt5.QtCore import Qt
@@ -10,11 +10,6 @@ from PyQt5.QtWidgets import QCheckBox, QComboBox, QDialog, QFormLayout, QVBoxLay
 from ..models import Owner
 from .common import Button, ButtonSave, FLabel, FWidget, IntLineEdit, LineEdit
 from .util import check_is_empty, field_error, is_valide_codition_field
-
-try:
-    unicode
-except:
-    unicode = str
 
 
 class NewOrEditUserViewWidget(QDialog, FWidget):

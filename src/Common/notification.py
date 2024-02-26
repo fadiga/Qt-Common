@@ -57,7 +57,7 @@ class Notification(QtWidgets.QWidget):
 
     def animate(self):
         self.move(self.x, self.y)
-        self.y += 0.5
+        self.y += 1
 
 
 class WorkThread(QtCore.QThread):

@@ -2,8 +2,9 @@
 # -*- coding: utf8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
-from __future__ import absolute_import, division, print_function, unicode_literals
 
+
+import ctypes
 import hashlib
 import locale
 import os
@@ -16,6 +17,7 @@ from urllib.request import URLError, urlopen
 from uuid import getnode
 
 from PyQt5.QtCore import QTimer
+from PyQt5.QtGui import QCursor, QIcon
 from PyQt5.QtWidgets import QMessageBox, QSystemTrayIcon, QTextEdit
 
 from ..cstatic import CConstants, logger
@@ -235,7 +237,6 @@ def is_float(val):
         val = val.replace(",", ".").replace(" ", "").replace("\xa0", "")
         return float(val)
     except Exception as e:
-        # print("is_float", e)
         logger.debug("is_float ", e)
         return 0
 
@@ -248,7 +249,6 @@ def is_int(val):
             v += i
         return int(v)
     except Exception as e:
-        # print("is_int", e)
         logger.debug("is_int ", e)
         return 0
 
@@ -413,7 +413,7 @@ def get_lcse_file():
 
 
 def _disk_c(self):
-    drive = unicode(os.getenv("SystemDrive"))
+    drive = str(os.getenv("SystemDrive"))
     freeuser = ctypes.c_int64()
     total = ctypes.c_int64()
     free = ctypes.c_int64()

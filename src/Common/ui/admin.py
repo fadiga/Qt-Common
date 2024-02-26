@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QIcon, QPixmap
@@ -66,7 +66,6 @@ class AdminViewWidget(FWidget):
         self.bttempty = Button(_("Vide"))
         self.bttempty.clicked.connect(self.deletedseleted)
         self.bttempty.setEnabled(False)
-        # Grid
         gridbox = QGridLayout()
         history_table = QVBoxLayout()
 

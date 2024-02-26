@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # Autor: Fadiga
 
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 from .models import Settings, Version
 

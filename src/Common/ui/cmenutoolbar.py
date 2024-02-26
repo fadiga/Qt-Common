@@ -10,7 +10,7 @@ except Exception as e:
 
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtGui import QCursor, QIcon
-from PyQt5.QtWidgets import QAction, QApplication, QMainWindow, QToolBar
+from PyQt5.QtWidgets import QToolBar
 
 from .common import FMainWindow
 

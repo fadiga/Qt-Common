@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 # maintainer: Fad
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 from datetime import date
 
@@ -43,11 +43,6 @@ try:
     from ..cstatic import CConstants
 except Exception as e:
     print(e)
-
-try:
-    unicode
-except:
-    unicode = str
 
 
 class FMainWindow(QMainWindow):
@@ -94,7 +89,7 @@ class FMainWindow(QMainWindow):
         d.exec_()
 
     def logout(self):
-        from .models import Owner, Settings
+        from ..models import Owner, Settings
 
         # print("logout")
         if Settings.get(id=1).is_login:
@@ -103,7 +98,7 @@ class FMainWindow(QMainWindow):
                 ur.save()
 
     def Notify(self, mssg="Hi", type_mssg="warring"):
-        from notification import Notification
+        from ..notification import Notification
 
         self.notify = Notification(mssg=mssg, type_mssg=type_mssg)
 
@@ -728,9 +723,7 @@ class ExtendedComboBox(QComboBox):
         self.completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
         self.setCompleter(self.completer)
         # connect signals
-        self.lineEdit().textEdited[unicode].connect(
-            self.pFilterModel.setFilterFixedString
-        )
+        self.lineEdit().textEdited[str].connect(self.pFilterModel.setFilterFixedString)
         self.completer.activated.connect(self.on_completer_activated)
 
     # on selection of an item from the completer, select the corresponding
@@ -798,7 +791,7 @@ class WigglyWidget(QWidget):
 
         painter = QtGui.QPainter(self)
 
-        for i in xrange(self.text.size()):
+        for i in range(self.text.size()):
             index = (self.step + i) % 16
             color.setHsv((15 - index) * 16, 255, 191)
             painter.setPen(color)

@@ -1,12 +1,11 @@
 #!usr/bin/env python
 # -*- coding: utf8 -*-
 # maintainer: Fad
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QCheckBox,
-    QComboBox,
     QDialog,
     QFormLayout,
     QGroupBox,

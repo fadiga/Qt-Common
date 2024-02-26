@@ -1,20 +1,17 @@
 #!usr/bin/env python
 # -*- coding: utf8 -*-
 # maintainer: Fad
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
 import shutil
 from datetime import datetime
 
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
-    QAction,
     QComboBox,
     QDialog,
     QFormLayout,
     QGroupBox,
-    QMessageBox,
     QPushButton,
     QVBoxLayout,
 )

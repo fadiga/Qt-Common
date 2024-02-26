@@ -2,17 +2,21 @@
 # -*- coding: utf-8 -*-
 # maintainer: Fad
 
-import os
+# import os
 import sys
 
-from cdatabase import AdminDatabase
+# from cdatabase import AdminDatabase
 from cmain import cmain
-from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication
 from ui.cmenubar import FMenuBar
 from ui.cmenutoolbar import FMenuToolBar
 from ui.common import FMainWindow, FWidget
-from ui.style_qss import theme
+
+# from PyQt5.QtGui import QIcon
+
+
+# from ui.style_qss import theme
 
 app = QApplication(sys.argv)
 
@@ -35,9 +39,7 @@ class MainWindow(FMainWindow):
     def __init__(self):
         FMainWindow.__init__(self)
 
-        self.setWindowIcon(
-            QIcon.fromTheme("logo", QIcon("{}".format(CConstants.APP_LOGO)))
-        )
+        # self.setWindowIcon(QIcon.fromTheme("logo", QIcon("{}".format(Config.APP_LOGO))))
         self.menubar = FMenuBar(self)
         self.setMenuBar(self.menubar)
         self.toolbar = FMenuToolBar(self)

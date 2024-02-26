@@ -7,7 +7,7 @@ import sys
 from threading import Event
 
 import requests
-from PyQt5.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QObject, Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QLabel, QProgressBar, QPushButton, QStatusBar
 
@@ -25,17 +25,19 @@ except Exception as e:
 
 class GStatusBar(QStatusBar):
     def __init__(self, parent=None):
-        QStatusBar.__init__(self, parent)
+        super(GStatusBar, self).__init__(parent)
+
         if not CConstants.SERV:
             logger.info("Not Serveur ")
             return
+
         logger.info("Option server active")
-        self.stopFlag = Event()
+        self.stopFlag = QThread.Event()
         self.info_label = QLabel()
         icon_label = QLabel()
         name_label = QLabel()
         name_label.setText(
-            'Développer par IBS-Mali | <a href="https://ibsmali.ml/">ibsmali.ml</a>'
+            'Développé par IBS-Mali | <a href="https://ibsmali.ml/">ibsmali.ml</a>'
         )
         name_label.setOpenExternalLinks(True)
         icon_label.setPixmap(QPixmap("{}".format(CConstants.IBS_LOGO)))
@@ -44,15 +46,9 @@ class GStatusBar(QStatusBar):
         self.addWidget(self.info_label, 1)
 
         self.check_serv = TaskThreadServer(self)
-        QObject.connect(
-            self.check_serv,
-            SIGNAL("contact_server"),
-            self.contact_server,
-            Qt.QueuedConnection,
-        )
-        QObject.connect(
-            self.check_serv, SIGNAL("download_"), self.download_, Qt.QueuedConnection
-        )
+        self.check_serv.contact_server_signal.connect(self.contact_server)
+        self.check_serv.download_signal.connect(self.download_)
+
         try:
             logger.info("check_serv")
             self.check_serv.start()
@@ -60,7 +56,6 @@ class GStatusBar(QStatusBar):
             logger.error("Failed start check serv ", e)
 
     def download_(self):
-        # print("download_")
         self.b = QPushButton("")
         self.b.setIcon(
             QIcon.fromTheme(
@@ -78,10 +73,9 @@ class GStatusBar(QStatusBar):
 
     def get_setup(self):
         self.progressBar = QProgressBar(self)
-        # self.progressBar.setGeometry(430, 30, 400, 25)
         self.addWidget(self.progressBar, 2)
         self.t = TaskThreadDowload(self)
-        QObject.connect(self.t, SIGNAL("download_finish"), self.download_finish)
+        self.t.download_finish_signal.connect(self.download_finish)
 
         try:
             self.t.start()
@@ -112,7 +106,6 @@ class GStatusBar(QStatusBar):
             )
         )
         self.instb.clicked.connect(self.start_install)
-        # self.progressBar.close()
         self.addWidget(self.instb)
 
     def start_install(self):
@@ -120,7 +113,6 @@ class GStatusBar(QStatusBar):
             os.startfile(os.path.basename(self.installer_name))
             sys.exit()
         except Exception as e:
-            # print(e)
             self.failure()
 
     def download_setup_file(self):
@@ -134,7 +126,7 @@ class GStatusBar(QStatusBar):
         if r.status_code == 200:
             total_length = r.headers.get("content-length")
             with open(self.installer_name, "wb") as f:
-                if total_length is None:  # no content length header
+                if total_length is None:
                     f.write(r.content)
                 else:
                     dl = 0
@@ -182,20 +174,25 @@ class GStatusBar(QStatusBar):
                 r_sy=r_sy,
             )
         )
-        self.emit(SIGNAL("contact_server"))
+        self.check_serv_contact_server()
 
 
 class TaskThreadDowload(QThread):
+    download_finish_signal = pyqtSignal()
+
     def __init__(self, parent):
         QThread.__init__(self, parent)
         self.parent = parent
 
     def run(self):
         self.parent.download_setup_file()
-        self.emit(SIGNAL("download_finish"))
+        self.download_finish_signal.emit()
 
 
 class TaskThreadServer(QThread):
+    contact_server_signal = pyqtSignal()
+    download_signal = pyqtSignal()
+
     def __init__(self, parent):
         QThread.__init__(self, parent)
         self.parent = parent
@@ -209,21 +206,18 @@ class TaskThreadServer(QThread):
         while not self.stopped.wait(w):
             if Organization().select().count() > 0:
                 orga_slug = Organization.get(id=1).slug
-                # print('QStatusBar orga_slug', orga_slug)
                 if acces_server():
-                    logger.info("Server acces is OK")
+                    logger.info("Server access is OK")
                     if not orga_slug:
                         rep_serv = Network().get_or_inscript_app()
                     else:
                         self.data = Network().update_version_checher()
-                        # print("Contact server : ", self.data)
-
                         w = 50
                         if not self.data:
                             return
                         if not self.data.get("is_last") and p == 1:
                             p += 1
-                            self.emit(SIGNAL("download_"))
+                            self.download_signal.emit()
                 else:
-                    logger.info("Not server acces")
-                self.emit(SIGNAL("contact_server"))
+                    logger.info("No server access")
+                self.contact_server_signal.emit()

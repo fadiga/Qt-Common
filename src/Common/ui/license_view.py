@@ -1,7 +1,7 @@
 #!usr/bin/env python
 # -*- coding: utf8 -*-
 # maintainer: Fad
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 from datetime import datetime
 
@@ -26,13 +26,7 @@ from .common import (
     LineEdit,
     PyTextViewer,
 )
-from .util import (
-    check_is_empty,
-    clean_mac,
-    get_lcse_file,
-    is_valide_codition_field,
-    make_lcse,
-)
+from .util import check_is_empty, get_lcse_file, is_valide_codition_field, make_lcse
 
 
 class LicenseViewWidget(QDialog, FWidget):

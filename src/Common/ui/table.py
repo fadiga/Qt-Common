@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 # vim: ai ts=4 sts=4 et sw=4 nu
 # maintainer: Fad
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 import datetime
 
@@ -28,10 +28,6 @@ try:
     long
 except NameError:
     long = int
-try:
-    xrange
-except:
-    xrange = range
 
 
 class FlexibleTable(QTableWidget):
@@ -277,10 +273,10 @@ class FTableWidget(QTableWidget):
             remaining_width = extra_width - vheader_width
             try:
                 to_stretch = self.stretch_columns
-                indiv_extra = remaining_width / len(to_stretch)
+                indiv_extra = int(remaining_width / len(to_stretch))
             except ZeroDivisionError:
                 to_stretch = range(0, self.horizontalHeader().count())
-                indiv_extra = remaining_width / len(to_stretch)
+                indiv_extra = int(remaining_width / len(to_stretch))
             except:
                 indiv_extra = 0
 
