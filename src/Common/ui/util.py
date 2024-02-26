@@ -242,15 +242,29 @@ def is_float(val):
 
 
 def is_int(val):
+    val = str(val).split()
+    v = ""
+    for i in val:
+        v += i
     try:
-        val = str(val).split()
-        v = ""
-        for i in val:
-            v += i
-        return int(v)
-    except Exception as e:
-        logger.debug("is_int ", e)
-        return 0
+        v = int(v)
+    except ValueError:
+        v = v.replace(",", "")
+    return int(v)
+
+
+def parse_integer(value):
+    # Remove spaces and commas from the input string
+    cleaned_value = value.replace(" ", "").replace(",", "")
+
+    try:
+        # Attempt to convert the cleaned value to an integer
+        result = int(cleaned_value)
+    except ValueError:
+        # Handle the case where conversion to int fails
+        result = None  # or raise an exception or provide a default value
+
+    return result
 
 
 def date_to_str(date):
