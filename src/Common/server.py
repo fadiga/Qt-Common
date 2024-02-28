@@ -7,7 +7,7 @@ from PyQt5.QtCore import QObject
 
 from .cstatic import logger
 from .info_hot import getSystemInfo
-from .models import License, Organization, Settings
+from .models import License, Organization  # Settings
 from .ui.util import access_server, datetime_to_str, get_server_url, is_valide_mac
 
 try:
@@ -31,7 +31,7 @@ class Network(QObject):
                 response = client.get(get_server_url(url), data=json.dumps(data))
                 logger.info(response)
                 if response.status_code == 200:
-                    # logger.debug(response.status_code)
+                    logger.debug(response.status_code)
                     try:
                         return json.loads(response.content.decode("UTF-8"))
                     except Exception as e:
@@ -76,7 +76,7 @@ class Network(QObject):
 
     def get_or_inscript_app(self):
         orga = Organization.get(id=1)
-        sttg = Settings.get(id=1)
+        # sttg = Settings.get(id=1)
         data = {
             "app_info": {
                 "name": CConstants.APP_NAME,

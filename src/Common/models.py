@@ -307,7 +307,7 @@ class License(BaseModel):
 
     def remaining_days(self):
         return (
-            "{} jours".format(self.expiration_date - datetime.now().days)
+            "{} jours".format(self.expiration_date - datetime.now())
             if self.can_expired
             else "illimité"
         )
