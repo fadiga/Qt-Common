@@ -79,7 +79,7 @@ class LoginWidget(FDialog, FWidget):
         # login button
         self.login_button = QPushButton("&S'identifier")
         self.login_button.setIcon(
-            QIcon.fromTheme("save", QIcon("{}login.png".format(CConstants.img_cmedia)))
+            QIcon.fromTheme("save", QIcon(f"{CConstants.img_cmedia}login.png"))
         )
         self.login_button.clicked.connect(self.login)
 

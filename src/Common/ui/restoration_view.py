@@ -20,7 +20,7 @@ class RestorationViewWidget(QDialog, FWidget):
         QDialog.__init__(self, parent, *args, **kwargs)
 
         self.setWindowTitle("Restoration de Données")
-        vbox = QVBoxLayout()
+        self.vbox = QVBoxLayout()
         # self.online_resto_box()
         self.label = FLabel()
         self.label.setStyleSheet(
@@ -34,19 +34,19 @@ class RestorationViewWidget(QDialog, FWidget):
         self.onlineRestorBoxBtt = QGroupBox(self.tr("Restoration de données en line"))
         self.bn_resto_onligne = Button("Connexion")
         self.bn_resto_onligne.setIcon(
-            QIcon.fromTheme("", QIcon("{}cloud.png".format(CConstants.img_cmedia)))
+            QIcon.fromTheme("", QIcon(f"{CConstants.img_cmedia}cloud.png"))
         )
         self.bn_resto_onligne.clicked.connect(self.resto_onligne)
 
         self.bn_resto_l = Button("Import de sauvegarde locale")
         self.bn_resto_l.setIcon(
-            QIcon.fromTheme("", QIcon("{}db.png".format(CConstants.img_cmedia)))
+            QIcon.fromTheme("", QIcon(f"{CConstants.img_cmedia}db.png"))
         )
         self.bn_resto_l.clicked.connect(self.resto_local_db)
 
         self.bn_ignore = Button("Première installation")
         self.bn_ignore.setIcon(
-            QIcon.fromTheme("", QIcon("{}go-next.png".format(CConstants.img_cmedia)))
+            QIcon.fromTheme("", QIcon(f"{CConstants.img_cmedia}go-next.png"))
         )
         self.bn_ignore.clicked.connect(self.ignore_resto)
 
@@ -62,7 +62,7 @@ class RestorationViewWidget(QDialog, FWidget):
         formbox.addRow(FormLabel("Mot de passe"), self.password_field)
         formbox.addRow(FormLabel(""), self.bn_resto_onligne)
         self.onlineRestorBoxBtt.setLayout(formbox)
-        vbox.addWidget(self.onlineRestorBoxBtt)
+        self.vbox.addWidget(self.onlineRestorBoxBtt)
 
         # ==== Box of restor online ====
         self.onLocaleRestorBoxBtt = QGroupBox(
@@ -73,12 +73,12 @@ class RestorationViewWidget(QDialog, FWidget):
         # l_formbox.addRow(FormLabel("<i>Une copie de la base de données exportée.</i>"))
         l_formbox.addRow(FormLabel(""), self.bn_resto_l)
         self.onLocaleRestorBoxBtt.setLayout(l_formbox)
-        vbox.addWidget(self.onLocaleRestorBoxBtt)
+        self.vbox.addWidget(self.onLocaleRestorBoxBtt)
 
         i_formbox = QFormLayout()
         i_formbox.addRow(FLabel("<h2></h2>"), self.bn_ignore)
-        vbox.addLayout(i_formbox)
-        self.setLayout(vbox)
+        self.vbox.addLayout(i_formbox)
+        self.setLayout(self.vbox)
 
     def resto_onligne(self):
         # self.open_dialog()

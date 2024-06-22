@@ -5,8 +5,9 @@
 
 import logging
 import os
+from pathlib import Path
 
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath("__file__")))
+# ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -26,14 +27,10 @@ class CConstants(object):
     OK = "ok"
     IS_NOT_ACTIVATED = "is_not_activated"
     IS_EXPIRED = "is_expired"
-    img_media = ""
+    img_media = "static/images/"
     NAME_MAIN = "main.py"
-    file_img = os.path.join(os.path.dirname(os.path.abspath("__file__")), "cimages/")
-    # deployment
-    if os.path.exists(file_img):
-        img_cmedia = file_img
-    else:
-        img_cmedia = os.path.join(ROOT_DIR, "Common", "cimages/")
+    # img_media = os.path.join(ROOT_DIR, "static", "images/")
+    img_cmedia = str(Path(__file__).parent.joinpath("cimages").resolve()) + "/"
 
     IBS_LOGO = os.path.join(img_cmedia, "ibs.jpg")
     # ------------------------- Autor --------------------------#
@@ -51,14 +48,14 @@ class CConstants(object):
     APP_VERSION = "1.7"
     DEBUG = False
 
-    des_image_record = ROOT_DIR
+    des_image_record = Path(__file__)
     EXCLUDE_MENU_ADMIN = []
     LSE = True
     ORG = False
-    SERV = True
+    SERV = False
     list_models = []
-    APP_LOGO = os.path.join(img_cmedia, "logo.png")
-    APP_LOGO_ICO = os.path.join(img_cmedia, "logo.ico")
+    APP_LOGO = os.path.join(img_media, "logo.png")
+    APP_LOGO_ICO = os.path.join(img_media, "logo.ico")
     ExportFolders = []
     ExportFiles = []
     BASE_URL = "https://file-repo.ml"

@@ -27,7 +27,7 @@ class NewOrEditUserViewWidget(QDialog, FWidget):
         self.error_mssg = ""
         if self.owner:
             self.new = False
-            self.title = "Modification de l'utilisateur {}".format(self.owner.username)
+            self.title = f"Modification de l'utilisateur {self.owner.username}"
             self.succes_msg = "L'utilisateur a été bien mise à jour"
             if self.owner.isactive:
                 self.checked.setCheckState(Qt.Checked)

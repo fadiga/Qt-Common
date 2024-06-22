@@ -41,7 +41,7 @@ class GStatusBar(QStatusBar):
             'Developed by IBS-Mali | <a href="https://ibsmali.ml/">ibsmali.ml</a>'
         )
         name_label.setOpenExternalLinks(True)
-        icon_label.setPixmap(QPixmap("{}".format(CConstants.IBS_LOGO)))
+        icon_label.setPixmap(QPixmap(f"{CConstants.IBS_LOGO}"))
         self.addWidget(icon_label, 0)
         self.addWidget(name_label, 1)
         self.addWidget(self.info_label, 1)
@@ -58,14 +58,7 @@ class GStatusBar(QStatusBar):
     def download(self):
         self.download_button = QPushButton("")
         self.download_button.setIcon(
-            QIcon.fromTheme(
-                "",
-                QIcon(
-                    "{img_media}{img}".format(
-                        img_media=CConstants.img_cmedia, img="setup.png"
-                    )
-                ),
-            )
+            QIcon.fromTheme("", QIcon(f"{CConstants.img_cmedia}setup.png"))
         )
         self.download_button.clicked.connect(self.start_download)
         self.download_button.setText(self.check_serv.data.get("message"))
@@ -80,23 +73,16 @@ class GStatusBar(QStatusBar):
         try:
             download_thread.start()
         except Exception as exc:
-            logger.error("Failed to start download thread: {}".format(exc))
+            logger.error("Failed to start download thread: {exc}")
 
     def download_finish(self):
         self.download_button.hide()
         self.progress_bar.close()
         self.install_button = QPushButton(
-            "Install Version {}".format(self.check_serv.data.get("version"))
+            f"Install Version {self.check_serv.data.get('version')}"
         )
         self.install_button.setIcon(
-            QIcon.fromTheme(
-                "",
-                QIcon(
-                    "{img_media}{img}".format(
-                        img_media=CConstants.img_cmedia, img="setup.png"
-                    )
-                ),
-            )
+            QIcon.fromTheme("", QIcon(f"{CConstants.img_cmedia}setup.png"))
         )
         self.install_button.clicked.connect(self.start_install)
         self.addWidget(self.install_button)
@@ -112,7 +98,7 @@ class GStatusBar(QStatusBar):
         self.download_button.setEnabled(False)
         self.info_label.setText("Downloading in progress...")
 
-        self.installer_name = "{}.exe".format(self.check_serv.data.get("app"))
+        self.installer_name = "{self.check_serv.data.get('app')}.exe"
         url = get_server_url(self.check_serv.data.get("setup_file_url"))
         response = requests.get(url, stream=True)
 
@@ -148,23 +134,16 @@ class GStatusBar(QStatusBar):
         if lse:
             lse_style, r_lse = (
                 "color:green",
-                "<b>{}</b>".format(lse.remaining_days()) if valid else "Expired",
+                "<b>{lse.remaining_days()}</b>" if valid else "Expired",
             )
 
         self.info_label.setText(
-            """
+            f"""
             <strong>Internet:</strong><span style={net_style}>{net_response}</span>
             <strong>Server:</strong><span style={net_style}>{net_response}</span><br>
             <strong>Synchronization:</strong><span style={sy_style}>{r_sy}</span>
             <strong>License:</strong><span style={lse_style}>{r_lse}</span>
-            """.format(
-                net_style=net_style,
-                net_response=net_response,
-                sy_style=sy_style,
-                r_sy=r_sy,
-                lse_style=lse_style,
-                r_lse=r_lse,
-            )
+            """
         )
 
         # self.check_serv_contact_server()

@@ -17,7 +17,7 @@ class UpdaterInit(QObject):
     contact_server_signal = pyqtSignal()
 
     def __init__(self):
-        QObject.__init__(self)
+        super().__init__()
 
         self.stopFlag = Event()
         self.check = TaskThreadUpdater(self)
@@ -47,7 +47,7 @@ class TaskThreadUpdater(QThread):
     contact_server_signal = pyqtSignal()
 
     def __init__(self, parent):
-        QThread.__init__(self, parent)
+        super().__init__(parent)
         self.parent = parent
         self.stopped = parent.stopFlag
 
@@ -60,7 +60,7 @@ class TaskThreadUpdater(QThread):
                 orga_slug = self.get_organization_slug()
 
                 if not orga_slug or orga_slug == "-":
-                    rep_serv = Network().get_or_inscribe_app()
+                    Network().get_or_inscribe_app()
                 else:
                     lcse = is_valide_mac()[0]
                     resp = Network().submit(
@@ -89,7 +89,7 @@ class TaskThreadUpdater(QThread):
 
     def update_data(self, orga_slug):
         logger.info("Updating data")
-        from database import Setup
+        from .database import Setup
 
         self.contact_server_signal.emit()
 

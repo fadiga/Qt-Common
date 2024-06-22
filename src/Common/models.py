@@ -12,13 +12,8 @@ import time
 from datetime import datetime, timedelta
 
 import peewee
-from playhouse.migrate import (
-    BooleanField,
-    CharField,
-    DateTimeField,
-    SqliteMigrator,
-    migrate,
-)
+from playhouse.migrate import DateTimeField  # CharField,
+from playhouse.migrate import BooleanField, SqliteMigrator, migrate
 
 from .ui.util import copy_file, date_to_str, datetime_to_str
 
@@ -307,7 +302,7 @@ class License(BaseModel):
 
     def remaining_days(self):
         return (
-            "{} jours".format(self.expiration_date - datetime.now())
+            f"{self.expiration_date - datetime.now()} jours"
             if self.can_expired
             else "illimité"
         )

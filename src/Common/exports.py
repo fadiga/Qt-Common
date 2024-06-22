@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import QFileDialog, QWidget
 from .models import DB_FILE, Organization, Version
 from .ui.util import get_lcse_file, raise_error, raise_success, uopen_file
 
-DATETIME = "{}".format(datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss"))
+DATETIME = f"{datetime.now().strftime('%m-%d-%Y_%Hh%Mm%Ss')}"
 
 
 def export_database_as_file():

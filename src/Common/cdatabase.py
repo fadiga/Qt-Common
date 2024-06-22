@@ -6,13 +6,8 @@
 from datetime import datetime
 
 from playhouse import migrate as migrate_
-from playhouse.migrate import (
-    BooleanField,
-    CharField,  # ForeignKeyField,
-    DateTimeField,
-    IntegerField,
-    migrate,
-)
+from playhouse.migrate import CharField  # ForeignKeyField,
+from playhouse.migrate import BooleanField, DateTimeField, IntegerField, migrate
 
 from .models import (
     FileJoin,
@@ -79,7 +74,8 @@ class AdminDatabase(object):
         try:
             version = Version.get_or_none(Version.id == db_v)
             number = version.number
-        except:
+        except Exception as e:
+            print(e)
             number = 0
             version = Version()
         count_list = len(self.LIST_MIGRATE)

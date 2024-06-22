@@ -7,14 +7,16 @@ from reportlab.lib.colors import HexColor
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
-from reportlab.pdfgen import canvas
 
 # from reportlab.lib import colors
-from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+from reportlab.platypus import Paragraph, SimpleDocTemplate
 from reportlab.platypus.tables import Table, TableStyle
 
 # from num2words import num2words
 from .ui.util import openFile
+
+# from reportlab.pdfgen import canvas
+
 
 # setup the empty canvas
 # from io import FileIO as file

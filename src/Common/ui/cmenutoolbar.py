@@ -38,8 +38,9 @@ class FMenuToolBar(QToolBar, FMainWindow):
         # self.setAcceptDrops(True)
         # self.setAutoFillBackground(True)
         # self.addSeparator()
+        print("toolbar", CConstants.img_cmedia)
         self.addAction(
-            QIcon("{}exit.png".format(CConstants.img_cmedia)), "Quiter", self.goto_exit
+            QIcon(f"{CConstants.img_cmedia}exit.png"), "Quiter", self.goto_exit
         )
 
         menu = []

@@ -29,16 +29,16 @@ style_label = {"border": 0}
 style_headers = {"border": 1}
 
 
-def align_style(val):
-    try:
-        int(val)
-        return int_align
-    except ValueError:
-        return str_align
-    except TypeError:
-        return "ERROR"
-    else:
-        return 0
+# def align_style(val):
+#     try:
+#         int(val)
+#         return int_align
+#     except ValueError:
+#         return str_align
+#     except TypeError:
+#         return "ERROR"
+#     else:
+#         return 0
 
 
 def export_dynamic_data(dict_data):
@@ -101,10 +101,10 @@ def export_dynamic_data(dict_data):
     style_def = workbook.add_format({})
     rowx = 1
     end_colx = len(headers) - 1
-    if CConstants.ORG_LOGO:
+    if CConstants.APP_LOGO:
         worksheet.insert_image(
             "A1:B2",
-            os.path.join(CConstants.img_media, CConstants.ORG_LOGO),
+            os.path.join(CConstants.img_media, CConstants.APP_LOGO),
             {"x_offset": 1.5, "y_offset": 0.5},
         )
         rowx += 6

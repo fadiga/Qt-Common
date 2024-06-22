@@ -51,9 +51,9 @@ class FMainWindow(QMainWindow):
         print("FMainWindow")
         # self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setWindowIcon(
-            QIcon.fromTheme("logo", QIcon("{}logo.png".format(CConstants.img_media)))
+            QIcon.fromTheme(f"logo", QIcon("{CConstants.img_media}logo.png"))
         )
-
+        print(f"{CConstants.img_media=}")
         self.statusbar = GStatusBar(self)
         self.setStatusBar(self.statusbar)
 
@@ -565,13 +565,23 @@ class BttExport(Button):
 
 
 class BttExportXLSX(BttExport):
-    def __init__(self, arg):
+    def __init__(self, img):
         super(BttExportXLSX, self).__init__("xlsx")
+        self.pixmap = QPixmap(
+            "{img_media}{img}".format(
+                img_media=CConstants.img_cmedia, img="{}.png".format(img)
+            )
+        )
 
 
 class BttExportPDF(BttExport):
-    def __init__(self, arg):
+    def __init__(self, img):
         super(BttExportPDF, self).__init__("pdf")
+        self.pixmap = QPixmap(
+            "{img_media}{img}".format(
+                img_media=CConstants.img_cmedia, img="{}.png".format(img)
+            )
+        )
 
 
 # class FLineEdit(QLineEdit):

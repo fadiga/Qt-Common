@@ -31,10 +31,10 @@ class FMenuBar(QMenuBar, FWidget):
         self.file_ = self.addMenu("&Fichier")
         # Export
         backup = self.file_.addMenu("&Base de données")
-        backup.setIcon(QIcon("{}db.png".format(CConstants.img_cmedia)))
+        backup.setIcon(QIcon(f"{CConstants.img_cmedia}db.png"))
         # Sauvegarde
         savegarder = QAction(
-            QIcon.fromTheme("", QIcon("{}export.png".format(CConstants.img_cmedia))),
+            QIcon.fromTheme("", QIcon(f"{CConstants.img_cmedia}export.png")),
             "Sauvegarder",
             self,
         )
@@ -44,7 +44,7 @@ class FMenuBar(QMenuBar, FWidget):
 
         # Importer db
         import_db = QAction(
-            QIcon.fromTheme("", QIcon("{}import_db.png".format(CConstants.img_cmedia))),
+            QIcon.fromTheme("", QIcon(f"{CConstants.img_cmedia}import_db.png")),
             "Importation db",
             self,
         )
@@ -95,14 +95,12 @@ class FMenuBar(QMenuBar, FWidget):
                 )
                 _theme.addSeparator()
                 _theme.addAction(el_menu)
-                _theme.setIcon(QIcon("{}theme.png".format(CConstants.img_cmedia)))
+                _theme.setIcon(QIcon(f"{CConstants.img_cmedia}theme.png"))
 
         if ow.exists():
             if ow.get().group == Owner.ADMIN:
                 admin_ = QAction(
-                    QIcon.fromTheme(
-                        "", QIcon("{}settings.png".format(CConstants.img_cmedia))
-                    ),
+                    QIcon.fromTheme("", QIcon(f"{CConstants.img_cmedia}settings.png")),
                     "Gestion Administration",
                     self,
                 )
@@ -110,9 +108,7 @@ class FMenuBar(QMenuBar, FWidget):
                 admin_.triggered.connect(self.goto_admin)
                 preference.addAction(admin_)
         # logout
-        lock = QAction(
-            QIcon("{}login.png".format(CConstants.img_cmedia)), "Verrouiller", self
-        )
+        lock = QAction(QIcon(f"{CConstants.img_cmedia}login.png"), "Verrouiller", self)
         lock.setShortcut("Ctrl+V")
         lock.setToolTip("Verrouiller l'application")
         lock.triggered.connect(self.logout)
@@ -129,7 +125,7 @@ class FMenuBar(QMenuBar, FWidget):
             license = QAction(
                 QIcon.fromTheme(
                     "emblem-system",
-                    QIcon("{}licence.png".format(CConstants.img_cmedia)),
+                    QIcon(f"{CConstants.img_cmedia}licence.png"),
                 ),
                 "Activation",
                 self,

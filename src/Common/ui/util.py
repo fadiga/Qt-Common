@@ -34,7 +34,7 @@ def internet_on():
         urlopen("https://google.com", timeout=1)
         return True
     except URLError as err:
-        logger.debug("URLError {}".format(err))
+        logger.debug(f"URLError {err}")
         return False
     except Exception as exc:
         logger.debug(exc)
@@ -60,7 +60,7 @@ def device_amount(value, dvs=None):
     from Common.models import Settings
 
     if dvs:
-        return "{} {}".format(formatted_number(value), dvs)
+        return f"{formatted_number(value)} {dvs}"
     try:
         organ = Settings().get(id=1)
     except Exception as e:
@@ -68,9 +68,9 @@ def device_amount(value, dvs=None):
     d = organ.DEVISE[organ.devise]
     v = formatted_number(value)
     if organ.devise == organ.USA:
-        return "{d}{v}".format(v=v, d=d)
+        return f"{d}{v}"
     else:
-        return "{v} {d}".format(v=v, d=d)
+        return f"{v} {d}"
 
 
 def check_is_empty(field):
@@ -133,10 +133,14 @@ def uopen_prefix(platform=sys.platform):
 
 
 def openFile(file):
-    if sys.platform == "linux2":
-        subprocess.call(["xdg-open", file])
-    else:
-        os.startfile(file)
+    # if sys.platform == "linux2":
+    #     subprocess.call(["xdg-open", file])
+    # else:
+    #     os.startfile(file)
+    import subprocess, sys
+
+    opener = "open" if sys.platform == "darwin" else "xdg-open"
+    subprocess.call([opener, file])
 
 
 def uopen_file(filename):
@@ -234,11 +238,21 @@ class SystemTrayIcon(QSystemTrayIcon):
 
 def is_float(val):
     try:
-        val = val.replace(",", ".").replace(" ", "").replace("\xa0", "")
-        return float(val)
-    except Exception as e:
-        logger.debug("is_float ", e)
-        return 0
+        # Normalize the string by removing spaces and non-breaking spaces
+        val = val.replace(" ", "").replace("\xa0", "")
+
+        # Handle comma as decimal separator, ensuring only the last occurrence is replaced
+        if "," in val and "." in val:
+            val = val.replace(".", "").replace(",", ".")
+        else:
+            val = val.replace(",", ".")
+
+        # Convert to float to check validity
+        float(val)
+        return True
+    except ValueError as e:
+        logger.debug("is_float error: %s", e)
+        return False
 
 
 def is_int(val):
