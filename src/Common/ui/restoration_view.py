@@ -1,7 +1,6 @@
-#!usr/bin/env python
-# -*- coding: utf8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # maintainer: Fad
-
 
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QDialog, QFormLayout, QGroupBox, QVBoxLayout
@@ -12,26 +11,25 @@ from .common import Button, EnterTabbedLineEdit, FLabel, FormLabel, FWidget, Lin
 try:
     from ..cstatic import CConstants
 except Exception as e:
-    print(e)
+    print("Erreur lors de l'importation de CConstants:", e)
 
 
 class RestorationViewWidget(QDialog, FWidget):
     def __init__(self, pp=None, owner=None, parent=None, *args, **kwargs):
-        QDialog.__init__(self, parent, *args, **kwargs)
+        super().__init__(parent, *args, **kwargs)
 
         self.setWindowTitle("Restoration de Données")
         self.vbox = QVBoxLayout()
-        # self.online_resto_box()
+
+        # Configure the label with an image
         self.label = FLabel()
         self.label.setStyleSheet(
-            "background: url('{}center.png') no-repeat scroll 0 0;"
-            "height: 50px;width:50px; margin: 0; padding: 0;".format(
-                CConstants.img_media
-            )
+            f"background: url('{CConstants.img_media}center.png') no-repeat scroll 0 0;"
+            "height: 50px; width: 50px; margin: 0; padding: 0;"
         )
 
-        # ==== Box of restor online ====
-        self.onlineRestorBoxBtt = QGroupBox(self.tr("Restoration de données en line"))
+        # ==== Online Restoration Box ====
+        self.onlineRestorBoxBtt = QGroupBox(self.tr("Restoration de données en ligne"))
         self.bn_resto_onligne = Button("Connexion")
         self.bn_resto_onligne.setIcon(
             QIcon.fromTheme("", QIcon(f"{CConstants.img_cmedia}cloud.png"))
@@ -56,21 +54,17 @@ class RestorationViewWidget(QDialog, FWidget):
         self.password_field.setFocus()
 
         formbox = QFormLayout()
-
-        # formbox.addRow(FormLabel("<i>les données sauvegardé en ligne</i>"))
         formbox.addRow(FormLabel("E-mail"), self.mail_field)
         formbox.addRow(FormLabel("Mot de passe"), self.password_field)
         formbox.addRow(FormLabel(""), self.bn_resto_onligne)
         self.onlineRestorBoxBtt.setLayout(formbox)
         self.vbox.addWidget(self.onlineRestorBoxBtt)
 
-        # ==== Box of restor online ====
+        # ==== Local Restoration Box ====
         self.onLocaleRestorBoxBtt = QGroupBox(
             self.tr("Restoration de données en locale.")
         )
-
         l_formbox = QFormLayout()
-        # l_formbox.addRow(FormLabel("<i>Une copie de la base de données exportée.</i>"))
         l_formbox.addRow(FormLabel(""), self.bn_resto_l)
         self.onLocaleRestorBoxBtt.setLayout(l_formbox)
         self.vbox.addWidget(self.onLocaleRestorBoxBtt)
@@ -78,12 +72,12 @@ class RestorationViewWidget(QDialog, FWidget):
         i_formbox = QFormLayout()
         i_formbox.addRow(FLabel("<h2></h2>"), self.bn_ignore)
         self.vbox.addLayout(i_formbox)
+
         self.setLayout(self.vbox)
 
     def resto_onligne(self):
-        # self.open_dialog()
-        self.vbox.removeWidget(self.topLeftGroupBoxBtt)
-        # return
+        # Placeholder method for online restoration
+        print("Online restoration not implemented.")
 
     def ignore_resto(self):
         print("ignore_resto")

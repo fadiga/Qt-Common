@@ -6,6 +6,7 @@
 
 import hashlib
 import os
+import sys
 import time
 
 # from peewee_migrate import Router
@@ -13,15 +14,24 @@ from datetime import datetime, timedelta
 
 import peewee
 from playhouse.migrate import DateTimeField  # CharField,
-from playhouse.migrate import BooleanField, SqliteMigrator, migrate
+from playhouse.migrate import BooleanField, SqliteMigrator
 
 from .ui.util import copy_file, date_to_str, datetime_to_str
 
 DB_FILE = "database.db"
 
+# If running in a PyInstaller bundle
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+    # Change the db_file to the absolute path
+    DB_FILE = os.path.join(sys._MEIPASS, DB_FILE)
+
+print(f"{DB_FILE=}")
+
+
 print("Peewee version : " + peewee.__version__)
 
 NOW = datetime.now()
+
 
 dbh = peewee.SqliteDatabase(DB_FILE)
 migrator = SqliteMigrator(dbh)

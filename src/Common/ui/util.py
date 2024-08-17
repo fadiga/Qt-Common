@@ -7,6 +7,7 @@
 import ctypes
 import hashlib
 import locale
+import logging
 import os
 import subprocess
 import sys
@@ -187,29 +188,33 @@ def raise_success(title, message):
 
 
 def formatted_number(number, sep=".", aftergam=None):
-    """ """
+    """Format a number according to locale settings and custom precision."""
 
     from Common.models import Settings
 
     if not aftergam:
         aftergam = int(Settings.select().get().after_cam)
+
+    # Set the locale to the desired locale
+    # locale.setlocale(locale.LC_ALL, "fra") # Uncomment if you need to set a specific locale
+
     locale_name, encoding = locale.getlocale()
-    # locale.setlocale(locale.LC_ALL, "fra")
-    fmt = "%s"
+
+    # Determine the format based on the type of number
     if isinstance(number, int):
-        # print("int ", number)
         fmt = "%d"
     elif isinstance(number, float):
-        # print("float, ", number)
-        fmt = "%.{}f".format(aftergam)
+        fmt = f"%.{aftergam}f"
+    else:
+        return str(number)  # Return as string if the type is not supported
 
     try:
-        return locale.format(fmt, number, grouping=True).decode(encoding)
-    except AttributeError:
-        return locale.format(fmt, number, grouping=True)
+        # Format the number using locale settings
+        formatted = locale.format_string(fmt, number, grouping=True)
+        return formatted
     except Exception as e:
-        logger.debug("formatted_number : ", e)
-        return "%s" % number
+        logger.debug("formatted_number : %s", e)
+        return str(number)
 
 
 class SystemTrayIcon(QSystemTrayIcon):
